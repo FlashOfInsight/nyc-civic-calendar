@@ -47,17 +47,12 @@ module.exports = async function handler(req, res) {
     agencies: { success: false, count: 0, error: null }
   };
 
-  // Scrape City Council
+  // Scrape City Council (no API key needed - uses HTML scraping)
   try {
-    const legistarToken = process.env.LEGISTAR_API_KEY;
-    if (!legistarToken) {
-      results.cityCouncil.error = "Missing LEGISTAR_API_KEY";
-    } else {
-      const meetings = await scrapeCityCouncil(legistarToken);
-      await writeMeetings("city-council.json", meetings);
-      results.cityCouncil.success = true;
-      results.cityCouncil.count = meetings.length;
-    }
+    const meetings = await scrapeCityCouncil();
+    await writeMeetings("city-council.json", meetings);
+    results.cityCouncil.success = true;
+    results.cityCouncil.count = meetings.length;
   } catch (err) {
     results.cityCouncil.error = err.message;
   }
