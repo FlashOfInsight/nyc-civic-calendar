@@ -108,8 +108,10 @@ module.exports = async function handler(req, res) {
 
   // Set headers for calendar file
   res.setHeader("Content-Type", "text/calendar; charset=utf-8");
-  res.setHeader("Content-Disposition", 'attachment; filename="nyc-civic-calendar.ics"');
-  res.setHeader("Cache-Control", "public, max-age=3600"); // Cache for 1 hour
+  res.setHeader("Content-Disposition", 'inline; filename="nyc-civic-calendar.ics"');
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
 
   res.status(200).send(ics);
 };
