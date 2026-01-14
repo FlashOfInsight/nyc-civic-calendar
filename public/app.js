@@ -330,6 +330,7 @@ function buildTree(orgs, prefix = "") {
       const leafKeys = getLeafKeys(org, fullKey);
       checkbox.onclick = (e) => {
         e.stopPropagation();
+        console.log("Parent checkbox clicked:", fullKey, "checked:", checkbox.checked, "leafKeys:", leafKeys);
         if (checkbox.checked) {
           leafKeys.forEach(k => selectedOrgs.add(k));
         } else {
@@ -343,6 +344,7 @@ function buildTree(orgs, prefix = "") {
       // Leaf checkbox
       checkbox.onclick = (e) => {
         e.stopPropagation();
+        console.log("Leaf checkbox clicked:", fullKey, "checked:", checkbox.checked);
         if (checkbox.checked) {
           selectedOrgs.add(fullKey);
         } else {
@@ -431,8 +433,11 @@ function updateCalendarUrl() {
   const section = document.getElementById("calendar-section");
   const urlInput = document.getElementById("calendar-url");
 
+  console.log("updateCalendarUrl called, selectedOrgs:", [...selectedOrgs]);
+
   if (selectedOrgs.size === 0) {
     section.style.display = "none";
+    console.log("No orgs selected, hiding section");
     return;
   }
 
@@ -443,6 +448,7 @@ function updateCalendarUrl() {
   const orgsParam = [...selectedOrgs].sort().join(",");
   const url = `${baseUrl}/api/calendar.ics?orgs=${encodeURIComponent(orgsParam)}`;
 
+  console.log("Generated URL:", url);
   urlInput.value = url;
 }
 
@@ -463,6 +469,7 @@ function copyUrl() {
 
 // Initialize
 function init() {
+  console.log("NYC Civic Calendar app v2.0 initialized");
   loadSelections();
 
   const treeContainer = document.getElementById("org-tree");
