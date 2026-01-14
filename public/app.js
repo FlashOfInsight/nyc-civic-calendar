@@ -83,18 +83,167 @@ const organizations = {
       "manhattan": {
         name: "Manhattan",
         children: {
-          "1": { name: "CB1 - Financial District, Battery Park City, Tribeca" },
-          "2": { name: "CB2 - Greenwich Village, SoHo, NoHo" },
-          "3": { name: "CB3 - East Village, Lower East Side, Chinatown" },
-          "4": { name: "CB4 - Chelsea, Hell's Kitchen" },
-          "5": { name: "CB5 - Midtown" },
-          "6": { name: "CB6 - Murray Hill, Gramercy Park, Stuyvesant Town" },
-          "7": { name: "CB7 - Upper West Side, Lincoln Square" },
-          "8": { name: "CB8 - Upper East Side, Roosevelt Island" },
-          "9": { name: "CB9 - Morningside Heights, Hamilton Heights" },
-          "10": { name: "CB10 - Central Harlem" },
-          "11": { name: "CB11 - East Harlem" },
-          "12": { name: "CB12 - Washington Heights, Inwood" }
+          "1": {
+            name: "CB1 - Financial District, Battery Park City, Tribeca",
+            children: {
+              "full-board": { name: "Full Board" },
+              "executive": { name: "Executive Committee" },
+              "land-use": { name: "Land Use & Zoning" },
+              "landmarks": { name: "Landmarks & Preservation" },
+              "transportation": { name: "Transportation" },
+              "parks": { name: "Parks & Waterfront" },
+              "licensing": { name: "Licensing & Permits" },
+              "youth-education": { name: "Youth & Education" },
+              "quality-of-life": { name: "Quality of Life & Housing" }
+            }
+          },
+          "2": {
+            name: "CB2 - Greenwich Village, SoHo, NoHo",
+            children: {
+              "full-board": { name: "Full Board" },
+              "executive": { name: "Executive Committee" },
+              "land-use": { name: "Land Use & Housing" },
+              "landmarks": { name: "Landmarks" },
+              "traffic": { name: "Traffic & Transportation" },
+              "parks": { name: "Parks & Waterfront" },
+              "sla": { name: "SLA Licensing" },
+              "schools": { name: "Schools & Education" },
+              "quality-of-life": { name: "Quality of Life" }
+            }
+          },
+          "3": {
+            name: "CB3 - East Village, Lower East Side, Chinatown",
+            children: {
+              "full-board": { name: "Full Board" },
+              "executive": { name: "Executive Committee" },
+              "land-use": { name: "Land Use, Zoning & Housing" },
+              "landmarks": { name: "Landmarks" },
+              "transportation": { name: "Transportation & Public Safety" },
+              "parks": { name: "Parks, Recreation & Waterfront" },
+              "sla": { name: "SLA Licensing & Outdoor Dining" },
+              "health": { name: "Health, Seniors & Human Services" }
+            }
+          },
+          "4": {
+            name: "CB4 - Chelsea, Hell's Kitchen",
+            children: {
+              "full-board": { name: "Full Board" },
+              "executive": { name: "Executive Committee" },
+              "land-use": { name: "Land Use & Zoning" },
+              "landmarks": { name: "Landmarks" },
+              "transportation": { name: "Transportation" },
+              "parks": { name: "Parks & Waterfront" },
+              "business": { name: "Business Licenses" },
+              "housing": { name: "Housing & Human Services" }
+            }
+          },
+          "5": {
+            name: "CB5 - Midtown",
+            children: {
+              "full-board": { name: "Full Board" },
+              "executive": { name: "Executive Committee" },
+              "land-use": { name: "Land Use, Housing & Zoning" },
+              "landmarks": { name: "Landmarks" },
+              "transportation": { name: "Transportation & Environment" },
+              "parks": { name: "Parks & Public Spaces" },
+              "business": { name: "Business Affairs" }
+            }
+          },
+          "6": {
+            name: "CB6 - Murray Hill, Gramercy Park, Stuyvesant Town",
+            children: {
+              "full-board": { name: "Full Board" },
+              "executive": { name: "Executive Committee" },
+              "land-use": { name: "Land Use & Waterfront" },
+              "landmarks": { name: "Parks, Landmarks & Cultural Affairs" },
+              "transportation": { name: "Transportation" },
+              "business": { name: "Business Affairs & Licensing" },
+              "housing": { name: "Housing & Homelessness" },
+              "health": { name: "Health & Education" },
+              "public-safety": { name: "Public Safety & Sanitation" }
+            }
+          },
+          "7": {
+            name: "CB7 - Upper West Side, Lincoln Square",
+            children: {
+              "full-board": { name: "Full Board" },
+              "executive": { name: "Executive Committee" },
+              "land-use": { name: "Land Use" },
+              "preservation": { name: "Preservation" },
+              "transportation": { name: "Transportation" },
+              "parks": { name: "Parks & Environment" },
+              "business": { name: "Business & Consumer Issues" },
+              "health": { name: "Health & Human Services" }
+            }
+          },
+          "8": {
+            name: "CB8 - Upper East Side, Roosevelt Island",
+            children: {
+              "full-board": { name: "Full Board" },
+              "executive": { name: "Executive Committee" },
+              "land-use": { name: "Land Use" },
+              "landmarks": { name: "Landmarks" },
+              "transportation": { name: "Transportation" },
+              "parks": { name: "Parks & Waterfront" },
+              "zoning": { name: "Zoning, Development & Housing" },
+              "small-business": { name: "Small Business" },
+              "health": { name: "Health, Seniors & Social Services" },
+              "street-life": { name: "Street Life" }
+            }
+          },
+          "9": {
+            name: "CB9 - Morningside Heights, Hamilton Heights",
+            children: {
+              "full-board": { name: "Full Board" },
+              "executive": { name: "Executive Committee" },
+              "land-use": { name: "Housing, Land Use & Zoning" },
+              "transportation": { name: "Transportation" },
+              "parks": { name: "Parks & Environment" },
+              "health": { name: "Health & Environment" }
+            }
+          },
+          "10": {
+            name: "CB10 - Central Harlem",
+            children: {
+              "full-board": { name: "Full Board" },
+              "executive": { name: "Executive Committee" },
+              "land-use": { name: "Land Use & Housing" },
+              "landmarks": { name: "Transportation, Landmarks & Historic Preservation" },
+              "parks": { name: "Parks & Recreation" },
+              "economic": { name: "Economic Development & Technology" },
+              "arts": { name: "Arts & Culture" },
+              "education": { name: "Education, Youth & Libraries" },
+              "health": { name: "Health & Human Services" },
+              "public-safety": { name: "Public Safety" }
+            }
+          },
+          "11": {
+            name: "CB11 - East Harlem",
+            children: {
+              "full-board": { name: "Full Board" },
+              "executive": { name: "Executive Committee" },
+              "land-use": { name: "Land Use" },
+              "parks": { name: "Parks & Recreation" },
+              "housing": { name: "Housing & Human Services" },
+              "health": { name: "Health & Environment" }
+            }
+          },
+          "12": {
+            name: "CB12 - Washington Heights, Inwood",
+            children: {
+              "full-board": { name: "Full Board" },
+              "executive": { name: "Executive Committee" },
+              "land-use": { name: "Land Use" },
+              "traffic": { name: "Traffic & Transportation" },
+              "parks": { name: "Parks & Cultural Affairs" },
+              "licensing": { name: "Licensing" },
+              "business": { name: "Business Development" },
+              "housing": { name: "Housing & Human Services" },
+              "health": { name: "Health & Environment" },
+              "youth": { name: "Youth & Education" },
+              "public-safety": { name: "Public Safety" }
+            }
+          }
         }
       }
     }
