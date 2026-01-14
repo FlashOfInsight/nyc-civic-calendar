@@ -1,66 +1,54 @@
-// Debug endpoint to test scrapers individually
+// Debug endpoint to test scrapers
 const https = require("https");
-const cheerio = require("cheerio");
-
-function fetchHTML(url) {
-  return new Promise((resolve, reject) => {
-    https.get(url, { headers: { "User-Agent": "Mozilla/5.0" } }, (res) => {
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        let redirectUrl = res.headers.location;
-        if (redirectUrl.startsWith("/")) {
-          redirectUrl = "https://www.mta.info" + redirectUrl;
-        }
-        fetchHTML(redirectUrl).then(resolve).catch(reject);
-        return;
-      }
-      let data = "";
-      res.on("data", chunk => data += chunk);
-      res.on("end", () => resolve(data));
-    }).on("error", reject);
-  });
-}
 
 module.exports = async function handler(req, res) {
   const results = {
-    htmlLength: 0,
-    allLinks: [],
-    matchingLinks: [],
-    error: null
+    legistarTest: null,
+    apiKeyPresent: !!process.env.LEGISTAR_API_KEY,
+    apiKeyLength: process.env.LEGISTAR_API_KEY ? process.env.LEGISTAR_API_KEY.length : 0
   };
 
+  // Test Legistar API
   try {
-    const html = await fetchHTML("https://www.mta.info/transparency/board-and-committee-meetings");
-    results.htmlLength = html.length;
+    const token = process.env.LEGISTAR_API_KEY;
+    const today = new Date().toISOString().split("T")[0];
 
-    const $ = cheerio.load(html);
+    // Try with token as query param
+    const url = token
+      ? `https://webapi.legistar.com/v1/nyc/events?token=${token}&$top=5`
+      : `https://webapi.legistar.com/v1/nyc/events?$top=5`;
 
-    // Get all links
-    $("a").each((_, elem) => {
-      const text = $(elem).text().trim();
-      const href = $(elem).attr("href") || "";
+    results.urlTested = url.replace(token || '', '[HIDDEN]');
 
-      if (text.length > 0 && text.length < 200) {
-        results.allLinks.push({ text: text.substring(0, 100), href: href.substring(0, 100) });
-      }
-
-      // Check if it matches our pattern
-      const dateMatch = text.match(/(\w+)\s+(\d+)\s+and\s+(\d+),\s+(\d{4})/i);
-      if (dateMatch) {
-        results.matchingLinks.push({
-          text,
-          href,
-          match: dateMatch[0],
-          month: dateMatch[1],
-          day1: dateMatch[2],
-          day2: dateMatch[3],
-          year: dateMatch[4]
-        });
-      }
+    const data = await new Promise((resolve, reject) => {
+      https.get(url, (response) => {
+        let body = "";
+        results.statusCode = response.statusCode;
+        response.on("data", chunk => body += chunk);
+        response.on("end", () => resolve(body));
+      }).on("error", reject);
     });
 
-    // Limit allLinks to first 50
-    results.allLinks = results.allLinks.slice(0, 50);
+    results.responseLength = data.length;
+    results.responsePreview = data.substring(0, 500);
 
+    try {
+      const parsed = JSON.parse(data);
+      results.parsed = true;
+      results.isArray = Array.isArray(parsed);
+      results.itemCount = Array.isArray(parsed) ? parsed.length : null;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        results.sampleEvent = {
+          EventId: parsed[0].EventId,
+          EventBodyName: parsed[0].EventBodyName,
+          EventDate: parsed[0].EventDate,
+          EventTime: parsed[0].EventTime
+        };
+      }
+    } catch (e) {
+      results.parsed = false;
+      results.parseError = e.message;
+    }
   } catch (err) {
     results.error = err.message;
   }
