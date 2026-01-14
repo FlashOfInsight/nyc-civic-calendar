@@ -19,7 +19,8 @@ async function writeMeetings(filename, meetings) {
 
   await put(filename, JSON.stringify(data, null, 2), {
     access: "public",
-    addRandomSuffix: false
+    addRandomSuffix: false,
+    allowOverwrite: true
   });
 
   console.log(`Wrote ${meetings.length} meetings to ${filename}`);
