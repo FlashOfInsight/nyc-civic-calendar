@@ -1,0 +1,18 @@
+{
+  "name": "nyc-civic-calendar",
+  "version": "1.0.0",
+  "description": "NYC Civic Meeting Calendar Notifier",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "scrape": "node scripts/scrape.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "ics": "^3.7.2"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NYC Civic Calendar</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>NYC Civic Calendar</h1>
+      <p class="subtitle">Subscribe to NYC government meeting calendars</p>
+    </header>
+
+    <main>
+      <section class="instructions">
+        <h2>How it works</h2>
+        <ol>
+          <li>Select the meetings you want to track below</li>
+          <li>Copy your personalized calendar URL</li>
+          <li>Add it to your calendar app (Google Calendar, Outlook, Apple Calendar)</li>
+          <li>Your calendar will automatically update with new meetings</li>
+        </ol>
+      </section>
+
+      <section class="organizations">
+        <h2>Select Organizations</h2>
+        <div id="org-tree"></div>
+      </section>
+
+      <section class="calendar-url" id="calendar-section" style="display: none;">
+        <h2>Your Calendar URL</h2>
+        <div class="url-box">
+          <input type="text" id="calendar-url" readonly>
+          <button id="copy-btn" onclick="copyUrl()">Copy</button>
+        </div>
+        <p class="url-hint">Add this URL as a calendar subscription in your calendar app</p>
+
+        <div class="calendar-instructions">
+          <details>
+            <summary>Google Calendar</summary>
+            <ol>
+              <li>Open Google Calendar</li>
+              <li>Click the + next to "Other calendars"</li>
+              <li>Select "From URL"</li>
+              <li>Paste your calendar URL</li>
+              <li>Click "Add calendar"</li>
+            </ol>
+          </details>
+          <details>
+            <summary>Apple Calendar</summary>
+            <ol>
+              <li>Open Calendar app</li>
+              <li>Go to File → New Calendar Subscription</li>
+              <li>Paste your calendar URL</li>
+              <li>Click Subscribe</li>
+            </ol>
+          </details>
+          <details>
+            <summary>Outlook</summary>
+            <ol>
+              <li>Open Outlook Calendar</li>
+              <li>Click "Add calendar" → "Subscribe from web"</li>
+              <li>Paste your calendar URL</li>
+              <li>Click "Import"</li>
+            </ol>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Data refreshed weekly from official NYC sources</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

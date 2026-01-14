@@ -1,0 +1,115 @@
+{
+  "meetings": [
+    {
+      "id": "cc-stated-2025-01-29",
+      "org": "city-council.stated",
+      "title": "Stated Meeting",
+      "date": "2025-01-29",
+      "time": "13:30",
+      "endTime": "17:00",
+      "location": "Council Chambers, City Hall, New York, NY",
+      "description": "Regular Stated Meeting of the New York City Council",
+      "url": "https://legistar.council.nyc.gov/Calendar.aspx"
+    },
+    {
+      "id": "cc-stated-2025-02-12",
+      "org": "city-council.stated",
+      "title": "Stated Meeting",
+      "date": "2025-02-12",
+      "time": "13:30",
+      "endTime": "17:00",
+      "location": "Council Chambers, City Hall, New York, NY",
+      "description": "Regular Stated Meeting of the New York City Council",
+      "url": "https://legistar.council.nyc.gov/Calendar.aspx"
+    },
+    {
+      "id": "cc-finance-2025-01-27",
+      "org": "city-council.finance",
+      "title": "Committee on Finance",
+      "date": "2025-01-27",
+      "time": "10:00",
+      "endTime": "13:00",
+      "location": "Council Chambers, City Hall, New York, NY",
+      "description": "Finance Committee Hearing",
+      "url": "https://legistar.council.nyc.gov/Calendar.aspx"
+    },
+    {
+      "id": "cc-finance-2025-02-10",
+      "org": "city-council.finance",
+      "title": "Committee on Finance",
+      "date": "2025-02-10",
+      "time": "10:00",
+      "endTime": "13:00",
+      "location": "Council Chambers, City Hall, New York, NY",
+      "description": "Finance Committee Hearing",
+      "url": "https://legistar.council.nyc.gov/Calendar.aspx"
+    },
+    {
+      "id": "cc-land-use-2025-01-28",
+      "org": "city-council.land-use",
+      "title": "Committee on Land Use",
+      "date": "2025-01-28",
+      "time": "09:30",
+      "endTime": "12:00",
+      "location": "Council Chambers, City Hall, New York, NY",
+      "description": "Land Use Committee Hearing",
+      "url": "https://legistar.council.nyc.gov/Calendar.aspx"
+    },
+    {
+      "id": "cc-transportation-2025-02-03",
+      "org": "city-council.transportation",
+      "title": "Committee on Transportation and Infrastructure",
+      "date": "2025-02-03",
+      "time": "10:00",
+      "endTime": "13:00",
+      "location": "Council Chambers, City Hall, New York, NY",
+      "description": "Transportation Committee Hearing",
+      "url": "https://legistar.council.nyc.gov/Calendar.aspx"
+    },
+    {
+      "id": "cc-housing-2025-02-04",
+      "org": "city-council.housing-buildings",
+      "title": "Committee on Housing and Buildings",
+      "date": "2025-02-04",
+      "time": "10:00",
+      "endTime": "13:00",
+      "location": "Council Chambers, City Hall, New York, NY",
+      "description": "Housing and Buildings Committee Hearing",
+      "url": "https://legistar.council.nyc.gov/Calendar.aspx"
+    },
+    {
+      "id": "cc-education-2025-02-05",
+      "org": "city-council.education",
+      "title": "Committee on Education",
+      "date": "2025-02-05",
+      "time": "13:00",
+      "endTime": "16:00",
+      "location": "Council Chambers, City Hall, New York, NY",
+      "description": "Education Committee Hearing",
+      "url": "https://legistar.council.nyc.gov/Calendar.aspx"
+    },
+    {
+      "id": "cc-public-safety-2025-02-06",
+      "org": "city-council.public-safety",
+      "title": "Committee on Public Safety",
+      "date": "2025-02-06",
+      "time": "10:00",
+      "endTime": "13:00",
+      "location": "Council Chambers, City Hall, New York, NY",
+      "description": "Public Safety Committee Hearing",
+      "url": "https://legistar.council.nyc.gov/Calendar.aspx"
+    },
+    {
+      "id": "cc-zoning-2025-02-11",
+      "org": "city-council.subcommittee-zoning",
+      "title": "Subcommittee on Zoning and Franchises",
+      "date": "2025-02-11",
+      "time": "09:30",
+      "endTime": "12:00",
+      "location": "Council Chambers, City Hall, New York, NY",
+      "description": "Zoning Subcommittee Hearing",
+      "url": "https://legistar.council.nyc.gov/Calendar.aspx"
+    }
+  ],
+  "lastUpdated": "2025-01-14T12:00:00Z"
+}

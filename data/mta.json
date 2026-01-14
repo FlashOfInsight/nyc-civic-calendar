@@ -1,0 +1,104 @@
+{
+  "meetings": [
+    {
+      "id": "mta-board-2025-01",
+      "org": "state-authorities.mta.board",
+      "title": "MTA Board Meeting - January 2025",
+      "date": "2025-01-29",
+      "time": "10:00",
+      "endTime": "13:00",
+      "location": "MTA Board Room, 2 Broadway, 20th Floor, New York, NY",
+      "description": "Regular MTA Board meeting",
+      "url": "https://www.mta.info/transparency/board-and-committee-meetings/january-2025"
+    },
+    {
+      "id": "mta-finance-2025-01",
+      "org": "state-authorities.mta.finance",
+      "title": "MTA Finance Committee - January 2025",
+      "date": "2025-01-27",
+      "time": "12:00",
+      "endTime": "13:00",
+      "location": "MTA Board Room, 2 Broadway, 20th Floor, New York, NY",
+      "description": "Finance Committee meeting",
+      "url": "https://www.mta.info/transparency/board-and-committee-meetings/january-2025"
+    },
+    {
+      "id": "mta-capital-2025-01",
+      "org": "state-authorities.mta.capital-program",
+      "title": "MTA Capital Program Committee - January 2025",
+      "date": "2025-01-27",
+      "time": "12:45",
+      "endTime": "13:30",
+      "location": "MTA Board Room, 2 Broadway, 20th Floor, New York, NY",
+      "description": "Capital Program Committee meeting",
+      "url": "https://www.mta.info/transparency/board-and-committee-meetings/january-2025"
+    },
+    {
+      "id": "mta-safety-2025-01",
+      "org": "state-authorities.mta.safety",
+      "title": "MTA Safety Committee - January 2025",
+      "date": "2025-01-27",
+      "time": "09:00",
+      "endTime": "09:30",
+      "location": "MTA Board Room, 2 Broadway, 20th Floor, New York, NY",
+      "description": "Safety Committee meeting",
+      "url": "https://www.mta.info/transparency/board-and-committee-meetings/january-2025"
+    },
+    {
+      "id": "mta-nyct-2025-01",
+      "org": "state-authorities.mta.nyct-bus",
+      "title": "NYC Transit/MTA Bus Committee - January 2025",
+      "date": "2025-01-27",
+      "time": "10:45",
+      "endTime": "11:45",
+      "location": "MTA Board Room, 2 Broadway, 20th Floor, New York, NY",
+      "description": "NYC Transit and MTA Bus Committee meeting",
+      "url": "https://www.mta.info/transparency/board-and-committee-meetings/january-2025"
+    },
+    {
+      "id": "mta-board-2025-02",
+      "org": "state-authorities.mta.board",
+      "title": "MTA Board Meeting - February 2025",
+      "date": "2025-02-26",
+      "time": "10:00",
+      "endTime": "13:00",
+      "location": "MTA Board Room, 2 Broadway, 20th Floor, New York, NY",
+      "description": "Regular MTA Board meeting",
+      "url": "https://www.mta.info/transparency/board-and-committee-meetings/february-2025"
+    },
+    {
+      "id": "mta-finance-2025-02",
+      "org": "state-authorities.mta.finance",
+      "title": "MTA Finance Committee - February 2025",
+      "date": "2025-02-24",
+      "time": "12:00",
+      "endTime": "13:00",
+      "location": "MTA Board Room, 2 Broadway, 20th Floor, New York, NY",
+      "description": "Finance Committee meeting",
+      "url": "https://www.mta.info/transparency/board-and-committee-meetings/february-2025"
+    },
+    {
+      "id": "mta-lirr-mnr-2025-02",
+      "org": "state-authorities.mta.lirr-mnr",
+      "title": "Joint LIRR/Metro-North Committee - February 2025",
+      "date": "2025-02-24",
+      "time": "09:30",
+      "endTime": "10:30",
+      "location": "MTA Board Room, 2 Broadway, 20th Floor, New York, NY",
+      "description": "Joint Long Island Rail Road and Metro-North Railroad Committee meeting",
+      "url": "https://www.mta.info/transparency/board-and-committee-meetings/february-2025"
+    },
+    {
+      "id": "mta-bridges-2025-02",
+      "org": "state-authorities.mta.bridges-tunnels",
+      "title": "Bridges & Tunnels Committee - February 2025",
+      "date": "2025-02-24",
+      "time": "13:30",
+      "endTime": "14:00",
+      "location": "MTA Board Room, 2 Broadway, 20th Floor, New York, NY",
+      "description": "Bridges and Tunnels Committee meeting",
+      "url": "https://www.mta.info/transparency/board-and-committee-meetings/february-2025"
+    }
+  ],
+  "lastUpdated": "2025-01-14T12:00:00Z"
+}

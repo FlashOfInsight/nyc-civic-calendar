@@ -1,0 +1,93 @@
+{
+  "meetings": [
+    {
+      "id": "dot-cac-2025-01",
+      "org": "city-agencies.dot",
+      "title": "DOT Construction Advisory Committee Meeting",
+      "date": "2025-01-30",
+      "time": "10:00",
+      "endTime": "12:00",
+      "location": "55 Water Street, New York, NY",
+      "description": "Monthly Construction Advisory Committee meeting for stakeholders",
+      "url": "https://www.nyc.gov/html/dot/html/about/cac.shtml"
+    },
+    {
+      "id": "dot-cac-2025-02",
+      "org": "city-agencies.dot",
+      "title": "DOT Construction Advisory Committee Meeting",
+      "date": "2025-02-27",
+      "time": "10:00",
+      "endTime": "12:00",
+      "location": "55 Water Street, New York, NY",
+      "description": "Monthly Construction Advisory Committee meeting for stakeholders",
+      "url": "https://www.nyc.gov/html/dot/html/about/cac.shtml"
+    },
+    {
+      "id": "dob-qa-manhattan-2025-01-21",
+      "org": "city-agencies.dob",
+      "title": "DOB Live Q&A Session - Manhattan",
+      "date": "2025-01-21",
+      "time": "14:00",
+      "endTime": "15:30",
+      "location": "Virtual - Zoom",
+      "description": "Bi-weekly online Q&A session for property owners and professionals",
+      "url": "https://www.nyc.gov/site/buildings/dob/upcoming-events.page"
+    },
+    {
+      "id": "dob-qa-brooklyn-2025-01-23",
+      "org": "city-agencies.dob",
+      "title": "DOB Live Q&A Session - Brooklyn",
+      "date": "2025-01-23",
+      "time": "14:00",
+      "endTime": "15:30",
+      "location": "Virtual - Zoom",
+      "description": "Bi-weekly online Q&A session for property owners and professionals",
+      "url": "https://www.nyc.gov/site/buildings/dob/upcoming-events.page"
+    },
+    {
+      "id": "dob-industry-2025-02",
+      "org": "city-agencies.dob",
+      "title": "DOB Industry Meeting",
+      "date": "2025-02-05",
+      "time": "09:00",
+      "endTime": "11:00",
+      "location": "280 Broadway, New York, NY",
+      "description": "Monthly industry meeting for construction professionals",
+      "url": "https://www.nyc.gov/site/buildings/dob/upcoming-events.page"
+    },
+    {
+      "id": "doe-pep-2025-01",
+      "org": "city-agencies.doe.pep",
+      "title": "Panel for Educational Policy Meeting",
+      "date": "2025-01-22",
+      "time": "18:00",
+      "endTime": "21:00",
+      "location": "Murry Bergtraum High School, 411 Pearl Street, New York, NY",
+      "description": "Monthly PEP meeting with public comment period",
+      "url": "https://www.schools.nyc.gov/about-us/leadership/panel-for-education-policy"
+    },
+    {
+      "id": "doe-pep-2025-02",
+      "org": "city-agencies.doe.pep",
+      "title": "Panel for Educational Policy Meeting",
+      "date": "2025-02-26",
+      "time": "18:00",
+      "endTime": "21:00",
+      "location": "TBD",
+      "description": "Monthly PEP meeting with public comment period",
+      "url": "https://www.schools.nyc.gov/about-us/leadership/panel-for-education-policy"
+    },
+    {
+      "id": "doe-all-2025-02-03",
+      "org": "city-agencies.doe.all",
+      "title": "DOE Public Hearing - School Utilization",
+      "date": "2025-02-03",
+      "time": "17:00",
+      "endTime": "19:00",
+      "location": "Virtual",
+      "description": "Public hearing on school building utilization",
+      "url": "https://www.schools.nyc.gov/about-us/news/announcements"
+    }
+  ],
+  "lastUpdated": "2025-01-14T12:00:00Z"
+}
