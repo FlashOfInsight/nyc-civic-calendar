@@ -76,6 +76,28 @@ const organizations = {
         }
       }
     }
+  },
+  "community-boards": {
+    name: "Community Boards",
+    children: {
+      "manhattan": {
+        name: "Manhattan",
+        children: {
+          "1": { name: "CB1 - Financial District, Battery Park City, Tribeca" },
+          "2": { name: "CB2 - Greenwich Village, SoHo, NoHo" },
+          "3": { name: "CB3 - East Village, Lower East Side, Chinatown" },
+          "4": { name: "CB4 - Chelsea, Hell's Kitchen" },
+          "5": { name: "CB5 - Midtown" },
+          "6": { name: "CB6 - Murray Hill, Gramercy Park, Stuyvesant Town" },
+          "7": { name: "CB7 - Upper West Side, Lincoln Square" },
+          "8": { name: "CB8 - Upper East Side, Roosevelt Island" },
+          "9": { name: "CB9 - Morningside Heights, Hamilton Heights" },
+          "10": { name: "CB10 - Central Harlem" },
+          "11": { name: "CB11 - East Harlem" },
+          "12": { name: "CB12 - Washington Heights, Inwood" }
+        }
+      }
+    }
   }
 };
 
