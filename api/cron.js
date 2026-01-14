@@ -32,14 +32,18 @@ function writeMeetings(filename, meetings) {
 }
 
 module.exports = async function handler(req, res) {
-  // Verify cron secret in production
-  // Vercel automatically adds CRON_SECRET for cron jobs
-  if (process.env.VERCEL && req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
-    // Allow manual trigger in development
-    if (process.env.NODE_ENV === "production") {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
+  // Verify authorization for cron endpoint
+  // Allow: Vercel cron (with CRON_SECRET), or manual trigger with ?secret= param
+  const cronSecret = process.env.CRON_SECRET;
+  const isVercelCron = req.headers.authorization === `Bearer ${cronSecret}`;
+  const isManualTrigger = req.query.secret && req.query.secret === process.env.REFRESH_SECRET;
+
+  if (process.env.VERCEL && !isVercelCron && !isManualTrigger) {
+    res.status(401).json({
+      error: "Unauthorized",
+      hint: "Add REFRESH_SECRET env var and use ?secret=YOUR_SECRET to trigger manually"
+    });
+    return;
   }
 
   const results = {
