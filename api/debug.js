@@ -13,15 +13,16 @@ module.exports = async function handler(req, res) {
     const token = process.env.LEGISTAR_API_KEY;
     const today = new Date().toISOString().split("T")[0];
 
-    // Try with token as query param
-    const url = token
-      ? `https://webapi.legistar.com/v1/nyc/events?token=${token}&$top=5`
-      : `https://webapi.legistar.com/v1/nyc/events?$top=5`;
+    // Try with token as header (Ocp-Apim-Subscription-Key)
+    const url = `https://webapi.legistar.com/v1/nyc/events?$top=5`;
+    results.urlTested = url;
 
-    results.urlTested = url.replace(token || '', '[HIDDEN]');
+    const options = {
+      headers: token ? { "Ocp-Apim-Subscription-Key": token } : {}
+    };
 
     const data = await new Promise((resolve, reject) => {
-      https.get(url, (response) => {
+      https.get(url, options, (response) => {
         let body = "";
         results.statusCode = response.statusCode;
         response.on("data", chunk => body += chunk);
