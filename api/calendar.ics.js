@@ -10,7 +10,7 @@ const BLOB_BASE = process.env.BLOB_BASE_URL;
 // Load meeting data from Vercel Blob storage
 async function loadMeetings() {
   const meetings = [];
-  const files = ["city-council.json", "mta.json", "agencies.json"];
+  const files = ["city-council.json", "mta.json", "agencies.json", "community-boards.json"];
 
   for (const file of files) {
     try {

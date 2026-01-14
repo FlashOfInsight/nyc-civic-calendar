@@ -5,6 +5,7 @@ const { put } = require("@vercel/blob");
 const { scrapeCityCouncil } = require("../lib/scrapers/city-council");
 const { scrapeMTA } = require("../lib/scrapers/mta");
 const { scrapeAgencies } = require("../lib/scrapers/agencies");
+const { scrapeManhattanCBs } = require("../lib/scrapers/community-boards");
 
 /**
  * Write meetings to Vercel Blob storage
@@ -44,7 +45,8 @@ module.exports = async function handler(req, res) {
   const results = {
     cityCouncil: { success: false, count: 0, error: null },
     mta: { success: false, count: 0, error: null },
-    agencies: { success: false, count: 0, error: null }
+    agencies: { success: false, count: 0, error: null },
+    communityBoards: { success: false, count: 0, error: null }
   };
 
   // Scrape City Council (no API key needed - uses HTML scraping)
@@ -77,9 +79,19 @@ module.exports = async function handler(req, res) {
     results.agencies.error = err.message;
   }
 
+  // Scrape Manhattan Community Boards
+  try {
+    const meetings = await scrapeManhattanCBs();
+    await writeMeetings("community-boards.json", meetings);
+    results.communityBoards.success = true;
+    results.communityBoards.count = meetings.length;
+  } catch (err) {
+    results.communityBoards.error = err.message;
+  }
+
   // Return results
-  const totalMeetings = results.cityCouncil.count + results.mta.count + results.agencies.count;
-  const allSuccess = results.cityCouncil.success && results.mta.success && results.agencies.success;
+  const totalMeetings = results.cityCouncil.count + results.mta.count + results.agencies.count + results.communityBoards.count;
+  const allSuccess = results.cityCouncil.success && results.mta.success && results.agencies.success && results.communityBoards.success;
 
   res.status(allSuccess ? 200 : 207).json({
     success: allSuccess,
