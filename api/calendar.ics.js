@@ -2,27 +2,66 @@
 // URL: /api/calendar.ics?orgs=city-council.stated,mta.board
 
 const { generateICS } = require("../lib/ics-generator");
-const fs = require("fs");
-const path = require("path");
+const { list } = require("@vercel/blob");
 
-// Load meeting data from JSON files
-function loadMeetings() {
-  const dataDir = path.join(process.cwd(), "data");
+// Blob storage base URL (set after first upload)
+const BLOB_BASE = process.env.BLOB_BASE_URL;
+
+// Load meeting data from Vercel Blob storage
+async function loadMeetings() {
   const meetings = [];
-
   const files = ["city-council.json", "mta.json", "agencies.json"];
 
   for (const file of files) {
-    const filePath = path.join(dataDir, file);
     try {
-      if (fs.existsSync(filePath)) {
-        const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
-        if (data.meetings) {
-          meetings.push(...data.meetings);
+      // Try to fetch from blob storage
+      const blobUrl = BLOB_BASE ? `${BLOB_BASE}/${file}` : null;
+
+      if (blobUrl) {
+        const response = await fetch(blobUrl);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.meetings) {
+            meetings.push(...data.meetings);
+          }
+          continue;
+        }
+      }
+
+      // Fallback: try to list blobs and find the file
+      const { blobs } = await list({ prefix: file.replace(".json", "") });
+      if (blobs.length > 0) {
+        const response = await fetch(blobs[0].url);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.meetings) {
+            meetings.push(...data.meetings);
+          }
         }
       }
     } catch (err) {
       console.error(`Error loading ${file}:`, err.message);
+    }
+  }
+
+  // If no meetings from blob, try local data files (for initial deployment)
+  if (meetings.length === 0) {
+    try {
+      const fs = require("fs");
+      const path = require("path");
+      const dataDir = path.join(process.cwd(), "data");
+
+      for (const file of files) {
+        const filePath = path.join(dataDir, file);
+        if (fs.existsSync(filePath)) {
+          const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+          if (data.meetings) {
+            meetings.push(...data.meetings);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error loading local data:", err.message);
     }
   }
 
@@ -61,7 +100,7 @@ module.exports = async function handler(req, res) {
   }
 
   // Load and filter meetings
-  const allMeetings = loadMeetings();
+  const allMeetings = await loadMeetings();
   const filteredMeetings = filterMeetings(allMeetings, selectedOrgs);
 
   // Generate ICS

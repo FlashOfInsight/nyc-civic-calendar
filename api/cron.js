@@ -1,33 +1,27 @@
 // Cron job endpoint for refreshing meeting data
 // Triggered weekly by Vercel Cron
 
-const fs = require("fs");
-const path = require("path");
+const { put } = require("@vercel/blob");
 const { scrapeCityCouncil } = require("../lib/scrapers/city-council");
 const { scrapeMTA } = require("../lib/scrapers/mta");
 const { scrapeAgencies } = require("../lib/scrapers/agencies");
 
-// Data directory
-const DATA_DIR = path.join(process.cwd(), "data");
-
 /**
- * Write meetings to JSON file
+ * Write meetings to Vercel Blob storage
  * @param {string} filename
  * @param {Array} meetings
  */
-function writeMeetings(filename, meetings) {
-  const filePath = path.join(DATA_DIR, filename);
+async function writeMeetings(filename, meetings) {
   const data = {
     meetings,
     lastUpdated: new Date().toISOString()
   };
 
-  // Ensure data directory exists
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
+  await put(filename, JSON.stringify(data, null, 2), {
+    access: "public",
+    addRandomSuffix: false
+  });
 
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
   console.log(`Wrote ${meetings.length} meetings to ${filename}`);
 }
 
@@ -59,7 +53,7 @@ module.exports = async function handler(req, res) {
       results.cityCouncil.error = "Missing LEGISTAR_API_KEY";
     } else {
       const meetings = await scrapeCityCouncil(legistarToken);
-      writeMeetings("city-council.json", meetings);
+      await writeMeetings("city-council.json", meetings);
       results.cityCouncil.success = true;
       results.cityCouncil.count = meetings.length;
     }
@@ -70,7 +64,7 @@ module.exports = async function handler(req, res) {
   // Scrape MTA
   try {
     const meetings = await scrapeMTA();
-    writeMeetings("mta.json", meetings);
+    await writeMeetings("mta.json", meetings);
     results.mta.success = true;
     results.mta.count = meetings.length;
   } catch (err) {
@@ -84,7 +78,7 @@ module.exports = async function handler(req, res) {
       results.agencies.error = "Missing NYC_API_KEY";
     } else {
       const meetings = await scrapeAgencies(nycApiKey);
-      writeMeetings("agencies.json", meetings);
+      await writeMeetings("agencies.json", meetings);
       results.agencies.success = true;
       results.agencies.count = meetings.length;
     }
