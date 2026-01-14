@@ -67,17 +67,12 @@ module.exports = async function handler(req, res) {
     results.mta.error = err.message;
   }
 
-  // Scrape Agencies
+  // Scrape Agencies (DOB, DOE PEP - no API key needed, uses HTML scraping)
   try {
-    const nycApiKey = process.env.NYC_API_KEY;
-    if (!nycApiKey) {
-      results.agencies.error = "Missing NYC_API_KEY";
-    } else {
-      const meetings = await scrapeAgencies(nycApiKey);
-      await writeMeetings("agencies.json", meetings);
-      results.agencies.success = true;
-      results.agencies.count = meetings.length;
-    }
+    const meetings = await scrapeAgencies();
+    await writeMeetings("agencies.json", meetings);
+    results.agencies.success = true;
+    results.agencies.count = meetings.length;
   } catch (err) {
     results.agencies.error = err.message;
   }
