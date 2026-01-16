@@ -5,7 +5,7 @@ const { put } = require("@vercel/blob");
 const { scrapeCityCouncil } = require("../lib/scrapers/city-council");
 const { scrapeMTA } = require("../lib/scrapers/mta");
 const { scrapeAgencies } = require("../lib/scrapers/agencies");
-const { scrapeManhattanCBs, scrapeBrooklynCBs } = require("../lib/scrapers/community-boards");
+const { scrapeManhattanCBs, scrapeBrooklynCBs, scrapeQueensCBs } = require("../lib/scrapers/community-boards");
 
 /**
  * Write meetings to Vercel Blob storage
@@ -79,11 +79,12 @@ module.exports = async function handler(req, res) {
     results.agencies.error = err.message;
   }
 
-  // Scrape Community Boards (Manhattan and Brooklyn)
+  // Scrape Community Boards (Manhattan, Brooklyn, and Queens)
   try {
     const manhattanMeetings = await scrapeManhattanCBs();
     const brooklynMeetings = await scrapeBrooklynCBs();
-    const allMeetings = [...manhattanMeetings, ...brooklynMeetings];
+    const queensMeetings = await scrapeQueensCBs();
+    const allMeetings = [...manhattanMeetings, ...brooklynMeetings, ...queensMeetings];
     await writeMeetings("community-boards.json", allMeetings);
     results.communityBoards.success = true;
     results.communityBoards.count = allMeetings.length;
