@@ -927,6 +927,7 @@ const organizations = {
 
 // State
 let selectedOrgs = new Set();
+let activeOrgs = new Set(); // Orgs that have events
 
 // Load saved selections from localStorage
 function loadSelections() {
@@ -940,21 +941,70 @@ function loadSelections() {
   }
 }
 
+// Load active orgs from API
+async function loadActiveOrgs() {
+  try {
+    const response = await fetch("/api/active-orgs");
+    if (response.ok) {
+      const data = await response.json();
+      if (data.activeOrgs && data.activeOrgs.length > 0) {
+        activeOrgs = new Set(data.activeOrgs);
+        console.log(`Loaded ${activeOrgs.size} active orgs`);
+      }
+    }
+  } catch (e) {
+    console.log("Could not load active orgs, showing all committees");
+  }
+}
+
+// Check if an org key or any of its children have events
+function hasActiveEvents(org, prefix) {
+  // If no active orgs loaded yet, show everything
+  if (activeOrgs.size === 0) {
+    return true;
+  }
+
+  // Check if this exact key has events
+  if (activeOrgs.has(prefix)) {
+    return true;
+  }
+
+  // If this has children, check if any child has events
+  if (org.children) {
+    for (const [key, child] of Object.entries(org.children)) {
+      const fullKey = prefix ? `${prefix}.${key}` : key;
+      if (hasActiveEvents(child, fullKey)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  return false;
+}
+
 // Save selections to localStorage
 function saveSelections() {
   localStorage.setItem('nyc-civic-calendar-selections', JSON.stringify([...selectedOrgs]));
 }
 
-// Get all leaf keys under a given org
+// Get all leaf keys under a given org (only active ones if activeOrgs is populated)
 function getLeafKeys(org, prefix) {
   const keys = [];
   if (org.children) {
     for (const [key, child] of Object.entries(org.children)) {
       const fullKey = prefix ? `${prefix}.${key}` : key;
+      // Skip inactive orgs
+      if (activeOrgs.size > 0 && !hasActiveEvents(child, fullKey)) {
+        continue;
+      }
       keys.push(...getLeafKeys(child, fullKey));
     }
   } else {
-    keys.push(prefix);
+    // Only add leaf if it's active (or if we haven't loaded activeOrgs yet)
+    if (activeOrgs.size === 0 || activeOrgs.has(prefix)) {
+      keys.push(prefix);
+    }
   }
   return keys;
 }
@@ -971,6 +1021,12 @@ function buildTree(orgs, prefix = "") {
 
   for (const [key, org] of Object.entries(orgs)) {
     const fullKey = prefix ? `${prefix}.${key}` : key;
+
+    // Skip committees that have no events (only for leaf nodes or empty branches)
+    if (!hasActiveEvents(org, fullKey)) {
+      continue;
+    }
+
     const li = document.createElement("li");
     li.className = "org-item";
 
@@ -1193,9 +1249,12 @@ async function loadStats() {
 }
 
 // Initialize
-function init() {
-  console.log("NYC Civic Calendar app v2.0 initialized");
+async function init() {
+  console.log("NYC Civic Calendar app v2.1 initialized");
   loadSelections();
+
+  // Load active orgs first to hide empty committees
+  await loadActiveOrgs();
 
   const treeContainer = document.getElementById("org-tree");
   treeContainer.appendChild(buildTree(organizations));

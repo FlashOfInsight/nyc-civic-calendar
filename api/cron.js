@@ -27,6 +27,40 @@ async function writeMeetings(filename, meetings) {
   console.log(`Wrote ${meetings.length} meetings to ${filename}`);
 }
 
+/**
+ * Extract unique org keys from all meetings
+ * @param {Array} allMeetings - Combined array of all meetings
+ * @returns {Array} - Sorted array of unique org keys
+ */
+function extractActiveOrgs(allMeetings) {
+  const orgKeys = new Set();
+  for (const meeting of allMeetings) {
+    if (meeting.org) {
+      orgKeys.add(meeting.org);
+    }
+  }
+  return [...orgKeys].sort();
+}
+
+/**
+ * Write active orgs to Vercel Blob storage
+ * @param {Array} activeOrgs - Array of active org keys
+ */
+async function writeActiveOrgs(activeOrgs) {
+  const data = {
+    activeOrgs,
+    lastUpdated: new Date().toISOString()
+  };
+
+  await put("active-orgs.json", JSON.stringify(data, null, 2), {
+    access: "public",
+    addRandomSuffix: false,
+    allowOverwrite: true
+  });
+
+  console.log(`Wrote ${activeOrgs.length} active org keys to active-orgs.json`);
+}
+
 module.exports = async function handler(req, res) {
   // Verify authorization for cron endpoint
   // Allow: Vercel cron (with CRON_SECRET), or manual trigger with ?secret= param
@@ -43,10 +77,10 @@ module.exports = async function handler(req, res) {
   }
 
   const results = {
-    cityCouncil: { success: false, count: 0, error: null },
-    mta: { success: false, count: 0, error: null },
-    agencies: { success: false, count: 0, error: null },
-    communityBoards: { success: false, count: 0, error: null }
+    cityCouncil: { success: false, count: 0, error: null, meetings: [] },
+    mta: { success: false, count: 0, error: null, meetings: [] },
+    agencies: { success: false, count: 0, error: null, meetings: [] },
+    communityBoards: { success: false, count: 0, error: null, meetings: [] }
   };
 
   // Scrape City Council (no API key needed - uses HTML scraping)
@@ -55,6 +89,7 @@ module.exports = async function handler(req, res) {
     await writeMeetings("city-council.json", meetings);
     results.cityCouncil.success = true;
     results.cityCouncil.count = meetings.length;
+    results.cityCouncil.meetings = meetings;
   } catch (err) {
     results.cityCouncil.error = err.message;
   }
@@ -65,6 +100,7 @@ module.exports = async function handler(req, res) {
     await writeMeetings("mta.json", meetings);
     results.mta.success = true;
     results.mta.count = meetings.length;
+    results.mta.meetings = meetings;
   } catch (err) {
     results.mta.error = err.message;
   }
@@ -75,6 +111,7 @@ module.exports = async function handler(req, res) {
     await writeMeetings("agencies.json", meetings);
     results.agencies.success = true;
     results.agencies.count = meetings.length;
+    results.agencies.meetings = meetings;
   } catch (err) {
     results.agencies.error = err.message;
   }
@@ -86,15 +123,26 @@ module.exports = async function handler(req, res) {
     const queensMeetings = await scrapeQueensCBs();
     const bronxMeetings = await scrapeBronxCBs();
     const statenIslandMeetings = await scrapeStatenIslandCBs();
-    const allMeetings = [...manhattanMeetings, ...brooklynMeetings, ...queensMeetings, ...bronxMeetings, ...statenIslandMeetings];
-    await writeMeetings("community-boards.json", allMeetings);
+    const allCBMeetings = [...manhattanMeetings, ...brooklynMeetings, ...queensMeetings, ...bronxMeetings, ...statenIslandMeetings];
+    await writeMeetings("community-boards.json", allCBMeetings);
     results.communityBoards.success = true;
-    results.communityBoards.count = allMeetings.length;
+    results.communityBoards.count = allCBMeetings.length;
+    results.communityBoards.meetings = allCBMeetings;
   } catch (err) {
     results.communityBoards.error = err.message;
   }
 
-  // Return results
+  // Compute and save active orgs from all scraped meetings
+  const allMeetings = [
+    ...results.cityCouncil.meetings,
+    ...results.mta.meetings,
+    ...results.agencies.meetings,
+    ...results.communityBoards.meetings
+  ];
+  const activeOrgs = extractActiveOrgs(allMeetings);
+  await writeActiveOrgs(activeOrgs);
+
+  // Return results (without meetings array to keep response small)
   const totalMeetings = results.cityCouncil.count + results.mta.count + results.agencies.count + results.communityBoards.count;
   const allSuccess = results.cityCouncil.success && results.mta.success && results.agencies.success && results.communityBoards.success;
 
@@ -102,6 +150,12 @@ module.exports = async function handler(req, res) {
     success: allSuccess,
     timestamp: new Date().toISOString(),
     totalMeetings,
-    results
+    activeOrgCount: activeOrgs.length,
+    results: {
+      cityCouncil: { success: results.cityCouncil.success, count: results.cityCouncil.count, error: results.cityCouncil.error },
+      mta: { success: results.mta.success, count: results.mta.count, error: results.mta.error },
+      agencies: { success: results.agencies.success, count: results.agencies.count, error: results.agencies.error },
+      communityBoards: { success: results.communityBoards.success, count: results.communityBoards.count, error: results.communityBoards.error }
+    }
   });
 };
