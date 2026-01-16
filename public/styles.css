@@ -239,6 +239,16 @@ footer .social a:hover {
   text-decoration: underline;
 }
 
+/* Refresh note */
+.refresh-note {
+  margin-top: 20px;
+  padding: 12px 15px;
+  background: #f8f9fa;
+  border-left: 3px solid #1a1a2e;
+  font-size: 13px;
+  color: #555;
+}
+
 /* Selection count badge */
 .selection-count {
   display: inline-block;
