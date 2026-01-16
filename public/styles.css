@@ -212,6 +212,12 @@ footer p {
   margin-bottom: 8px;
 }
 
+footer .active-users {
+  font-size: 13px;
+  color: #888;
+  font-style: italic;
+}
+
 footer .credit {
   margin-top: 15px;
   font-weight: 500;

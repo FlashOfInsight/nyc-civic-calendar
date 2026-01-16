@@ -732,6 +732,22 @@ function copyUrl() {
   });
 }
 
+// Fetch and display active user count
+async function loadStats() {
+  try {
+    const response = await fetch("/api/stats");
+    if (response.ok) {
+      const data = await response.json();
+      const el = document.getElementById("active-users");
+      if (el && data.activeUsers > 0) {
+        el.textContent = `${data.activeUsers} active calendar subscriptions this week`;
+      }
+    }
+  } catch (e) {
+    // Silently fail
+  }
+}
+
 // Initialize
 function init() {
   console.log("NYC Civic Calendar app v2.0 initialized");
@@ -742,6 +758,7 @@ function init() {
 
   updateCheckboxStates();
   updateCalendarUrl();
+  loadStats();
 }
 
 // Run on page load

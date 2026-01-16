@@ -2,7 +2,8 @@
 // URL: /api/calendar.ics?orgs=city-council.stated,mta.board
 
 const { generateICS } = require("../lib/ics-generator");
-const { list } = require("@vercel/blob");
+const { list, put } = require("@vercel/blob");
+const crypto = require("crypto");
 
 // Blob storage base URL (set after first upload)
 const BLOB_BASE = process.env.BLOB_BASE_URL;
@@ -79,6 +80,50 @@ function filterMeetings(meetings, selectedOrgs) {
   });
 }
 
+// Track calendar subscription access
+async function trackSubscription(orgsParam) {
+  try {
+    // Create a hash of the orgs to identify unique subscriptions
+    const subId = crypto.createHash("md5").update(orgsParam).digest("hex").substring(0, 12);
+    const now = Date.now();
+
+    // Load existing usage data
+    let usage = {};
+    try {
+      const { blobs } = await list({ prefix: "usage" });
+      if (blobs.length > 0) {
+        const response = await fetch(blobs[0].url);
+        if (response.ok) {
+          usage = await response.json();
+        }
+      }
+    } catch (e) {
+      // Start fresh if no data exists
+    }
+
+    // Update this subscription's last access time
+    usage[subId] = now;
+
+    // Clean up old entries (older than 7 days)
+    const weekAgo = now - (7 * 24 * 60 * 60 * 1000);
+    for (const id in usage) {
+      if (usage[id] < weekAgo) {
+        delete usage[id];
+      }
+    }
+
+    // Save updated usage data
+    await put("usage.json", JSON.stringify(usage), {
+      access: "public",
+      addRandomSuffix: false,
+      allowOverwrite: true
+    });
+  } catch (err) {
+    // Don't fail the request if tracking fails
+    console.error("Error tracking subscription:", err.message);
+  }
+}
+
 module.exports = async function handler(req, res) {
   // Get orgs from query parameter
   const orgsParam = req.query.orgs;
@@ -98,6 +143,9 @@ module.exports = async function handler(req, res) {
     res.status(400).json({ error: "No valid organizations specified" });
     return;
   }
+
+  // Track this subscription (don't await, run in background)
+  trackSubscription(orgsParam);
 
   // Load and filter meetings
   const allMeetings = await loadMeetings();
