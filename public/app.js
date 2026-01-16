@@ -693,27 +693,61 @@ function getOrgByKey(key) {
   return current;
 }
 
+// Optimize selected orgs by collapsing to parent keys when all children are selected
+function optimizeSelectedOrgs() {
+  // Check if all leaves under an org are selected
+  function allLeavesSelected(org, prefix) {
+    const leaves = getLeafKeys(org, prefix);
+    return leaves.length > 0 && leaves.every(leaf => selectedOrgs.has(leaf));
+  }
+
+  // Recursively find the optimal (shortest) set of keys
+  function findOptimalKeys(orgs, prefix) {
+    const result = [];
+    for (const [key, org] of Object.entries(orgs)) {
+      const fullKey = prefix ? `${prefix}.${key}` : key;
+      if (hasChildren(org)) {
+        // This is a parent node
+        if (allLeavesSelected(org, fullKey)) {
+          // All children selected - use parent key instead
+          result.push(fullKey);
+        } else {
+          // Only some children selected - recurse
+          result.push(...findOptimalKeys(org.children, fullKey));
+        }
+      } else {
+        // This is a leaf node
+        if (selectedOrgs.has(fullKey)) {
+          result.push(fullKey);
+        }
+      }
+    }
+    return result;
+  }
+
+  return new Set(findOptimalKeys(organizations, ""));
+}
+
 // Update the calendar URL
 function updateCalendarUrl() {
   const section = document.getElementById("calendar-section");
   const urlInput = document.getElementById("calendar-url");
 
-  console.log("updateCalendarUrl called, selectedOrgs:", [...selectedOrgs]);
-
   if (selectedOrgs.size === 0) {
     section.style.display = "none";
-    console.log("No orgs selected, hiding section");
     return;
   }
 
   section.style.display = "block";
 
+  // Optimize to shortest URL by collapsing to parent keys where possible
+  const optimizedOrgs = optimizeSelectedOrgs();
+
   // Build URL
   const baseUrl = window.location.origin;
-  const orgsParam = [...selectedOrgs].sort().join(",");
+  const orgsParam = [...optimizedOrgs].sort().join(",");
   const url = `${baseUrl}/api/calendar.ics?orgs=${encodeURIComponent(orgsParam)}`;
 
-  console.log("Generated URL:", url);
   urlInput.value = url;
 }
 
