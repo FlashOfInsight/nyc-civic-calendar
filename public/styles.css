@@ -208,6 +208,37 @@ footer {
   font-size: 14px;
 }
 
+footer p {
+  margin-bottom: 8px;
+}
+
+footer .credit {
+  margin-top: 15px;
+  font-weight: 500;
+  color: #333;
+}
+
+footer .contact {
+  font-size: 13px;
+}
+
+footer .contact a {
+  color: #1a1a2e;
+}
+
+footer .social {
+  margin-top: 10px;
+}
+
+footer .social a {
+  color: #1a1a2e;
+  text-decoration: none;
+}
+
+footer .social a:hover {
+  text-decoration: underline;
+}
+
 /* Selection count badge */
 .selection-count {
   display: inline-block;
