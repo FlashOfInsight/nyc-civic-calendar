@@ -3,8 +3,8 @@
 
 const { list } = require("@vercel/blob");
 
-// Vercel Blob base URL
-const BLOB_BASE_URL = "https://r9obi5taznzngbhm.public.blob.vercel-storage.com";
+// Blob storage base URL (from environment variable)
+const BLOB_BASE = process.env.BLOB_BASE_URL;
 
 module.exports = async function handler(req, res) {
   // Set CORS headers
@@ -17,10 +17,28 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // Fetch active-orgs.json from Vercel Blob storage
-    const response = await fetch(`${BLOB_BASE_URL}/active-orgs.json`);
+    let data = null;
 
-    if (!response.ok) {
+    // Try to fetch from blob storage using env var
+    if (BLOB_BASE) {
+      const response = await fetch(`${BLOB_BASE}/active-orgs.json`);
+      if (response.ok) {
+        data = await response.json();
+      }
+    }
+
+    // Fallback: try to list blobs and find the file
+    if (!data) {
+      const { blobs } = await list({ prefix: "active-orgs" });
+      if (blobs.length > 0) {
+        const response = await fetch(blobs[0].url);
+        if (response.ok) {
+          data = await response.json();
+        }
+      }
+    }
+
+    if (!data) {
       // File doesn't exist yet - return empty array
       res.status(200).json({
         activeOrgs: [],
@@ -29,8 +47,6 @@ module.exports = async function handler(req, res) {
       });
       return;
     }
-
-    const data = await response.json();
 
     res.status(200).json({
       activeOrgs: data.activeOrgs || [],
