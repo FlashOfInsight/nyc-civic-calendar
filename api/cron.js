@@ -11,6 +11,8 @@ const { scrapeCityCouncil } = require("../lib/scrapers/city-council");
 const { scrapeMTA } = require("../lib/scrapers/mta");
 const { scrapeAgencies } = require("../lib/scrapers/agencies");
 const { scrapeManhattanCBs, scrapeBrooklynCBs, scrapeQueensCBs, scrapeBronxCBs, scrapeStatenIslandCBs } = require("../lib/scrapers/community-boards");
+const { scrapeOversightBoards } = require("../lib/scrapers/oversight-boards");
+const { scrapeNYCRules } = require("../lib/scrapers/nyc-rules");
 
 // Blob storage base URL
 const BLOB_BASE = process.env.BLOB_BASE_URL;
@@ -20,7 +22,9 @@ const MIN_EXPECTED_MEETINGS = {
   "city-council.json": 5,
   "mta.json": 3,
   "agencies.json": 3,
-  "community-boards.json": 10
+  "community-boards.json": 10,
+  "oversight-boards.json": 5,  // CCRB, LPC, BSA, RGB combined
+  "nyc-rules.json": 1          // Varies based on active rulemaking
 };
 
 /**
@@ -263,7 +267,9 @@ module.exports = async function handler(req, res) {
     cityCouncil: { success: false, count: 0, error: null, meetings: [], writeResult: null },
     mta: { success: false, count: 0, error: null, meetings: [], writeResult: null },
     agencies: { success: false, count: 0, error: null, meetings: [], writeResult: null },
-    communityBoards: { success: false, count: 0, error: null, meetings: [], writeResult: null }
+    communityBoards: { success: false, count: 0, error: null, meetings: [], writeResult: null },
+    oversightBoards: { success: false, count: 0, error: null, meetings: [], writeResult: null },
+    nycRules: { success: false, count: 0, error: null, meetings: [], writeResult: null }
   };
 
   // Scrape City Council
@@ -332,19 +338,53 @@ module.exports = async function handler(req, res) {
     results.communityBoards.writeResult = writeResult;
   }
 
+  // Scrape Oversight Boards (CCRB, LPC, BSA, RGB)
+  try {
+    const meetings = await scrapeOversightBoards();
+    const writeResult = await writeMeetings("oversight-boards.json", meetings);
+    results.oversightBoards.success = true;
+    results.oversightBoards.count = meetings.length;
+    results.oversightBoards.meetings = meetings;
+    results.oversightBoards.writeResult = writeResult;
+  } catch (err) {
+    console.error("Oversight Boards scraper error:", err.message);
+    results.oversightBoards.error = err.message;
+    const writeResult = await writeMeetings("oversight-boards.json", []);
+    results.oversightBoards.writeResult = writeResult;
+  }
+
+  // Scrape NYC Rules (rulemaking hearings for all agencies)
+  try {
+    const meetings = await scrapeNYCRules();
+    const writeResult = await writeMeetings("nyc-rules.json", meetings);
+    results.nycRules.success = true;
+    results.nycRules.count = meetings.length;
+    results.nycRules.meetings = meetings;
+    results.nycRules.writeResult = writeResult;
+  } catch (err) {
+    console.error("NYC Rules scraper error:", err.message);
+    results.nycRules.error = err.message;
+    const writeResult = await writeMeetings("nyc-rules.json", []);
+    results.nycRules.writeResult = writeResult;
+  }
+
   // Compute and save active orgs from all scraped meetings
   const allMeetings = [
     ...results.cityCouncil.meetings,
     ...results.mta.meetings,
     ...results.agencies.meetings,
-    ...results.communityBoards.meetings
+    ...results.communityBoards.meetings,
+    ...results.oversightBoards.meetings,
+    ...results.nycRules.meetings
   ];
   const activeOrgs = extractActiveOrgs(allMeetings);
   await writeActiveOrgs(activeOrgs);
 
   // Return results (without meetings array to keep response small)
-  const totalMeetings = results.cityCouncil.count + results.mta.count + results.agencies.count + results.communityBoards.count;
-  const allSuccess = results.cityCouncil.success && results.mta.success && results.agencies.success && results.communityBoards.success;
+  const totalMeetings = results.cityCouncil.count + results.mta.count + results.agencies.count +
+    results.communityBoards.count + results.oversightBoards.count + results.nycRules.count;
+  const allSuccess = results.cityCouncil.success && results.mta.success && results.agencies.success &&
+    results.communityBoards.success && results.oversightBoards.success && results.nycRules.success;
 
   res.status(allSuccess ? 200 : 207).json({
     success: allSuccess,
@@ -375,6 +415,18 @@ module.exports = async function handler(req, res) {
         count: results.communityBoards.count,
         error: results.communityBoards.error,
         preserved: results.communityBoards.writeResult?.preserved || 0
+      },
+      oversightBoards: {
+        success: results.oversightBoards.success,
+        count: results.oversightBoards.count,
+        error: results.oversightBoards.error,
+        preserved: results.oversightBoards.writeResult?.preserved || 0
+      },
+      nycRules: {
+        success: results.nycRules.success,
+        count: results.nycRules.count,
+        error: results.nycRules.error,
+        preserved: results.nycRules.writeResult?.preserved || 0
       }
     }
   });
