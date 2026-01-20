@@ -15,6 +15,7 @@ const { scrapeAgencies } = require("../lib/scrapers/agencies");
 const { scrapeManhattanCBs, scrapeBrooklynCBs, scrapeQueensCBs, scrapeBronxCBs, scrapeStatenIslandCBs } = require("../lib/scrapers/community-boards");
 const { scrapeOversightBoards } = require("../lib/scrapers/oversight-boards");
 const { scrapeNYCRules } = require("../lib/scrapers/nyc-rules");
+const { scrapeCityGovernment } = require("../lib/scrapers/city-government");
 
 // Minimum expected meetings per source (if scraper returns fewer, something is wrong)
 const MIN_EXPECTED_MEETINGS = {
@@ -23,7 +24,8 @@ const MIN_EXPECTED_MEETINGS = {
   "agencies.json": 3,
   "community-boards.json": 10,
   "oversight-boards.json": 5,  // CCRB, LPC, BSA, RGB combined
-  "nyc-rules.json": 1          // Varies based on active rulemaking
+  "nyc-rules.json": 1,         // Varies based on active rulemaking
+  "city-government.json": 5    // CPC, Comptroller, DCAS, Borough Presidents
 };
 
 /**
@@ -218,7 +220,8 @@ module.exports = async function handler(req, res) {
     agencies: { success: false, count: 0, error: null, meetings: [], preparedData: null },
     communityBoards: { success: false, count: 0, error: null, meetings: [], preparedData: null },
     oversightBoards: { success: false, count: 0, error: null, meetings: [], preparedData: null },
-    nycRules: { success: false, count: 0, error: null, meetings: [], preparedData: null }
+    nycRules: { success: false, count: 0, error: null, meetings: [], preparedData: null },
+    cityGovernment: { success: false, count: 0, error: null, meetings: [], preparedData: null }
   };
 
   // Scrape City Council
@@ -316,6 +319,21 @@ module.exports = async function handler(req, res) {
     results.nycRules.preparedData = { data, result };
   }
 
+  // Scrape City Government (CPC, Comptroller, DCAS, Borough Presidents)
+  try {
+    const meetings = await scrapeCityGovernment();
+    const { data, result } = await prepareMeetingsData("city-government.json", meetings);
+    results.cityGovernment.success = true;
+    results.cityGovernment.count = meetings.length;
+    results.cityGovernment.meetings = meetings;
+    results.cityGovernment.preparedData = { data, result };
+  } catch (err) {
+    console.error("City Government scraper error:", err.message);
+    results.cityGovernment.error = err.message;
+    const { data, result } = await prepareMeetingsData("city-government.json", []);
+    results.cityGovernment.preparedData = { data, result };
+  }
+
   // Compute active orgs from all scraped meetings
   const allMeetings = [
     ...results.cityCouncil.meetings,
@@ -323,7 +341,8 @@ module.exports = async function handler(req, res) {
     ...results.agencies.meetings,
     ...results.communityBoards.meetings,
     ...results.oversightBoards.meetings,
-    ...results.nycRules.meetings
+    ...results.nycRules.meetings,
+    ...results.cityGovernment.meetings
   ];
   const activeOrgs = extractActiveOrgs(allMeetings);
   const activeOrgsData = await prepareActiveOrgsData(activeOrgs);
@@ -336,6 +355,7 @@ module.exports = async function handler(req, res) {
     "community-boards.json": prepareGistFile(results.communityBoards.preparedData.data),
     "oversight-boards.json": prepareGistFile(results.oversightBoards.preparedData.data),
     "nyc-rules.json": prepareGistFile(results.nycRules.preparedData.data),
+    "city-government.json": prepareGistFile(results.cityGovernment.preparedData.data),
     "active-orgs.json": prepareGistFile(activeOrgsData)
   };
 
@@ -348,9 +368,11 @@ module.exports = async function handler(req, res) {
 
   // Return results (without meetings array to keep response small)
   const totalMeetings = results.cityCouncil.count + results.mta.count + results.agencies.count +
-    results.communityBoards.count + results.oversightBoards.count + results.nycRules.count;
+    results.communityBoards.count + results.oversightBoards.count + results.nycRules.count +
+    results.cityGovernment.count;
   const allSuccess = results.cityCouncil.success && results.mta.success && results.agencies.success &&
-    results.communityBoards.success && results.oversightBoards.success && results.nycRules.success;
+    results.communityBoards.success && results.oversightBoards.success && results.nycRules.success &&
+    results.cityGovernment.success;
 
   res.status(allSuccess && writeResult.success ? 200 : 207).json({
     success: allSuccess && writeResult.success,
@@ -395,6 +417,12 @@ module.exports = async function handler(req, res) {
         count: results.nycRules.count,
         error: results.nycRules.error,
         preserved: results.nycRules.preparedData?.result?.preserved || 0
+      },
+      cityGovernment: {
+        success: results.cityGovernment.success,
+        count: results.cityGovernment.count,
+        error: results.cityGovernment.error,
+        preserved: results.cityGovernment.preparedData?.result?.preserved || 0
       }
     }
   });

@@ -15,7 +15,8 @@ async function loadMeetings() {
     "agencies.json",
     "community-boards.json",
     "oversight-boards.json",
-    "nyc-rules.json"
+    "nyc-rules.json",
+    "city-government.json"
   ];
 
   for (const file of files) {
