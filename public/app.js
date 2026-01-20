@@ -66,15 +66,127 @@ const organizations = {
   "city-agencies": {
     name: "City Agencies",
     children: {
-      "dot": { name: "Department of Transportation (DOT)" },
-      "dob": { name: "Department of Buildings (DOB)" },
+      "ccrb": {
+        name: "Civilian Complaint Review Board (CCRB)",
+        children: {
+          "board": { name: "Board Meetings" }
+        }
+      },
+      "lpc": {
+        name: "Landmarks Preservation Commission (LPC)",
+        children: {
+          "hearings": { name: "Public Hearings" }
+        }
+      },
+      "bsa": {
+        name: "Board of Standards and Appeals (BSA)",
+        children: {
+          "hearings": { name: "Public Hearings" }
+        }
+      },
+      "rgb": {
+        name: "Rent Guidelines Board (RGB)",
+        children: {
+          "meetings": { name: "Public Meetings" },
+          "hearings": { name: "Public Hearings" }
+        }
+      },
+      "dcp": {
+        name: "Department of City Planning (DCP)",
+        children: {
+          "commission": { name: "City Planning Commission" }
+        }
+      },
+      "comptroller": {
+        name: "NYC Comptroller",
+        children: {
+          "investment": { name: "Investment Advisory Committee" }
+        }
+      },
+      "dcas": {
+        name: "Dept of Citywide Administrative Services (DCAS)",
+        children: {
+          "rules": { name: "Rulemaking Hearings" },
+          "hearings": { name: "Civil Service Hearings" }
+        }
+      },
+      "dot": {
+        name: "Department of Transportation (DOT)",
+        children: {
+          "rules": { name: "Rulemaking Hearings" }
+        }
+      },
+      "dob": {
+        name: "Department of Buildings (DOB)",
+        children: {
+          "rules": { name: "Rulemaking Hearings" },
+          "after-hours": { name: "Buildings After Hours" },
+          "industry-bronx": { name: "Industry Meeting - Bronx" },
+          "industry-brooklyn": { name: "Industry Meeting - Brooklyn" },
+          "industry-manhattan": { name: "Industry Meeting - Manhattan" },
+          "industry-queens": { name: "Industry Meeting - Queens" },
+          "industry-si": { name: "Industry Meeting - Staten Island" }
+        }
+      },
       "doe": {
         name: "Department of Education (DOE)",
         children: {
-          "all": { name: "All Public Meetings" },
-          "pep": { name: "Panel for Educational Policy" }
+          "pep": { name: "Panel for Educational Policy" },
+          "rules": { name: "Rulemaking Hearings" }
+        }
+      },
+      "dohmh": {
+        name: "Dept of Health and Mental Hygiene (DOHMH)",
+        children: {
+          "rules": { name: "Rulemaking Hearings" }
+        }
+      },
+      "hpd": {
+        name: "Housing Preservation and Development (HPD)",
+        children: {
+          "rules": { name: "Rulemaking Hearings" }
+        }
+      },
+      "fdny": {
+        name: "Fire Department (FDNY)",
+        children: {
+          "rules": { name: "Rulemaking Hearings" }
+        }
+      },
+      "nypd": {
+        name: "Police Department (NYPD)",
+        children: {
+          "rules": { name: "Rulemaking Hearings" }
+        }
+      },
+      "dsny": {
+        name: "Department of Sanitation (DSNY)",
+        children: {
+          "rules": { name: "Rulemaking Hearings" }
+        }
+      },
+      "parks": {
+        name: "Department of Parks and Recreation",
+        children: {
+          "rules": { name: "Rulemaking Hearings" }
+        }
+      },
+      "tlc": {
+        name: "Taxi and Limousine Commission (TLC)",
+        children: {
+          "rules": { name: "Rulemaking Hearings" }
         }
       }
+    }
+  },
+  "borough-presidents": {
+    name: "Borough Presidents",
+    children: {
+      "manhattan": { name: "Manhattan Borough President" },
+      "brooklyn": { name: "Brooklyn Borough President" },
+      "queens": { name: "Queens Borough President" },
+      "bronx": { name: "Bronx Borough President" },
+      "staten-island": { name: "Staten Island Borough President" }
     }
   },
   "community-boards": {

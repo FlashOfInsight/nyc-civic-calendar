@@ -201,15 +201,18 @@ async function prepareActiveOrgsData(newActiveOrgs) {
 
 module.exports = async function handler(req, res) {
   // Verify authorization for cron endpoint
-  // Allow: Vercel cron (with CRON_SECRET), or manual trigger with ?secret= param
-  const cronSecret = process.env.CRON_SECRET;
-  const isVercelCron = req.headers.authorization === `Bearer ${cronSecret}`;
+  // Allow: Vercel cron (via special header), or manual trigger with ?secret= param
+
+  // Vercel crons include this header automatically
+  const isVercelCron = req.headers["x-vercel-cron"] === "1";
+
+  // Manual trigger with secret query param
   const isManualTrigger = req.query.secret && req.query.secret === process.env.REFRESH_SECRET;
 
   if (process.env.VERCEL && !isVercelCron && !isManualTrigger) {
     res.status(401).json({
       error: "Unauthorized",
-      hint: "Add REFRESH_SECRET env var and use ?secret=YOUR_SECRET to trigger manually"
+      hint: "Use ?secret=YOUR_SECRET to trigger manually"
     });
     return;
   }
