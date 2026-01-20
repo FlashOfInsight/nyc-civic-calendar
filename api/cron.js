@@ -5,17 +5,16 @@
 // - Never overwrites good data with empty data
 // - Merges new meetings with existing future meetings
 // - Preserves active-orgs stability across runs
+//
+// STORAGE: Uses GitHub Gist instead of Vercel Blob to avoid operation limits
 
-const { put, list } = require("@vercel/blob");
+const { readFromGist, writeToGist, prepareGistFile } = require("../lib/gist-storage");
 const { scrapeCityCouncil } = require("../lib/scrapers/city-council");
 const { scrapeMTA } = require("../lib/scrapers/mta");
 const { scrapeAgencies } = require("../lib/scrapers/agencies");
 const { scrapeManhattanCBs, scrapeBrooklynCBs, scrapeQueensCBs, scrapeBronxCBs, scrapeStatenIslandCBs } = require("../lib/scrapers/community-boards");
 const { scrapeOversightBoards } = require("../lib/scrapers/oversight-boards");
 const { scrapeNYCRules } = require("../lib/scrapers/nyc-rules");
-
-// Blob storage base URL
-const BLOB_BASE = process.env.BLOB_BASE_URL;
 
 // Minimum expected meetings per source (if scraper returns fewer, something is wrong)
 const MIN_EXPECTED_MEETINGS = {
@@ -28,29 +27,15 @@ const MIN_EXPECTED_MEETINGS = {
 };
 
 /**
- * Load existing meetings from Vercel Blob storage
+ * Load existing meetings from GitHub Gist storage
  * @param {string} filename
  * @returns {Promise<{meetings: Array, lastUpdated: string|null}>}
  */
 async function loadExistingMeetings(filename) {
   try {
-    // Try direct URL first
-    if (BLOB_BASE) {
-      const response = await fetch(`${BLOB_BASE}/${filename}`);
-      if (response.ok) {
-        const data = await response.json();
-        return { meetings: data.meetings || [], lastUpdated: data.lastUpdated || null };
-      }
-    }
-
-    // Fallback: list blobs
-    const { blobs } = await list({ prefix: filename.replace(".json", "") });
-    if (blobs.length > 0) {
-      const response = await fetch(blobs[0].url);
-      if (response.ok) {
-        const data = await response.json();
-        return { meetings: data.meetings || [], lastUpdated: data.lastUpdated || null };
-      }
+    const data = await readFromGist(filename);
+    if (data) {
+      return { meetings: data.meetings || [], lastUpdated: data.lastUpdated || null };
     }
   } catch (err) {
     console.error(`Error loading existing ${filename}:`, err.message);
@@ -95,17 +80,17 @@ function mergeMeetings(existingMeetings, newMeetings) {
 }
 
 /**
- * Write meetings to Vercel Blob storage with validation
+ * Prepare meetings data for writing (does not write, returns data for batching)
  * @param {string} filename
  * @param {Array} newMeetings - Newly scraped meetings
- * @returns {Promise<{written: boolean, count: number, preserved: number, reason: string|null}>}
+ * @returns {Promise<{data: object, result: {count: number, preserved: number, reason: string|null}}>}
  */
-async function writeMeetings(filename, newMeetings) {
+async function prepareMeetingsData(filename, newMeetings) {
   const minExpected = MIN_EXPECTED_MEETINGS[filename] || 1;
   const existing = await loadExistingMeetings(filename);
   const existingFuture = filterFutureMeetings(existing.meetings);
 
-  // Case 1: Scraper returned good data - merge and write
+  // Case 1: Scraper returned good data - merge and prepare
   if (newMeetings.length >= minExpected) {
     const merged = mergeMeetings(existing.meetings, newMeetings);
     const data = {
@@ -118,25 +103,18 @@ async function writeMeetings(filename, newMeetings) {
       }
     };
 
-    await put(filename, JSON.stringify(data, null, 2), {
-      access: "public",
-      addRandomSuffix: false,
-      allowOverwrite: true
-    });
-
-    console.log(`[${filename}] Wrote ${merged.length} meetings (${newMeetings.length} new, merged with existing)`);
-    return { written: true, count: merged.length, preserved: 0, reason: null };
+    console.log(`[${filename}] Prepared ${merged.length} meetings (${newMeetings.length} new, merged with existing)`);
+    return { data, result: { count: merged.length, preserved: 0, reason: null } };
   }
 
   // Case 2: Scraper returned too few results but we have existing data - preserve it
   if (existingFuture.length > 0) {
     console.warn(`[${filename}] Scraper returned ${newMeetings.length} meetings (min: ${minExpected}). Preserving ${existingFuture.length} existing future meetings.`);
 
-    // Still merge what we got (might be partial success)
     const merged = mergeMeetings(existing.meetings, newMeetings);
     const data = {
       meetings: merged,
-      lastUpdated: existing.lastUpdated, // Keep old timestamp to indicate data is stale
+      lastUpdated: existing.lastUpdated,
       lastScraperRun: {
         timestamp: new Date().toISOString(),
         scraperFound: newMeetings.length,
@@ -145,16 +123,10 @@ async function writeMeetings(filename, newMeetings) {
       }
     };
 
-    await put(filename, JSON.stringify(data, null, 2), {
-      access: "public",
-      addRandomSuffix: false,
-      allowOverwrite: true
-    });
-
-    return { written: true, count: merged.length, preserved: existingFuture.length, reason: "below_threshold" };
+    return { data, result: { count: merged.length, preserved: existingFuture.length, reason: "below_threshold" } };
   }
 
-  // Case 3: Scraper returned too few and no existing data - write what we have
+  // Case 3: Scraper returned too few and no existing data - prepare what we have
   console.warn(`[${filename}] Scraper returned ${newMeetings.length} meetings (min: ${minExpected}). No existing data to preserve.`);
   const data = {
     meetings: newMeetings,
@@ -167,13 +139,7 @@ async function writeMeetings(filename, newMeetings) {
     }
   };
 
-  await put(filename, JSON.stringify(data, null, 2), {
-    access: "public",
-    addRandomSuffix: false,
-    allowOverwrite: true
-  });
-
-  return { written: true, count: newMeetings.length, preserved: 0, reason: "no_existing_data" };
+  return { data, result: { count: newMeetings.length, preserved: 0, reason: "no_existing_data" } };
 }
 
 /**
@@ -192,26 +158,14 @@ function extractActiveOrgs(allMeetings) {
 }
 
 /**
- * Load existing active orgs from Vercel Blob storage
+ * Load existing active orgs from GitHub Gist storage
  * @returns {Promise<Array>}
  */
 async function loadExistingActiveOrgs() {
   try {
-    if (BLOB_BASE) {
-      const response = await fetch(`${BLOB_BASE}/active-orgs.json`);
-      if (response.ok) {
-        const data = await response.json();
-        return data.activeOrgs || [];
-      }
-    }
-
-    const { blobs } = await list({ prefix: "active-orgs" });
-    if (blobs.length > 0) {
-      const response = await fetch(blobs[0].url);
-      if (response.ok) {
-        const data = await response.json();
-        return data.activeOrgs || [];
-      }
+    const data = await readFromGist("active-orgs.json");
+    if (data) {
+      return data.activeOrgs || [];
     }
   } catch (err) {
     console.error("Error loading existing active orgs:", err.message);
@@ -221,15 +175,15 @@ async function loadExistingActiveOrgs() {
 }
 
 /**
- * Write active orgs to Vercel Blob storage
+ * Prepare active orgs data for writing (does not write, returns data for batching)
  * Merges with existing to prevent sudden disappearance of orgs
  * @param {Array} newActiveOrgs - Array of active org keys from current scrape
+ * @returns {Promise<object>}
  */
-async function writeActiveOrgs(newActiveOrgs) {
+async function prepareActiveOrgsData(newActiveOrgs) {
   const existingActiveOrgs = await loadExistingActiveOrgs();
 
   // Merge: keep existing orgs that aren't in new list (they might just be temporarily missing)
-  // but mark them so we can track staleness
   const mergedOrgs = new Set([...existingActiveOrgs, ...newActiveOrgs]);
 
   const data = {
@@ -239,13 +193,8 @@ async function writeActiveOrgs(newActiveOrgs) {
     totalOrgs: mergedOrgs.size
   };
 
-  await put("active-orgs.json", JSON.stringify(data, null, 2), {
-    access: "public",
-    addRandomSuffix: false,
-    allowOverwrite: true
-  });
-
-  console.log(`Wrote ${mergedOrgs.size} active org keys (${newActiveOrgs.length} from current run, ${existingActiveOrgs.length} existing)`);
+  console.log(`Prepared ${mergedOrgs.size} active org keys (${newActiveOrgs.length} from current run, ${existingActiveOrgs.length} existing)`);
+  return data;
 }
 
 module.exports = async function handler(req, res) {
@@ -264,58 +213,57 @@ module.exports = async function handler(req, res) {
   }
 
   const results = {
-    cityCouncil: { success: false, count: 0, error: null, meetings: [], writeResult: null },
-    mta: { success: false, count: 0, error: null, meetings: [], writeResult: null },
-    agencies: { success: false, count: 0, error: null, meetings: [], writeResult: null },
-    communityBoards: { success: false, count: 0, error: null, meetings: [], writeResult: null },
-    oversightBoards: { success: false, count: 0, error: null, meetings: [], writeResult: null },
-    nycRules: { success: false, count: 0, error: null, meetings: [], writeResult: null }
+    cityCouncil: { success: false, count: 0, error: null, meetings: [], preparedData: null },
+    mta: { success: false, count: 0, error: null, meetings: [], preparedData: null },
+    agencies: { success: false, count: 0, error: null, meetings: [], preparedData: null },
+    communityBoards: { success: false, count: 0, error: null, meetings: [], preparedData: null },
+    oversightBoards: { success: false, count: 0, error: null, meetings: [], preparedData: null },
+    nycRules: { success: false, count: 0, error: null, meetings: [], preparedData: null }
   };
 
   // Scrape City Council
   try {
     const meetings = await scrapeCityCouncil();
-    const writeResult = await writeMeetings("city-council.json", meetings);
+    const { data, result } = await prepareMeetingsData("city-council.json", meetings);
     results.cityCouncil.success = true;
     results.cityCouncil.count = meetings.length;
     results.cityCouncil.meetings = meetings;
-    results.cityCouncil.writeResult = writeResult;
+    results.cityCouncil.preparedData = { data, result };
   } catch (err) {
     console.error("City Council scraper error:", err.message);
     results.cityCouncil.error = err.message;
-    // On error, try to preserve existing data
-    const writeResult = await writeMeetings("city-council.json", []);
-    results.cityCouncil.writeResult = writeResult;
+    const { data, result } = await prepareMeetingsData("city-council.json", []);
+    results.cityCouncil.preparedData = { data, result };
   }
 
   // Scrape MTA
   try {
     const meetings = await scrapeMTA();
-    const writeResult = await writeMeetings("mta.json", meetings);
+    const { data, result } = await prepareMeetingsData("mta.json", meetings);
     results.mta.success = true;
     results.mta.count = meetings.length;
     results.mta.meetings = meetings;
-    results.mta.writeResult = writeResult;
+    results.mta.preparedData = { data, result };
   } catch (err) {
     console.error("MTA scraper error:", err.message);
     results.mta.error = err.message;
-    const writeResult = await writeMeetings("mta.json", []);
-    results.mta.writeResult = writeResult;
+    const { data, result } = await prepareMeetingsData("mta.json", []);
+    results.mta.preparedData = { data, result };
   }
 
   // Scrape Agencies
   try {
     const meetings = await scrapeAgencies();
-    const writeResult = await writeMeetings("agencies.json", meetings);
+    const { data, result } = await prepareMeetingsData("agencies.json", meetings);
     results.agencies.success = true;
     results.agencies.count = meetings.length;
     results.agencies.meetings = meetings;
-    results.agencies.writeResult = writeResult;
+    results.agencies.preparedData = { data, result };
   } catch (err) {
     console.error("Agencies scraper error:", err.message);
     results.agencies.error = err.message;
-    const writeResult = await writeMeetings("agencies.json", []);
-    results.agencies.writeResult = writeResult;
+    const { data, result } = await prepareMeetingsData("agencies.json", []);
+    results.agencies.preparedData = { data, result };
   }
 
   // Scrape Community Boards (all 5 boroughs)
@@ -326,49 +274,49 @@ module.exports = async function handler(req, res) {
     const bronxMeetings = await scrapeBronxCBs();
     const statenIslandMeetings = await scrapeStatenIslandCBs();
     const allCBMeetings = [...manhattanMeetings, ...brooklynMeetings, ...queensMeetings, ...bronxMeetings, ...statenIslandMeetings];
-    const writeResult = await writeMeetings("community-boards.json", allCBMeetings);
+    const { data, result } = await prepareMeetingsData("community-boards.json", allCBMeetings);
     results.communityBoards.success = true;
     results.communityBoards.count = allCBMeetings.length;
     results.communityBoards.meetings = allCBMeetings;
-    results.communityBoards.writeResult = writeResult;
+    results.communityBoards.preparedData = { data, result };
   } catch (err) {
     console.error("Community Boards scraper error:", err.message);
     results.communityBoards.error = err.message;
-    const writeResult = await writeMeetings("community-boards.json", []);
-    results.communityBoards.writeResult = writeResult;
+    const { data, result } = await prepareMeetingsData("community-boards.json", []);
+    results.communityBoards.preparedData = { data, result };
   }
 
   // Scrape Oversight Boards (CCRB, LPC, BSA, RGB)
   try {
     const meetings = await scrapeOversightBoards();
-    const writeResult = await writeMeetings("oversight-boards.json", meetings);
+    const { data, result } = await prepareMeetingsData("oversight-boards.json", meetings);
     results.oversightBoards.success = true;
     results.oversightBoards.count = meetings.length;
     results.oversightBoards.meetings = meetings;
-    results.oversightBoards.writeResult = writeResult;
+    results.oversightBoards.preparedData = { data, result };
   } catch (err) {
     console.error("Oversight Boards scraper error:", err.message);
     results.oversightBoards.error = err.message;
-    const writeResult = await writeMeetings("oversight-boards.json", []);
-    results.oversightBoards.writeResult = writeResult;
+    const { data, result } = await prepareMeetingsData("oversight-boards.json", []);
+    results.oversightBoards.preparedData = { data, result };
   }
 
   // Scrape NYC Rules (rulemaking hearings for all agencies)
   try {
     const meetings = await scrapeNYCRules();
-    const writeResult = await writeMeetings("nyc-rules.json", meetings);
+    const { data, result } = await prepareMeetingsData("nyc-rules.json", meetings);
     results.nycRules.success = true;
     results.nycRules.count = meetings.length;
     results.nycRules.meetings = meetings;
-    results.nycRules.writeResult = writeResult;
+    results.nycRules.preparedData = { data, result };
   } catch (err) {
     console.error("NYC Rules scraper error:", err.message);
     results.nycRules.error = err.message;
-    const writeResult = await writeMeetings("nyc-rules.json", []);
-    results.nycRules.writeResult = writeResult;
+    const { data, result } = await prepareMeetingsData("nyc-rules.json", []);
+    results.nycRules.preparedData = { data, result };
   }
 
-  // Compute and save active orgs from all scraped meetings
+  // Compute active orgs from all scraped meetings
   const allMeetings = [
     ...results.cityCouncil.meetings,
     ...results.mta.meetings,
@@ -378,7 +326,25 @@ module.exports = async function handler(req, res) {
     ...results.nycRules.meetings
   ];
   const activeOrgs = extractActiveOrgs(allMeetings);
-  await writeActiveOrgs(activeOrgs);
+  const activeOrgsData = await prepareActiveOrgsData(activeOrgs);
+
+  // Batch write all files to GitHub Gist in a single API call
+  const filesToWrite = {
+    "city-council.json": prepareGistFile(results.cityCouncil.preparedData.data),
+    "mta.json": prepareGistFile(results.mta.preparedData.data),
+    "agencies.json": prepareGistFile(results.agencies.preparedData.data),
+    "community-boards.json": prepareGistFile(results.communityBoards.preparedData.data),
+    "oversight-boards.json": prepareGistFile(results.oversightBoards.preparedData.data),
+    "nyc-rules.json": prepareGistFile(results.nycRules.preparedData.data),
+    "active-orgs.json": prepareGistFile(activeOrgsData)
+  };
+
+  const writeResult = await writeToGist(filesToWrite);
+  if (!writeResult.success) {
+    console.error("Failed to write to Gist:", writeResult.error);
+  } else {
+    console.log("Successfully wrote all files to Gist");
+  }
 
   // Return results (without meetings array to keep response small)
   const totalMeetings = results.cityCouncil.count + results.mta.count + results.agencies.count +
@@ -386,47 +352,49 @@ module.exports = async function handler(req, res) {
   const allSuccess = results.cityCouncil.success && results.mta.success && results.agencies.success &&
     results.communityBoards.success && results.oversightBoards.success && results.nycRules.success;
 
-  res.status(allSuccess ? 200 : 207).json({
-    success: allSuccess,
+  res.status(allSuccess && writeResult.success ? 200 : 207).json({
+    success: allSuccess && writeResult.success,
     timestamp: new Date().toISOString(),
     totalMeetings,
     activeOrgCount: activeOrgs.length,
+    gistWriteSuccess: writeResult.success,
+    gistWriteError: writeResult.error || null,
     results: {
       cityCouncil: {
         success: results.cityCouncil.success,
         count: results.cityCouncil.count,
         error: results.cityCouncil.error,
-        preserved: results.cityCouncil.writeResult?.preserved || 0
+        preserved: results.cityCouncil.preparedData?.result?.preserved || 0
       },
       mta: {
         success: results.mta.success,
         count: results.mta.count,
         error: results.mta.error,
-        preserved: results.mta.writeResult?.preserved || 0
+        preserved: results.mta.preparedData?.result?.preserved || 0
       },
       agencies: {
         success: results.agencies.success,
         count: results.agencies.count,
         error: results.agencies.error,
-        preserved: results.agencies.writeResult?.preserved || 0
+        preserved: results.agencies.preparedData?.result?.preserved || 0
       },
       communityBoards: {
         success: results.communityBoards.success,
         count: results.communityBoards.count,
         error: results.communityBoards.error,
-        preserved: results.communityBoards.writeResult?.preserved || 0
+        preserved: results.communityBoards.preparedData?.result?.preserved || 0
       },
       oversightBoards: {
         success: results.oversightBoards.success,
         count: results.oversightBoards.count,
         error: results.oversightBoards.error,
-        preserved: results.oversightBoards.writeResult?.preserved || 0
+        preserved: results.oversightBoards.preparedData?.result?.preserved || 0
       },
       nycRules: {
         success: results.nycRules.success,
         count: results.nycRules.count,
         error: results.nycRules.error,
-        preserved: results.nycRules.writeResult?.preserved || 0
+        preserved: results.nycRules.preparedData?.result?.preserved || 0
       }
     }
   });

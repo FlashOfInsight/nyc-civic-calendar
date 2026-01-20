@@ -1,10 +1,9 @@
 // API endpoint to return which organizations have active events
 // This is used by the frontend to hide empty committees
+//
+// STORAGE: Uses GitHub Gist (free, unlimited reads)
 
-const { list } = require("@vercel/blob");
-
-// Blob storage base URL (from environment variable)
-const BLOB_BASE = process.env.BLOB_BASE_URL;
+const { readFromGist } = require("../lib/gist-storage");
 
 module.exports = async function handler(req, res) {
   // Set CORS headers
@@ -17,26 +16,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    let data = null;
-
-    // Try to fetch from blob storage using env var
-    if (BLOB_BASE) {
-      const response = await fetch(`${BLOB_BASE}/active-orgs.json`);
-      if (response.ok) {
-        data = await response.json();
-      }
-    }
-
-    // Fallback: try to list blobs and find the file
-    if (!data) {
-      const { blobs } = await list({ prefix: "active-orgs" });
-      if (blobs.length > 0) {
-        const response = await fetch(blobs[0].url);
-        if (response.ok) {
-          data = await response.json();
-        }
-      }
-    }
+    const data = await readFromGist("active-orgs.json");
 
     if (!data) {
       // File doesn't exist yet - return empty array
