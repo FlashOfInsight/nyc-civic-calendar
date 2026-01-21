@@ -227,113 +227,128 @@ module.exports = async function handler(req, res) {
     cityGovernment: { success: false, count: 0, error: null, meetings: [], preparedData: null }
   };
 
-  // Scrape City Council
-  try {
-    const meetings = await scrapeCityCouncil();
+  // Run ALL scrapers in parallel for speed
+  console.log("Starting parallel scrape of all sources...");
+  const startTime = Date.now();
+
+  const [
+    cityCouncilResult,
+    mtaResult,
+    agenciesResult,
+    manhattanResult,
+    brooklynResult,
+    queensResult,
+    bronxResult,
+    statenIslandResult,
+    oversightResult,
+    nycRulesResult,
+    cityGovResult
+  ] = await Promise.allSettled([
+    scrapeCityCouncil(),
+    scrapeMTA(),
+    scrapeAgencies(),
+    scrapeManhattanCBs(),
+    scrapeBrooklynCBs(),
+    scrapeQueensCBs(),
+    scrapeBronxCBs(),
+    scrapeStatenIslandCBs(),
+    scrapeOversightBoards(),
+    scrapeNYCRules(),
+    scrapeCityGovernment()
+  ]);
+
+  console.log(`All scrapers completed in ${Date.now() - startTime}ms`);
+
+  // Process City Council
+  if (cityCouncilResult.status === "fulfilled") {
+    const meetings = cityCouncilResult.value;
     const { data, result } = await prepareMeetingsData("city-council.json", meetings);
-    results.cityCouncil.success = true;
-    results.cityCouncil.count = meetings.length;
-    results.cityCouncil.meetings = meetings;
-    results.cityCouncil.preparedData = { data, result };
-  } catch (err) {
-    console.error("City Council scraper error:", err.message);
-    results.cityCouncil.error = err.message;
+    results.cityCouncil = { success: true, count: meetings.length, error: null, meetings, preparedData: { data, result } };
+  } else {
+    console.error("City Council scraper error:", cityCouncilResult.reason?.message);
     const { data, result } = await prepareMeetingsData("city-council.json", []);
+    results.cityCouncil.error = cityCouncilResult.reason?.message;
     results.cityCouncil.preparedData = { data, result };
   }
 
-  // Scrape MTA
-  try {
-    const meetings = await scrapeMTA();
+  // Process MTA
+  if (mtaResult.status === "fulfilled") {
+    const meetings = mtaResult.value;
     const { data, result } = await prepareMeetingsData("mta.json", meetings);
-    results.mta.success = true;
-    results.mta.count = meetings.length;
-    results.mta.meetings = meetings;
-    results.mta.preparedData = { data, result };
-  } catch (err) {
-    console.error("MTA scraper error:", err.message);
-    results.mta.error = err.message;
+    results.mta = { success: true, count: meetings.length, error: null, meetings, preparedData: { data, result } };
+  } else {
+    console.error("MTA scraper error:", mtaResult.reason?.message);
     const { data, result } = await prepareMeetingsData("mta.json", []);
+    results.mta.error = mtaResult.reason?.message;
     results.mta.preparedData = { data, result };
   }
 
-  // Scrape Agencies
-  try {
-    const meetings = await scrapeAgencies();
+  // Process Agencies
+  if (agenciesResult.status === "fulfilled") {
+    const meetings = agenciesResult.value;
     const { data, result } = await prepareMeetingsData("agencies.json", meetings);
-    results.agencies.success = true;
-    results.agencies.count = meetings.length;
-    results.agencies.meetings = meetings;
-    results.agencies.preparedData = { data, result };
-  } catch (err) {
-    console.error("Agencies scraper error:", err.message);
-    results.agencies.error = err.message;
+    results.agencies = { success: true, count: meetings.length, error: null, meetings, preparedData: { data, result } };
+  } else {
+    console.error("Agencies scraper error:", agenciesResult.reason?.message);
     const { data, result } = await prepareMeetingsData("agencies.json", []);
+    results.agencies.error = agenciesResult.reason?.message;
     results.agencies.preparedData = { data, result };
   }
 
-  // Scrape Community Boards (all 5 boroughs)
-  try {
-    const manhattanMeetings = await scrapeManhattanCBs();
-    const brooklynMeetings = await scrapeBrooklynCBs();
-    const queensMeetings = await scrapeQueensCBs();
-    const bronxMeetings = await scrapeBronxCBs();
-    const statenIslandMeetings = await scrapeStatenIslandCBs();
-    const allCBMeetings = [...manhattanMeetings, ...brooklynMeetings, ...queensMeetings, ...bronxMeetings, ...statenIslandMeetings];
-    const { data, result } = await prepareMeetingsData("community-boards.json", allCBMeetings);
-    results.communityBoards.success = true;
-    results.communityBoards.count = allCBMeetings.length;
-    results.communityBoards.meetings = allCBMeetings;
-    results.communityBoards.preparedData = { data, result };
-  } catch (err) {
-    console.error("Community Boards scraper error:", err.message);
-    results.communityBoards.error = err.message;
-    const { data, result } = await prepareMeetingsData("community-boards.json", []);
-    results.communityBoards.preparedData = { data, result };
-  }
+  // Process Community Boards (combine all 5 boroughs)
+  const cbResults = [manhattanResult, brooklynResult, queensResult, bronxResult, statenIslandResult];
+  const allCBMeetings = [];
+  const cbErrors = [];
+  cbResults.forEach((r, i) => {
+    const boroughs = ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"];
+    if (r.status === "fulfilled") {
+      allCBMeetings.push(...r.value);
+    } else {
+      cbErrors.push(`${boroughs[i]}: ${r.reason?.message}`);
+    }
+  });
+  const { data: cbData, result: cbResult } = await prepareMeetingsData("community-boards.json", allCBMeetings);
+  results.communityBoards = {
+    success: cbErrors.length === 0,
+    count: allCBMeetings.length,
+    error: cbErrors.length > 0 ? cbErrors.join("; ") : null,
+    meetings: allCBMeetings,
+    preparedData: { data: cbData, result: cbResult }
+  };
 
-  // Scrape Oversight Boards (CCRB, LPC, BSA, RGB)
-  try {
-    const meetings = await scrapeOversightBoards();
+  // Process Oversight Boards
+  if (oversightResult.status === "fulfilled") {
+    const meetings = oversightResult.value;
     const { data, result } = await prepareMeetingsData("oversight-boards.json", meetings);
-    results.oversightBoards.success = true;
-    results.oversightBoards.count = meetings.length;
-    results.oversightBoards.meetings = meetings;
-    results.oversightBoards.preparedData = { data, result };
-  } catch (err) {
-    console.error("Oversight Boards scraper error:", err.message);
-    results.oversightBoards.error = err.message;
+    results.oversightBoards = { success: true, count: meetings.length, error: null, meetings, preparedData: { data, result } };
+  } else {
+    console.error("Oversight Boards scraper error:", oversightResult.reason?.message);
     const { data, result } = await prepareMeetingsData("oversight-boards.json", []);
+    results.oversightBoards.error = oversightResult.reason?.message;
     results.oversightBoards.preparedData = { data, result };
   }
 
-  // Scrape NYC Rules (rulemaking hearings for all agencies)
-  try {
-    const meetings = await scrapeNYCRules();
+  // Process NYC Rules
+  if (nycRulesResult.status === "fulfilled") {
+    const meetings = nycRulesResult.value;
     const { data, result } = await prepareMeetingsData("nyc-rules.json", meetings);
-    results.nycRules.success = true;
-    results.nycRules.count = meetings.length;
-    results.nycRules.meetings = meetings;
-    results.nycRules.preparedData = { data, result };
-  } catch (err) {
-    console.error("NYC Rules scraper error:", err.message);
-    results.nycRules.error = err.message;
+    results.nycRules = { success: true, count: meetings.length, error: null, meetings, preparedData: { data, result } };
+  } else {
+    console.error("NYC Rules scraper error:", nycRulesResult.reason?.message);
     const { data, result } = await prepareMeetingsData("nyc-rules.json", []);
+    results.nycRules.error = nycRulesResult.reason?.message;
     results.nycRules.preparedData = { data, result };
   }
 
-  // Scrape City Government (CPC, Comptroller, DCAS, Borough Presidents)
-  try {
-    const meetings = await scrapeCityGovernment();
+  // Process City Government
+  if (cityGovResult.status === "fulfilled") {
+    const meetings = cityGovResult.value;
     const { data, result } = await prepareMeetingsData("city-government.json", meetings);
-    results.cityGovernment.success = true;
-    results.cityGovernment.count = meetings.length;
-    results.cityGovernment.meetings = meetings;
-    results.cityGovernment.preparedData = { data, result };
-  } catch (err) {
-    console.error("City Government scraper error:", err.message);
-    results.cityGovernment.error = err.message;
+    results.cityGovernment = { success: true, count: meetings.length, error: null, meetings, preparedData: { data, result } };
+  } else {
+    console.error("City Government scraper error:", cityGovResult.reason?.message);
     const { data, result } = await prepareMeetingsData("city-government.json", []);
+    results.cityGovernment.error = cityGovResult.reason?.message;
     results.cityGovernment.preparedData = { data, result };
   }
 
