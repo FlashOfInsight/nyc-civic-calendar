@@ -1076,6 +1076,11 @@ function hasActiveEvents(org, prefix) {
     return true;
   }
 
+  // Always show City Council committees (meetings may be scheduled later)
+  if (prefix.startsWith("city-council")) {
+    return true;
+  }
+
   // Check if this exact key has events
   if (activeOrgs.has(prefix)) {
     return true;
