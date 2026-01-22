@@ -1077,8 +1077,8 @@ function hasActiveEvents(org, prefix) {
     return true;
   }
 
-  // Always show City Council committees (meetings may be scheduled later)
-  if (prefix.startsWith("city-council")) {
+  // Always show City Council committees and Borough Presidents (meetings may be scheduled later)
+  if (prefix.startsWith("city-council") || prefix.startsWith("borough-presidents")) {
     return true;
   }
 
@@ -1112,15 +1112,15 @@ function getLeafKeys(org, prefix) {
   if (org.children) {
     for (const [key, child] of Object.entries(org.children)) {
       const fullKey = prefix ? `${prefix}.${key}` : key;
-      // Skip inactive orgs (but always include city-council)
-      if (activeOrgs.size > 0 && !fullKey.startsWith("city-council") && !hasActiveEvents(child, fullKey)) {
+      // Skip inactive orgs (but always include city-council and borough-presidents)
+      if (activeOrgs.size > 0 && !fullKey.startsWith("city-council") && !fullKey.startsWith("borough-presidents") && !hasActiveEvents(child, fullKey)) {
         continue;
       }
       keys.push(...getLeafKeys(child, fullKey));
     }
   } else {
-    // Only add leaf if it's active, or if it's city-council, or if we haven't loaded activeOrgs yet
-    if (activeOrgs.size === 0 || prefix.startsWith("city-council") || activeOrgs.has(prefix)) {
+    // Only add leaf if it's active, or if it's city-council/borough-presidents, or if we haven't loaded activeOrgs yet
+    if (activeOrgs.size === 0 || prefix.startsWith("city-council") || prefix.startsWith("borough-presidents") || activeOrgs.has(prefix)) {
       keys.push(prefix);
     }
   }
