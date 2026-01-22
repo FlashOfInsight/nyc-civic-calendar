@@ -16,6 +16,7 @@ const { scrapeManhattanCBs, scrapeBrooklynCBs, scrapeQueensCBs, scrapeBronxCBs, 
 const { scrapeOversightBoards } = require("../lib/scrapers/oversight-boards");
 const { scrapeNYCRules } = require("../lib/scrapers/nyc-rules");
 const { scrapeCityGovernment } = require("../lib/scrapers/city-government");
+const { generateNYPDMeetings } = require("../lib/scrapers/nypd");
 
 // Minimum expected meetings per source (if scraper returns fewer, something is wrong)
 const MIN_EXPECTED_MEETINGS = {
@@ -25,7 +26,8 @@ const MIN_EXPECTED_MEETINGS = {
   "community-boards.json": 10,
   "oversight-boards.json": 5,  // CCRB, LPC, BSA, RGB combined
   "nyc-rules.json": 1,         // Varies based on active rulemaking
-  "city-government.json": 5    // CPC, Comptroller, DCAS, Borough Presidents
+  "city-government.json": 5,   // CPC, Comptroller, DCAS, Borough Presidents
+  "nypd.json": 50              // 77 precincts x ~10 months (pattern-generated)
 };
 
 /**
@@ -224,7 +226,8 @@ module.exports = async function handler(req, res) {
     communityBoards: { success: false, count: 0, error: null, meetings: [], preparedData: null },
     oversightBoards: { success: false, count: 0, error: null, meetings: [], preparedData: null },
     nycRules: { success: false, count: 0, error: null, meetings: [], preparedData: null },
-    cityGovernment: { success: false, count: 0, error: null, meetings: [], preparedData: null }
+    cityGovernment: { success: false, count: 0, error: null, meetings: [], preparedData: null },
+    nypd: { success: false, count: 0, error: null, meetings: [], preparedData: null }
   };
 
   // Run ALL scrapers in parallel for speed
@@ -352,6 +355,18 @@ module.exports = async function handler(req, res) {
     results.cityGovernment.preparedData = { data, result };
   }
 
+  // Process NYPD (pattern-based generator, no HTTP requests)
+  try {
+    const nypdMeetings = generateNYPDMeetings();
+    const { data, result } = await prepareMeetingsData("nypd.json", nypdMeetings);
+    results.nypd = { success: true, count: nypdMeetings.length, error: null, meetings: nypdMeetings, preparedData: { data, result } };
+  } catch (err) {
+    console.error("NYPD generator error:", err.message);
+    const { data, result } = await prepareMeetingsData("nypd.json", []);
+    results.nypd.error = err.message;
+    results.nypd.preparedData = { data, result };
+  }
+
   // Compute active orgs from all scraped meetings
   const allMeetings = [
     ...results.cityCouncil.meetings,
@@ -360,7 +375,8 @@ module.exports = async function handler(req, res) {
     ...results.communityBoards.meetings,
     ...results.oversightBoards.meetings,
     ...results.nycRules.meetings,
-    ...results.cityGovernment.meetings
+    ...results.cityGovernment.meetings,
+    ...results.nypd.meetings
   ];
   const activeOrgs = extractActiveOrgs(allMeetings);
   const activeOrgsData = await prepareActiveOrgsData(activeOrgs);
@@ -374,6 +390,7 @@ module.exports = async function handler(req, res) {
     "oversight-boards.json": prepareGistFile(results.oversightBoards.preparedData.data),
     "nyc-rules.json": prepareGistFile(results.nycRules.preparedData.data),
     "city-government.json": prepareGistFile(results.cityGovernment.preparedData.data),
+    "nypd.json": prepareGistFile(results.nypd.preparedData.data),
     "active-orgs.json": prepareGistFile(activeOrgsData)
   };
 
@@ -387,10 +404,10 @@ module.exports = async function handler(req, res) {
   // Return results (without meetings array to keep response small)
   const totalMeetings = results.cityCouncil.count + results.mta.count + results.agencies.count +
     results.communityBoards.count + results.oversightBoards.count + results.nycRules.count +
-    results.cityGovernment.count;
+    results.cityGovernment.count + results.nypd.count;
   const allSuccess = results.cityCouncil.success && results.mta.success && results.agencies.success &&
     results.communityBoards.success && results.oversightBoards.success && results.nycRules.success &&
-    results.cityGovernment.success;
+    results.cityGovernment.success && results.nypd.success;
 
   res.status(allSuccess && writeResult.success ? 200 : 207).json({
     success: allSuccess && writeResult.success,
