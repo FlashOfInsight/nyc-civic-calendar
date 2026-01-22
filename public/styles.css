@@ -58,6 +58,19 @@ h2 {
   margin-bottom: 8px;
 }
 
+/* District Finder */
+.district-finder {
+  background: #f0f4f8;
+  padding: 15px 20px;
+  font-size: 14px;
+  color: #555;
+}
+
+.district-finder a {
+  color: #1a1a2e;
+  font-weight: 500;
+}
+
 /* Organization Tree */
 .org-tree {
   list-style: none;
