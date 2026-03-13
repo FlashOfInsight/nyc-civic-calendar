@@ -32,18 +32,18 @@
       { "id": "34", "name": "34th Precinct", "weekOfMonth": 1, "dayOfWeek": 4, "hour": 19, "minute": 0, "location": "34th Precinct, 4295 Broadway, New York, NY 10033" }
     ],
     "bronx": [
-      { "id": "40", "name": "40th Precinct", "weekOfMonth": null, "dayOfWeek": null, "hour": null, "minute": null, "location": "40th Precinct, 567 East 149th Street, Bronx, NY 10455", "note": "Schedule varies - contact precinct" },
-      { "id": "41", "name": "41st Precinct", "weekOfMonth": null, "dayOfWeek": null, "hour": null, "minute": null, "location": "41st Precinct, 1035 Longwood Avenue, Bronx, NY 10459", "note": "Schedule varies - contact precinct" },
-      { "id": "42", "name": "42nd Precinct", "weekOfMonth": null, "dayOfWeek": null, "hour": null, "minute": null, "location": "42nd Precinct, 830 Washington Avenue, Bronx, NY 10451", "note": "Schedule varies - contact precinct" },
-      { "id": "43", "name": "43rd Precinct", "weekOfMonth": null, "dayOfWeek": null, "hour": null, "minute": null, "location": "43rd Precinct, 900 Fteley Avenue, Bronx, NY 10473", "note": "Schedule varies - contact precinct" },
-      { "id": "44", "name": "44th Precinct", "weekOfMonth": null, "dayOfWeek": null, "hour": null, "minute": null, "location": "44th Precinct, 2 East 169th Street, Bronx, NY 10452", "note": "Schedule varies - contact precinct" },
-      { "id": "45", "name": "45th Precinct", "weekOfMonth": null, "dayOfWeek": null, "hour": null, "minute": null, "location": "45th Precinct, 2877 Barkley Avenue, Bronx, NY 10465", "note": "Schedule varies - contact precinct" },
-      { "id": "46", "name": "46th Precinct", "weekOfMonth": null, "dayOfWeek": null, "hour": null, "minute": null, "location": "46th Precinct, 2120 Ryer Avenue, Bronx, NY 10457", "note": "Schedule varies - contact precinct" },
-      { "id": "47", "name": "47th Precinct", "weekOfMonth": null, "dayOfWeek": null, "hour": null, "minute": null, "location": "47th Precinct, 4111 Laconia Avenue, Bronx, NY 10466", "note": "Schedule varies - contact precinct" },
+      { "id": "40", "name": "40th Precinct", "weekOfMonth": 1, "dayOfWeek": 3, "hour": 18, "minute": 30, "location": "Lincoln Hospital, Room 4, 234 East 149th Street, Bronx, NY 10451" },
+      { "id": "41", "name": "41st Precinct", "weekOfMonth": 1, "dayOfWeek": 4, "hour": 18, "minute": 30, "location": "41st Precinct, 1035 Longwood Avenue, Bronx, NY 10459" },
+      { "id": "42", "name": "42nd Precinct", "weekOfMonth": 4, "dayOfWeek": 4, "hour": 19, "minute": 0, "location": "42nd Precinct, 830 Washington Avenue, Bronx, NY 10451", "note": "Location varies monthly" },
+      { "id": "43", "name": "43rd Precinct", "weekOfMonth": 1, "dayOfWeek": 3, "hour": 19, "minute": 0, "location": "ShopRite Community Room, 1720 Eastchester Road, Bronx, NY 10461" },
+      { "id": "44", "name": "44th Precinct", "weekOfMonth": 2, "dayOfWeek": 3, "hour": 18, "minute": 30, "location": "44th Precinct, 2 East 169th Street, Bronx, NY 10452" },
+      { "id": "45", "name": "45th Precinct", "weekOfMonth": 1, "dayOfWeek": 4, "hour": 19, "minute": 30, "location": "45th Precinct, 2877 Barkley Avenue, Bronx, NY 10465" },
+      { "id": "46", "name": "46th Precinct", "weekOfMonth": 3, "dayOfWeek": 2, "hour": 19, "minute": 0, "location": "46th Precinct, 2120 Ryer Avenue, Bronx, NY 10457" },
+      { "id": "47", "name": "47th Precinct", "weekOfMonth": 2, "dayOfWeek": 3, "hour": 19, "minute": 30, "location": "47th Precinct, 4111 Laconia Avenue, Bronx, NY 10466" },
       { "id": "48", "name": "48th Precinct", "weekOfMonth": -1, "dayOfWeek": 2, "hour": 19, "minute": 0, "location": "48th Precinct, 450 Cross Bronx Expressway, Bronx, NY 10457" },
       { "id": "49", "name": "49th Precinct", "weekOfMonth": -1, "dayOfWeek": 2, "hour": 19, "minute": 0, "location": "49th Precinct, 2121 Eastchester Road, Bronx, NY 10461", "note": "Location varies monthly" },
-      { "id": "50", "name": "50th Precinct", "weekOfMonth": null, "dayOfWeek": null, "hour": null, "minute": null, "location": "50th Precinct, 3450 Kingsbridge Avenue, Bronx, NY 10463", "note": "Schedule varies - contact precinct" },
-      { "id": "52", "name": "52nd Precinct", "weekOfMonth": null, "dayOfWeek": null, "hour": null, "minute": null, "location": "52nd Precinct, 3016 Webster Avenue, Bronx, NY 10467", "note": "Schedule varies - contact precinct" }
+      { "id": "50", "name": "50th Precinct", "weekOfMonth": 2, "dayOfWeek": 4, "hour": 19, "minute": 30, "location": "50th Precinct, 3450 Kingsbridge Avenue, Bronx, NY 10463" },
+      { "id": "52", "name": "52nd Precinct", "weekOfMonth": 3, "dayOfWeek": 4, "hour": 19, "minute": 0, "location": "52nd Precinct, 3016 Webster Avenue, Bronx, NY 10467" }
     ],
     "brooklyn": [
       { "id": "60", "name": "60th Precinct", "weekOfMonth": 3, "dayOfWeek": 2, "hour": 19, "minute": 0, "location": "2801 West 8th Street, Brooklyn, NY 11224" },
@@ -90,7 +90,7 @@
       { "id": "116", "name": "116th Precinct", "weekOfMonth": -1, "dayOfWeek": 4, "hour": 19, "minute": 0, "location": "116th Precinct, 227-01 Merrick Boulevard, Rosedale, NY 11422" }
     ],
     "staten-island": [
-      { "id": "120", "name": "120th Precinct", "weekOfMonth": null, "dayOfWeek": null, "hour": null, "minute": null, "location": "120th Precinct, 78 Richmond Terrace, Staten Island, NY 10301", "note": "Schedule varies - contact precinct" },
+      { "id": "120", "name": "120th Precinct", "weekOfMonth": 4, "dayOfWeek": 3, "hour": 19, "minute": 0, "location": "120th Precinct, 78 Richmond Terrace, Staten Island, NY 10301" },
       { "id": "121", "name": "121st Precinct", "weekOfMonth": 2, "dayOfWeek": 3, "hour": 19, "minute": 0, "location": "121st Precinct, 970 Richmond Avenue, Staten Island, NY 10314" },
       { "id": "122", "name": "122nd Precinct", "weekOfMonth": 3, "dayOfWeek": 3, "hour": 19, "minute": 30, "location": "122nd Precinct, 2320 Hylan Boulevard, Staten Island, NY 10306" },
       { "id": "123", "name": "123rd Precinct", "weekOfMonth": 3, "dayOfWeek": 2, "hour": 19, "minute": 0, "location": "123rd Precinct, 116 Main Street, Staten Island, NY 10307" }
