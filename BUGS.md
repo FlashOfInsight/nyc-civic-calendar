@@ -1,45 +1,35 @@
 # NYC Civic Calendar — Active Bugs
 
-Identified March 13, 2026 during codebase review.
+Last reviewed: March 13, 2026
 
-## High Priority
+## Fixed
+- ~~Active orgs list never prunes~~ — Intentional design; orgs preserved across runs to avoid flicker
+- ~~Stale meeting data persists~~ — `filterFutureMeetings()` in cron.js drops meetings before yesterday
+- ~~NYC Rules fragile regex~~ — Has proper try/catch and returns [] on failure
+
+## Still Active
+
+### High Priority
 
 ### 1. NYPD precincts missing meeting patterns
-~13 precincts have `weekOfMonth: null` in `lib/data/nypd-precincts.json` so no meetings are generated for them.
+11 precincts have `weekOfMonth: null` in `lib/data/nypd-precincts.json` — the scraper skips them silently, so zero meetings are generated.
 - **Affected:** Bronx 40-47, 50, 52; Staten Island 120
-- **File:** `lib/data/nypd-precincts.json`, `lib/scrapers/nypd.js`
-- **Fix:** Scrape or manually add meeting patterns for these precincts
+- **Files:** `lib/data/nypd-precincts.json`, `lib/scrapers/nypd.js`
+- **Fix:** Research actual meeting schedules and add patterns
 
-### 2. Active orgs list never prunes stale entries
-`api/cron.js` merges new active orgs but never removes old ones. If a scraper stops returning meetings for a committee, it stays visible in the UI indefinitely with zero events.
-- **File:** `api/cron.js` (~line 191)
-- **Fix:** Rebuild active-orgs from scratch each cron run instead of merging
+### 2. LPC scraper generates phantom Tuesday meetings
+Code collects actual dates from the LPC page but never uses them — always generates every Tuesday at 9:30 AM for 6 months (27 phantom meetings). LPC does not meet every Tuesday.
+- **File:** `lib/scrapers/oversight-boards.js` (lines ~174-211)
+- **Fix:** Use the `foundDates` set that's already being parsed, fall back to all-Tuesdays only if no dates found
 
-### 3. Stale meeting data persists when scrapers return 0 results
-Minimum threshold logic in `api/cron.js` preserves old data if a scraper returns fewer results than expected. Old meetings (potentially months past) can stick around.
-- **File:** `api/cron.js`
-- **Fix:** Add expiry dates — drop meetings older than X days regardless of scraper output
+### 3. ICS timezone not applied to events
+`VTIMEZONE` for America/New_York is defined in the calendar but `DTSTART` uses floating time (`20260313T093000`) without `TZID=America/New_York` prefix. Calendar apps ignore the timezone definition.
+- **File:** `lib/ics-generator.js` (lines ~71-75, 141-145)
+- **Fix:** Change `DTSTART:` to `DTSTART;TZID=America/New_York:` (same for DTEND)
 
-## Medium Priority
+### Low Priority
 
-### 4. LPC scraper generates phantom Tuesday meetings
-Assumes Landmarks Preservation Commission meets every Tuesday at 9:30 AM and generates future Tuesdays without validating the actual schedule.
-- **File:** `lib/scrapers/oversight-boards.js`
-- **Fix:** Scrape actual LPC calendar or add known skip-weeks
-
-### 5. NYC Rules scraper depends on fragile regex
-Parses meeting data by regex-matching `var hearing_array = [...]` from page source JS. Will silently break if the site changes its markup.
-- **File:** `lib/scrapers/nyc-rules.js`
-- **Fix:** Add fallback HTML/Cheerio parsing; add alerting on 0 results
-
-### 6. DOB industry meeting locations are hardcoded
-If DOB moves borough offices, the calendar will show wrong addresses.
-- **File:** `lib/scrapers/agencies.js`
-- **Fix:** Parse locations from DOB website if available
-
-## Low Priority
-
-### 7. ICS floating time format may confuse older calendar apps
-Events use format `20260320T100000` without explicit TZID or UTC `Z` suffix. Most modern apps handle this fine; older Outlook versions may interpret as UTC.
-- **File:** `lib/ics-generator.js`
-- **Fix:** Add `VTIMEZONE` component for America/New_York and use `DTSTART;TZID=America/New_York:`
+### 4. DOB industry meeting locations are hardcoded
+Five borough office addresses in `lib/scrapers/agencies.js` are static strings. Will show wrong locations if DOB moves offices.
+- **File:** `lib/scrapers/agencies.js` (lines ~148-154)
+- **Fix:** Parse from DOB website if available, or add a note to check quarterly
