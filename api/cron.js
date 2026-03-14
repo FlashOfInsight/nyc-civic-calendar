@@ -94,21 +94,21 @@ async function prepareMeetingsData(filename, newMeetings) {
   const existing = await loadExistingMeetings(filename);
   const existingFuture = filterFutureMeetings(existing.meetings);
 
-  // Case 1: Scraper returned good data - merge and prepare
+  // Case 1: Scraper returned good data - replace with new data (no merge)
+  // When the scraper succeeds, trust the new data fully. Merging would
+  // preserve stale entries with old IDs that no longer match new data.
   if (newMeetings.length >= minExpected) {
-    const merged = mergeMeetings(existing.meetings, newMeetings);
     const data = {
-      meetings: merged,
+      meetings: newMeetings.sort((a, b) => a.date.localeCompare(b.date)),
       lastUpdated: new Date().toISOString(),
       lastScraperRun: {
         timestamp: new Date().toISOString(),
-        scraperFound: newMeetings.length,
-        totalAfterMerge: merged.length
+        scraperFound: newMeetings.length
       }
     };
 
-    console.log(`[${filename}] Prepared ${merged.length} meetings (${newMeetings.length} new, merged with existing)`);
-    return { data, result: { count: merged.length, preserved: 0, reason: null } };
+    console.log(`[${filename}] Prepared ${newMeetings.length} meetings (full replace)`);
+    return { data, result: { count: newMeetings.length, preserved: 0, reason: null } };
   }
 
   // Case 2: Scraper returned too few results but we have existing data - preserve it
