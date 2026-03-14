@@ -1,6 +1,6 @@
 # NYC Civic Calendar — Bug Tracker
 
-Last reviewed: March 13, 2026
+Last reviewed: March 14, 2026
 
 ## Fixed (this session)
 
@@ -16,7 +16,18 @@ Last reviewed: March 13, 2026
 - ~~Stale meeting data persists~~ — filterFutureMeetings() in cron.js already drops meetings before yesterday
 - ~~NYC Rules fragile regex~~ — Has proper try/catch and returns [] on failure
 
+## Fixed (March 14, 2026)
+
+- ~~CB6 meetings showing as "Committee Meeting" without prefix~~ — Rewrote `scrapeCB6()` to walk DOM in order, track `<h2>` committee headings, skip "Upcoming" subheadings, and include `<div>` elements for "Next Meeting" dates. Now produces 60 meetings with proper names like "CB M6 Transportation", "CB M6 Full Board Meeting", etc.
+
 ## Still Active
+
+### Medium Priority
+
+### 3. Deferred City Council meetings showing as all-day events
+Meetings that have been deferred by the City Council still appear on the calendar, showing up as all-day events. They should be filtered out entirely.
+- **File:** `lib/scrapers/city-council.js`
+- **Action:** Detect deferred/postponed status from Legistar API or HTML and exclude those meetings
 
 ### Low Priority
 
