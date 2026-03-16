@@ -458,6 +458,12 @@ module.exports = async function handler(req, res) {
         count: results.cityGovernment.count,
         error: results.cityGovernment.error,
         preserved: results.cityGovernment.preparedData?.result?.preserved || 0
+      },
+      nypd: {
+        success: results.nypd.success,
+        count: results.nypd.count,
+        error: results.nypd.error,
+        preserved: results.nypd.preparedData?.result?.preserved || 0
       }
     }
   });

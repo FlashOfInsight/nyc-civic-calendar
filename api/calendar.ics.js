@@ -20,15 +20,18 @@ async function loadMeetings() {
     "nypd.json"
   ];
 
-  for (const file of files) {
-    try {
-      const data = await readFromGist(file);
-      if (data && data.meetings) {
-        meetings.push(...data.meetings);
-      }
-    } catch (err) {
-      console.error(`Error loading ${file}:`, err.message);
-    }
+  const results = await Promise.all(
+    files.map(file =>
+      readFromGist(file)
+        .then(data => (data && data.meetings ? data.meetings : []))
+        .catch(err => {
+          console.error(`Error loading ${file}:`, err.message);
+          return [];
+        })
+    )
+  );
+  for (const fileMeetings of results) {
+    meetings.push(...fileMeetings);
   }
 
   // If no meetings from Gist, try local data files (for initial deployment)
@@ -58,6 +61,9 @@ async function loadMeetings() {
 // Filter meetings by selected organizations
 function filterMeetings(meetings, selectedOrgs) {
   return meetings.filter(meeting => {
+    // Skip malformed meeting objects missing required fields
+    if (!meeting || !meeting.org || !meeting.date) return false;
+
     // Check if meeting's org matches any selected org
     // Support both exact match and prefix match (for parent selections)
     return selectedOrgs.some(org => {
