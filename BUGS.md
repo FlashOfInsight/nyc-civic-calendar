@@ -1,8 +1,8 @@
 # NYC Civic Calendar — Bug Tracker
 
-Last reviewed: March 14, 2026
+Last reviewed: March 16, 2026
 
-## Fixed (this session)
+## Fixed (March 13, 2026)
 
 - ~~City Council scraper only getting 12 meetings~~ — Rewrote to use Legistar API with HTML fallback (now 77-140 meetings)
 - ~~City Council meeting names not standardized~~ — All now use "CC [Committee]" format
@@ -12,13 +12,29 @@ Last reviewed: March 14, 2026
 - ~~NYPD precincts missing meeting patterns~~ — All 11 precincts researched and added (77/77 now active)
 - ~~All-day event DTEND same as DTSTART~~ — Now correctly sets DTEND to next day per RFC 5545
 - ~~Agencies scraper missing HTTP status check~~ — Now rejects on non-200 responses instead of silently returning bad HTML
-- ~~Active orgs list never prunes~~ — Intentional design; orgs preserved across runs to avoid flicker
-- ~~Stale meeting data persists~~ — filterFutureMeetings() in cron.js already drops meetings before yesterday
-- ~~NYC Rules fragile regex~~ — Has proper try/catch and returns [] on failure
 
 ## Fixed (March 14, 2026)
 
-- ~~CB6 meetings showing as "Committee Meeting" without prefix~~ — Rewrote `scrapeCB6()` to walk DOM in order, track `<h2>` committee headings, skip "Upcoming" subheadings, and include `<div>` elements for "Next Meeting" dates. Now produces 60 meetings with proper names like "CB M6 Transportation", "CB M6 Full Board Meeting", etc.
+- ~~CB6 meetings showing as "Committee Meeting" without prefix~~ — Rewrote `scrapeCB6()` to walk DOM in order, track headings, extract committee names
+- ~~Stale meeting data persisting after scraper changes~~ — Cron now does full replace (not merge) when scraper returns good data
+
+## Fixed (March 16, 2026) — Stability audit
+
+- ~~DOB Industry Meetings duplicated~~ — Was generated in both agencies.js and city-government.js; removed from agencies.js
+- ~~CB dedup checks comparing incompatible strings~~ — Raw title vs display title never matched; switched to Set-based dedup in 9 scrapers
+- ~~parseTime wrong for evening times without AM/PM~~ — "6:30" was treated as 6:30 AM; now assumes PM for hours 1-7
+- ~~ICS endpoint crash on missing meeting.org~~ — Added null check in filterMeetings
+- ~~Non-deterministic ICS UIDs~~ — Removed Date.now() from fallback UID; calendar apps no longer see duplicate events
+- ~~No HTTP timeouts on any scraper~~ — Added 15-second timeout to all 7 scrapers
+- ~~No redirect depth limit~~ — Added max 5 redirects to all fetchHTML functions
+- ~~Manhattan recurring meetings not skipping summer~~ — Now skips July/August like other boroughs
+- ~~scrapeCBManhattan no past-date filtering~~ — Added future-date check and midnight normalization
+- ~~NYPD missing from cron response~~ — Added nypd entry to results JSON
+- ~~Sequential Gist reads in ICS endpoint~~ — Parallelized with Promise.all (8x faster)
+- ~~Debug endpoint exposed stack traces with no auth~~ — Added secret auth, removed stack traces
+- ~~CB borough abbreviations not standardized~~ — Now uses M, Bx, Bk, Qn, SI across all boards
+- ~~Redundant CB# prefixes in titles~~ — Strips "CB2:", "CB17 CB17" etc. from source titles
+- ~~Navigation text scraped as meeting titles~~ — Filtered out "SelectMonthly", "Share Print" etc.
 
 ## Still Active
 
@@ -29,14 +45,44 @@ Meetings that have been deferred by the City Council still appear on the calenda
 - **File:** `lib/scrapers/city-council.js`
 - **Action:** Detect deferred/postponed status from Legistar API or HTML and exclude those meetings
 
+### 4. ICS lines not folded per RFC 5545
+RFC 5545 Section 3.1 requires content lines be no longer than 75 octets. Long SUMMARY, DESCRIPTION, or LOCATION values produce non-compliant lines. Some calendar clients (Outlook) may truncate or reject these.
+- **File:** `lib/ics-generator.js`
+- **Action:** Add line folding (insert CRLF + space at 75-octet boundaries)
+
+### 5. Active orgs list grows unboundedly
+The active-orgs merge logic only adds orgs, never removes. Over time, stale orgs accumulate in the list.
+- **File:** `api/cron.js` (`prepareActiveOrgsData`)
+- **Action:** Prune orgs that have zero future meetings
+
+### 6. Organization hierarchy drift between server and frontend
+7 agencies in `lib/organizations.js` are missing from `public/app.js`: DCWP, DEP, SBS, DFTA, ACS, DSS, Other.
+- **Action:** Sync frontend org tree with server definition
+
+### 7. Unused `ics` npm dependency
+The `ics` package is listed in package.json but never imported. Dead weight.
+- **Action:** `npm uninstall ics`
+
 ### Low Priority
 
 ### 1. DOB industry meeting locations are hardcoded
-Five borough office addresses in `lib/scrapers/agencies.js` are static strings. Will show wrong locations if DOB moves offices.
-- **File:** `lib/scrapers/agencies.js` (lines ~148-154)
+Five borough office addresses in `lib/scrapers/city-government.js` are static strings.
 - **Action:** Check quarterly or parse from DOB website
 
 ### 2. NYPD precincts with moderate confidence schedules
-Three precincts (46th, 50th, 52nd) had conflicting schedule info across sources. Current patterns are based on the most recent/reliable sources but may need verification.
+Three precincts (46th, 50th, 52nd) had conflicting schedule info.
 - **File:** `lib/data/nypd-precincts.json`
 - **Action:** Confirm at next community council meeting or contact precincts
+
+### 8. NYPD and pattern-based scrapers have no holiday handling
+Generated meetings appear on holidays (MLK Day, Thanksgiving, etc.) when they almost certainly won't happen.
+- **Action:** Add a holiday calendar and skip those dates
+
+### 9. City Council HTML fallback only scrapes current year
+In late December, January meetings won't appear from the HTML fallback scraper.
+- **File:** `lib/scrapers/city-council.js`
+- **Action:** Scrape next year's page when current month >= November
+
+### 10. Duplicated utility functions across scrapers
+`parseMonth`, `formatDate`, `fetchHTML`, `getNthWeekday` are copy-pasted across 7 files.
+- **Action:** Extract to a shared `lib/scraper-utils.js` module
