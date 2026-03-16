@@ -36,14 +36,13 @@ Last reviewed: March 16, 2026
 - ~~Redundant CB# prefixes in titles~~ — Strips "CB2:", "CB17 CB17" etc. from source titles
 - ~~Navigation text scraped as meeting titles~~ — Filtered out "SelectMonthly", "Share Print" etc.
 
+## Fixed (March 16, 2026) — Bug #3
+
+- ~~Deferred City Council meetings showing as all-day events~~ — Now filters meetings with status "deferred", "recessed", "postponed", or "cancelled" in both API path (`EventAgendaStatusName`) and HTML fallback (status column). API: 113 kept, 30 filtered. HTML fallback: 77 kept.
+
 ## Still Active
 
 ### Medium Priority
-
-### 3. Deferred City Council meetings showing as all-day events
-Meetings that have been deferred by the City Council still appear on the calendar, showing up as all-day events. They should be filtered out entirely.
-- **File:** `lib/scrapers/city-council.js`
-- **Action:** Detect deferred/postponed status from Legistar API or HTML and exclude those meetings
 
 ### 4. ICS lines not folded per RFC 5545
 RFC 5545 Section 3.1 requires content lines be no longer than 75 octets. Long SUMMARY, DESCRIPTION, or LOCATION values produce non-compliant lines. Some calendar clients (Outlook) may truncate or reject these.
