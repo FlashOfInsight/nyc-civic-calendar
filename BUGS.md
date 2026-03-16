@@ -40,27 +40,14 @@ Last reviewed: March 16, 2026
 
 - ~~Deferred City Council meetings showing as all-day events~~ — Now filters meetings with status "deferred", "recessed", "postponed", or "cancelled" in both API path (`EventAgendaStatusName`) and HTML fallback (status column). API: 113 kept, 30 filtered. HTML fallback: 77 kept.
 
+## Fixed (March 16, 2026) — Medium priority bugs
+
+- ~~ICS lines not folded per RFC 5545~~ — Added `foldLine()` to ICS generator; all content lines now <=75 octets with CRLF+space continuation
+- ~~Active orgs list grows unboundedly~~ — Full replace when all scrapers succeed; merge-with-existing only when some fail
+- ~~Organization hierarchy drift~~ — Added 7 missing agencies to frontend: DCWP, DEP, SBS, DFTA, ACS, DSS, Other
+- ~~Unused `ics` npm dependency~~ — Removed (npm uninstall)
+
 ## Still Active
-
-### Medium Priority
-
-### 4. ICS lines not folded per RFC 5545
-RFC 5545 Section 3.1 requires content lines be no longer than 75 octets. Long SUMMARY, DESCRIPTION, or LOCATION values produce non-compliant lines. Some calendar clients (Outlook) may truncate or reject these.
-- **File:** `lib/ics-generator.js`
-- **Action:** Add line folding (insert CRLF + space at 75-octet boundaries)
-
-### 5. Active orgs list grows unboundedly
-The active-orgs merge logic only adds orgs, never removes. Over time, stale orgs accumulate in the list.
-- **File:** `api/cron.js` (`prepareActiveOrgsData`)
-- **Action:** Prune orgs that have zero future meetings
-
-### 6. Organization hierarchy drift between server and frontend
-7 agencies in `lib/organizations.js` are missing from `public/app.js`: DCWP, DEP, SBS, DFTA, ACS, DSS, Other.
-- **Action:** Sync frontend org tree with server definition
-
-### 7. Unused `ics` npm dependency
-The `ics` package is listed in package.json but never imported. Dead weight.
-- **Action:** `npm uninstall ics`
 
 ### Low Priority
 
