@@ -184,10 +184,21 @@ async function loadExistingActiveOrgs() {
  * @param {Array} newActiveOrgs - Array of active org keys from current scrape
  * @returns {Promise<object>}
  */
-async function prepareActiveOrgsData(newActiveOrgs) {
-  const existingActiveOrgs = await loadExistingActiveOrgs();
+async function prepareActiveOrgsData(newActiveOrgs, allScrapersSucceeded) {
+  if (allScrapersSucceeded) {
+    // All scrapers ran — use only current orgs (prunes stale ones)
+    const data = {
+      activeOrgs: newActiveOrgs.sort(),
+      lastUpdated: new Date().toISOString(),
+      currentRunOrgs: newActiveOrgs.length,
+      totalOrgs: newActiveOrgs.length
+    };
+    console.log(`Prepared ${newActiveOrgs.length} active org keys (full replace, all scrapers succeeded)`);
+    return data;
+  }
 
-  // Merge: keep existing orgs that aren't in new list (they might just be temporarily missing)
+  // Some scrapers failed — merge with existing to avoid losing orgs from failed scrapers
+  const existingActiveOrgs = await loadExistingActiveOrgs();
   const mergedOrgs = new Set([...existingActiveOrgs, ...newActiveOrgs]);
 
   const data = {
@@ -197,7 +208,7 @@ async function prepareActiveOrgsData(newActiveOrgs) {
     totalOrgs: mergedOrgs.size
   };
 
-  console.log(`Prepared ${mergedOrgs.size} active org keys (${newActiveOrgs.length} from current run, ${existingActiveOrgs.length} existing)`);
+  console.log(`Prepared ${mergedOrgs.size} active org keys (merged — ${newActiveOrgs.length} current, ${existingActiveOrgs.length} existing)`);
   return data;
 }
 
@@ -379,7 +390,8 @@ module.exports = async function handler(req, res) {
     ...results.nypd.meetings
   ];
   const activeOrgs = extractActiveOrgs(allMeetings);
-  const activeOrgsData = await prepareActiveOrgsData(activeOrgs);
+  const allScrapersSucceeded = results.cityCouncil.success && results.mta.success && results.agencies.success && results.communityBoards.success && results.oversightBoards.success && results.nycRules.success && results.cityGovernment.success && results.nypd.success;
+  const activeOrgsData = await prepareActiveOrgsData(activeOrgs, allScrapersSucceeded);
 
   // Batch write all files to GitHub Gist in a single API call
   const filesToWrite = {

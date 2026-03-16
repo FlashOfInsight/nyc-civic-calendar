@@ -280,6 +280,48 @@ const organizations = {
         children: {
           "rules": { name: "Rulemaking Hearings" }
         }
+      },
+      "dcwp": {
+        name: "Dept of Consumer and Worker Protection (DCWP)",
+        children: {
+          "rules": { name: "Rulemaking Hearings" }
+        }
+      },
+      "dep": {
+        name: "Department of Environmental Protection (DEP)",
+        children: {
+          "rules": { name: "Rulemaking Hearings" }
+        }
+      },
+      "sbs": {
+        name: "Small Business Services (SBS)",
+        children: {
+          "rules": { name: "Rulemaking Hearings" }
+        }
+      },
+      "dfta": {
+        name: "Department for the Aging (DFTA)",
+        children: {
+          "rules": { name: "Rulemaking Hearings" }
+        }
+      },
+      "acs": {
+        name: "Administration for Children's Services (ACS)",
+        children: {
+          "rules": { name: "Rulemaking Hearings" }
+        }
+      },
+      "dss": {
+        name: "Department of Social Services (DSS/HRA)",
+        children: {
+          "rules": { name: "Rulemaking Hearings" }
+        }
+      },
+      "other": {
+        name: "Other City Agencies",
+        children: {
+          "rules": { name: "Rulemaking Hearings" }
+        }
       }
     }
   },
