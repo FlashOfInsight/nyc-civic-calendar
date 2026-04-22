@@ -50,6 +50,34 @@ h2 {
   color: #1a1a2e;
 }
 
+/* Migration banner — remove this block after cutoff date. */
+.migration-banner {
+  background: #fff8e1;
+  border-left: 6px solid #f57c00;
+}
+
+.migration-banner h2 {
+  color: #b26a00;
+}
+
+.migration-banner p {
+  margin-bottom: 10px;
+}
+
+.migration-banner p:last-child {
+  margin-bottom: 0;
+}
+
+.migration-banner a {
+  color: #b26a00;
+}
+
+.migration-steps {
+  padding: 10px 12px;
+  background: rgba(245, 124, 0, 0.08);
+  border-radius: 4px;
+}
+
 .instructions ol {
   margin-left: 20px;
 }

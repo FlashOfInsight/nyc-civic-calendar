@@ -96,8 +96,10 @@ module.exports = async function handler(req, res) {
   const allMeetings = await loadMeetings();
   const filteredMeetings = filterMeetings(allMeetings, selectedOrgs);
 
-  // Generate ICS
-  const ics = generateICS(filteredMeetings, "NYC Civic Meetings");
+  // Generate ICS with the migration notice prepended to every event.
+  // Only this legacy Vercel endpoint opts in — the new Cloudflare endpoint
+  // serves clean events so re-subscribed users stop seeing the notice.
+  const ics = generateICS(filteredMeetings, "NYC Civic Meetings", { migrationPrefix: true });
 
   // Set headers for calendar file
   res.setHeader("Content-Type", "text/calendar; charset=utf-8");
