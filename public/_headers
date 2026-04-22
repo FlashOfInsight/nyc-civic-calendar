@@ -1,0 +1,8 @@
+# Cloudflare Pages headers
+# See: https://developers.cloudflare.com/pages/configuration/headers/
+
+/app.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/styles.css
+  Cache-Control: no-cache, no-store, must-revalidate
