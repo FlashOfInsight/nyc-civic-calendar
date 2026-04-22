@@ -1,0 +1,39 @@
+name: Daily scrape
+
+on:
+  schedule:
+    # Daily at 6 AM UTC (matches the original Vercel cron schedule)
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: scrape
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run scrapers
+        env:
+          GIST_ID: ${{ secrets.GIST_ID }}
+          # GIST_GITHUB_TOKEN holds a PAT with `gist` scope. It is exposed to
+          # the script as GITHUB_TOKEN so gist-storage.js reads it unchanged.
+          # (We cannot use the built-in secrets.GITHUB_TOKEN here — that token
+          # is scoped to the repo and cannot write to user Gists.)
+          GITHUB_TOKEN: ${{ secrets.GIST_GITHUB_TOKEN }}
+          LEGISTAR_TOKEN: ${{ secrets.LEGISTAR_TOKEN }}
+        run: node scripts/run-scrapers.js
