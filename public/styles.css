@@ -51,6 +51,12 @@ h2 {
 }
 
 /* Migration banner — remove this block after cutoff date. */
+/* Hide on the new domain so users arriving there don't see a circular notice. */
+html[data-host="nycciviccalendar.com"] .migration-banner,
+html[data-host="www.nycciviccalendar.com"] .migration-banner {
+  display: none;
+}
+
 .migration-banner {
   background: #fff8e1;
   border-left: 6px solid #f57c00;

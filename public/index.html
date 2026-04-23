@@ -6,6 +6,10 @@
   <title>NYC Civic Calendar</title>
   <link rel="stylesheet" href="styles.css">
   <script>
+    // Tag the root element with the current hostname so CSS can hide the
+    // migration banner on the new domain (it should only appear on the
+    // legacy Vercel URL during the grace period).
+    document.documentElement.dataset.host = location.hostname;
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
