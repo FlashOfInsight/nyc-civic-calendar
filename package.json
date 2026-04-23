@@ -5,12 +5,17 @@
   "main": "index.js",
   "scripts": {
     "dev": "vercel dev",
-    "scrape": "node scripts/scrape.js"
+    "scrape": "node scripts/scrape.js",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.12"
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "wrangler": "^4.84.1"
   }
 }
