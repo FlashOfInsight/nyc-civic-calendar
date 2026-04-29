@@ -1,73 +1,136 @@
-* {
+/* ── Reset ──────────────────────────────────────────────── */
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+/* ── Tokens ─────────────────────────────────────────────── */
+:root {
+  --bg:           #F7F6F2;
+  --ink:          #111111;
+  --ink-mid:      #555555;
+  --ink-light:    #999999;
+  --border:       #111111;
+  --border-light: #DDDDCC;
+
+  --font-sans:    'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono:    'IBM Plex Mono', monospace;
+
+  --space-xs:     0.5rem;
+  --space-sm:     1rem;
+  --space-md:     2rem;
+  --space-lg:     3.5rem;
+
+  --max-width:    900px;
+}
+
+/* ── Base ───────────────────────────────────────────────── */
+html {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
   line-height: 1.6;
-  color: #333;
-  background: #f5f5f5;
+  -webkit-font-smoothing: antialiased;
 }
 
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
 
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ── Header ─────────────────────────────────────────────── */
 header {
-  text-align: center;
-  margin-bottom: 30px;
-  padding: 20px;
-  background: #1a1a2e;
-  color: white;
-  border-radius: 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
-header h1 {
-  font-size: 2rem;
-  margin-bottom: 5px;
+.header-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
 }
 
-.subtitle {
-  opacity: 0.8;
-  font-size: 1.1rem;
+.site-name {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
 }
 
-section {
-  background: white;
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+nav {
+  display: flex;
+  gap: var(--space-md);
 }
 
-h2 {
-  font-size: 1.3rem;
-  margin-bottom: 15px;
-  color: #1a1a2e;
+nav a {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-mid);
+  text-transform: uppercase;
+  transition: color 0.15s;
 }
 
-/* Migration banner — remove this block after cutoff date. */
-/* Hide on the new domain so users arriving there don't see a circular notice. */
+nav a:hover {
+  color: var(--ink);
+}
+
+/* ── Main ───────────────────────────────────────────────── */
+main {
+  flex: 1;
+  max-width: var(--max-width);
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* ── Section label ──────────────────────────────────────── */
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  color: var(--ink-light);
+  margin-bottom: var(--space-sm);
+}
+
+/* ── Migration Banner ───────────────────────────────────── */
 html[data-host="nycciviccalendar.com"] .migration-banner,
 html[data-host="www.nycciviccalendar.com"] .migration-banner {
   display: none;
 }
 
 .migration-banner {
-  background: #fff8e1;
-  border-left: 6px solid #f57c00;
-}
-
-.migration-banner h2 {
-  color: #b26a00;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--ink);
+  padding: var(--space-md);
 }
 
 .migration-banner p {
-  margin-bottom: 10px;
+  font-size: 0.9rem;
+  color: var(--ink-mid);
+  margin-bottom: var(--space-xs);
 }
 
 .migration-banner p:last-child {
@@ -75,55 +138,72 @@ html[data-host="www.nycciviccalendar.com"] .migration-banner {
 }
 
 .migration-banner a {
-  color: #b26a00;
+  color: var(--ink);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.migration-banner a:hover {
+  border-bottom-color: var(--ink);
 }
 
 .migration-steps {
-  padding: 10px 12px;
-  background: rgba(245, 124, 0, 0.08);
-  border-radius: 4px;
+  padding: var(--space-xs) var(--space-sm);
+  border-left: 2px solid var(--border-light);
+  color: var(--ink);
+  font-size: 0.9rem;
 }
 
+/* ── Instructions ───────────────────────────────────────── */
 .instructions ol {
-  margin-left: 20px;
+  margin-left: var(--space-md);
 }
 
 .instructions li {
-  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: var(--ink-mid);
+  margin-bottom: var(--space-xs);
 }
 
-/* District Finder */
+/* ── District Finder ────────────────────────────────────── */
 .district-finder {
-  background: #f0f4f8;
-  padding: 15px 20px;
-  font-size: 14px;
-  color: #555;
+  font-size: 0.875rem;
+  color: var(--ink-mid);
 }
 
 .district-finder a {
-  color: #1a1a2e;
-  font-weight: 500;
+  color: var(--ink);
+  border-bottom: 1px solid var(--border-light);
+  transition: border-color 0.15s;
 }
 
-/* Organization Tree */
+.district-finder a:hover {
+  border-bottom-color: var(--ink);
+}
+
+/* ── Organization Tree ──────────────────────────────────── */
 .org-tree {
   list-style: none;
+  border: 1px solid var(--border);
 }
 
 .org-item {
-  margin-bottom: 4px;
+  margin-bottom: 0;
+}
+
+.org-item + .org-item {
+  border-top: 1px solid var(--border-light);
 }
 
 .org-header {
   display: flex;
   align-items: center;
-  padding: 8px;
-  border-radius: 4px;
+  padding: 8px var(--space-sm);
   cursor: pointer;
+  transition: background 0.15s;
 }
 
 .org-header:hover {
-  background: #f0f0f0;
+  background: #EEEEE8;
 }
 
 .org-toggle {
@@ -133,8 +213,8 @@ html[data-host="www.nycciviccalendar.com"] .migration-banner {
   align-items: center;
   justify-content: center;
   margin-right: 8px;
-  font-size: 12px;
-  color: #666;
+  font-size: 11px;
+  color: var(--ink-light);
   user-select: none;
 }
 
@@ -143,184 +223,239 @@ html[data-host="www.nycciviccalendar.com"] .migration-banner {
 }
 
 .org-toggle.has-children:hover {
-  color: #333;
+  color: var(--ink);
 }
 
 .org-checkbox {
   margin-right: 10px;
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
   cursor: pointer;
+  accent-color: var(--ink);
+}
+
+.org-checkbox.indeterminate {
+  opacity: 0.6;
 }
 
 .org-name {
   flex: 1;
+  font-size: 0.875rem;
 }
 
 .org-children {
   margin-left: 28px;
   display: none;
+  border-top: 1px solid var(--border-light);
 }
 
 .org-children.expanded {
   display: block;
 }
 
-/* Indeterminate state for parent checkboxes */
-.org-checkbox.indeterminate {
-  opacity: 0.6;
+/* ── Selection count badge ──────────────────────────────── */
+.selection-count {
+  display: inline-block;
+  background: var(--ink);
+  color: var(--bg);
+  padding: 1px 7px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  margin-left: 8px;
 }
 
-/* Calendar URL Section */
+/* ── Calendar URL Section ───────────────────────────────── */
 .calendar-url {
-  border: 2px solid #1a1a2e;
+  border: 1px solid var(--border);
+  padding: var(--space-md);
 }
 
 .url-box {
   display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xs);
 }
 
 #calendar-url {
   flex: 1;
-  padding: 12px;
-  font-size: 14px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: #f9f9f9;
+  padding: 10px var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--ink);
+  outline: none;
+}
+
+#calendar-url:focus {
+  background: #EEEEE8;
 }
 
 #copy-btn {
-  padding: 12px 24px;
-  background: #1a1a2e;
-  color: white;
+  padding: 10px var(--space-md);
+  background: var(--ink);
+  color: var(--bg);
   border: none;
-  border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: opacity 0.15s;
+  white-space: nowrap;
 }
 
 #copy-btn:hover {
-  background: #2d2d4a;
+  opacity: 0.75;
 }
 
 #copy-btn.copied {
-  background: #28a745;
+  opacity: 0.55;
 }
 
 .url-hint {
-  font-size: 13px;
-  color: #666;
-  margin-bottom: 15px;
+  font-size: 0.8rem;
+  color: var(--ink-light);
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-mono);
+  letter-spacing: 0.03em;
 }
 
-/* Calendar Instructions */
+/* ── Calendar Instructions ──────────────────────────────── */
 .calendar-instructions {
-  margin-top: 15px;
+  margin-top: var(--space-sm);
 }
 
 .calendar-instructions details {
-  margin-bottom: 8px;
-  border: 1px solid #eee;
-  border-radius: 4px;
+  margin-bottom: 3px;
+  border: 1px solid var(--border-light);
 }
 
 .calendar-instructions summary {
-  padding: 10px 15px;
+  padding: 8px var(--space-sm);
   cursor: pointer;
-  background: #f9f9f9;
-  font-weight: 500;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  background: var(--bg);
+  list-style: none;
+  transition: background 0.15s;
+}
+
+.calendar-instructions summary::-webkit-details-marker {
+  display: none;
+}
+
+.calendar-instructions summary::before {
+  content: '▶ ';
+  font-size: 0.6rem;
+  color: var(--ink-light);
+}
+
+details[open] summary::before {
+  content: '▼ ';
 }
 
 .calendar-instructions summary:hover {
-  background: #f0f0f0;
+  background: #EEEEE8;
 }
 
 .calendar-instructions ol {
-  padding: 15px 15px 15px 35px;
+  padding: var(--space-sm) var(--space-sm) var(--space-sm) calc(var(--space-sm) + var(--space-md));
 }
 
 .calendar-instructions li {
-  margin-bottom: 5px;
-  font-size: 14px;
+  margin-bottom: 4px;
+  font-size: 0.875rem;
+  color: var(--ink-mid);
 }
 
-/* Footer */
-footer {
-  text-align: center;
-  padding: 20px;
-  color: #666;
-  font-size: 14px;
+/* ── Refresh Note ───────────────────────────────────────── */
+.refresh-note {
+  margin-top: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  border-left: 2px solid var(--border-light);
+  font-size: 0.8rem;
+  color: var(--ink-mid);
 }
 
-footer p {
-  margin-bottom: 8px;
-}
-
-footer .active-users {
-  font-size: 13px;
-  color: #888;
+/* ── Stats line ─────────────────────────────────────────── */
+.footer-stats {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-md) var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-light);
   font-style: italic;
 }
 
-footer .credit {
-  margin-top: 15px;
-  font-weight: 500;
-  color: #333;
+.footer-stats:empty {
+  display: none;
 }
 
-footer .contact {
-  font-size: 13px;
+/* ── Footer ─────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  background: var(--bg);
 }
 
-footer .contact a {
-  color: #1a1a2e;
+.footer-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-footer .social {
-  margin-top: 10px;
+.footer-copy {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-light);
 }
 
-footer .social a {
-  color: #1a1a2e;
-  text-decoration: none;
+.footer-copy a {
+  border-bottom: 1px solid var(--border-light);
+  transition: border-color 0.15s;
 }
 
-footer .social a:hover {
-  text-decoration: underline;
+.footer-copy a:hover {
+  border-bottom-color: var(--ink);
+  color: var(--ink);
 }
 
-/* Refresh note */
-.refresh-note {
-  margin-top: 20px;
-  padding: 12px 15px;
-  background: #f8f9fa;
-  border-left: 3px solid #1a1a2e;
-  font-size: 13px;
-  color: #555;
+.footer-links {
+  display: flex;
+  gap: var(--space-md);
 }
 
-/* Selection count badge */
-.selection-count {
-  display: inline-block;
-  background: #1a1a2e;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  margin-left: 10px;
+.footer-links a {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-light);
+  transition: color 0.15s;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-  .container {
-    padding: 10px;
+.footer-links a:hover {
+  color: var(--ink);
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 680px) {
+  .header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
   }
 
-  header h1 {
-    font-size: 1.5rem;
+  main {
+    gap: var(--space-md);
   }
 
   .url-box {
@@ -329,5 +464,9 @@ footer .social a:hover {
 
   #copy-btn {
     width: 100%;
+  }
+
+  .footer-links {
+    display: none;
   }
 }

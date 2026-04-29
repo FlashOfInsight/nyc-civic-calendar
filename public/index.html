@@ -4,125 +4,142 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NYC Civic Calendar</title>
+  <meta name="description" content="Subscribe to NYC government meeting calendars — community boards, city council, and agency hearings.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
   <link rel="stylesheet" href="styles.css">
   <script>
-    // Tag the root element with the current hostname so CSS can hide the
-    // migration banner on the new domain (it should only appear on the
-    // legacy Vercel URL during the grace period).
     document.documentElement.dataset.host = location.hostname;
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>NYC Civic Calendar</h1>
-      <p class="subtitle">Subscribe to NYC government meeting calendars</p>
-    </header>
 
-    <main>
-      <!--
-        MIGRATION NOTICE — remove this entire <section> after the cutoff date.
-        See also: lib/ics-generator.js (migration prefix on events) and
-        the Vercel project (turn off once cutoff passes).
-      -->
-      <section class="migration-banner" role="alert">
-        <h2>We are moving to a new URL</h2>
-        <p>
-          Following Vercel's recent security incident, we are proactively
-          migrating NYC Civic Calendar off Vercel to Cloudflare. <strong>Our
-          data was not affected</strong> — we are switching hosts out of an
-          abundance of caution.
-        </p>
-        <p>
-          The new home is <a href="https://nycciviccalendar.com"><strong>nycciviccalendar.com</strong></a>.
-          Please re-subscribe your calendar feed there before
-          <strong>June 30, 2026</strong>. Subscriptions to the old URL will
-          stop updating after that date.
-        </p>
-        <p class="migration-steps">
-          <strong>Important:</strong> remove your existing subscription first,
-          then add the new one. Adding the new feed without removing the old
-          will cause duplicate events in your calendar.
-        </p>
-      </section>
+  <header>
+    <div class="header-inner">
+      <span class="site-name">NYC CIVIC CALENDAR</span>
+      <nav>
+        <a href="https://laeo.net" target="_blank" rel="noopener">laeo.net</a>
+      </nav>
+    </div>
+  </header>
 
-      <section class="instructions">
-        <h2>How it works</h2>
-        <ol>
-          <li>Select the meetings you want to track below</li>
-          <li>Copy your personalized calendar URL</li>
-          <li>Add it to your calendar app (Google Calendar, Outlook, Apple Calendar)</li>
-          <li>Your calendar will automatically update with new meetings</li>
-        </ol>
-      </section>
+  <main>
 
-      <section class="district-finder">
-        <p>Not sure what community board, council district, or precinct you live in? <a href="https://boundaries.beta.nyc/" target="_blank">Check this map</a> to find your boundaries.</p>
-      </section>
-
-      <section class="organizations">
-        <h2>Select Organizations</h2>
-        <div id="org-tree"></div>
-      </section>
-
-      <section class="calendar-url" id="calendar-section" style="display: none;">
-        <h2>Your Calendar URL</h2>
-        <div class="url-box">
-          <input type="text" id="calendar-url" readonly>
-          <button id="copy-btn" onclick="copyUrl()">Copy</button>
-        </div>
-        <p class="url-hint">Add this URL as a calendar subscription in your calendar app</p>
-
-        <div class="calendar-instructions">
-          <details>
-            <summary>Google Calendar</summary>
-            <ol>
-              <li>Open Google Calendar</li>
-              <li>Click the + next to "Other calendars"</li>
-              <li>Select "From URL"</li>
-              <li>Paste your calendar URL</li>
-              <li>Click "Add calendar"</li>
-            </ol>
-          </details>
-          <details>
-            <summary>Apple Calendar</summary>
-            <ol>
-              <li>Open Calendar app</li>
-              <li>Go to File → New Calendar Subscription</li>
-              <li>Paste your calendar URL</li>
-              <li>Click Subscribe</li>
-            </ol>
-          </details>
-          <details>
-            <summary>Outlook</summary>
-            <ol>
-              <li>Open Outlook Calendar</li>
-              <li>Click "Add calendar" → "Subscribe from web"</li>
-              <li>Paste your calendar URL</li>
-              <li>Click "Import"</li>
-            </ol>
-          </details>
-        </div>
-
-        <div class="refresh-note">
-          <strong>Note:</strong> Calendar apps refresh subscriptions on their own schedule (usually every 12-24 hours). If you change your selections and want to see updates immediately, you'll need to remove the calendar subscription and re-add it with your new URL.
-        </div>
-      </section>
-    </main>
-
-    <footer>
-      <p>Data refreshed weekly from official NYC sources</p>
-      <p class="active-users" id="active-users"></p>
-      <p class="credit">This app was created by Laeo Crnkovic-Rubsamen for public use.</p>
-      <p class="contact">Have an idea for a calendar to add, or found an error? Email <a href="mailto:Laeo@maximumnewyork.com">Laeo@maximumnewyork.com</a></p>
-      <p class="social">
-        <a href="https://x.com/laeo_cr" target="_blank">Twitter</a> ·
-        <a href="https://diffusebenefits.substack.com/" target="_blank">Substack</a>
+    <!--
+      MIGRATION NOTICE — remove this entire <section> after the cutoff date.
+      See also: lib/ics-generator.js (migration prefix on events) and
+      the Vercel project (turn off once cutover passes).
+    -->
+    <section class="migration-banner" role="alert">
+      <div class="section-label">NOTICE</div>
+      <p>
+        Following Vercel's recent security incident, we are proactively
+        migrating NYC Civic Calendar off Vercel to Cloudflare. <strong>Our
+        data was not affected</strong> — we are switching hosts out of an
+        abundance of caution.
       </p>
-    </footer>
-  </div>
+      <p>
+        The new home is <a href="https://nycciviccalendar.com"><strong>nycciviccalendar.com</strong></a>.
+        Please re-subscribe your calendar feed there before
+        <strong>June 30, 2026</strong>. Subscriptions to the old URL will
+        stop updating after that date.
+      </p>
+      <p class="migration-steps">
+        <strong>Important:</strong> remove your existing subscription first,
+        then add the new one. Adding the new feed without removing the old
+        will cause duplicate events in your calendar.
+      </p>
+    </section>
+
+    <section class="instructions">
+      <div class="section-label">HOW IT WORKS</div>
+      <ol>
+        <li>Select the meetings you want to track below</li>
+        <li>Copy your personalized calendar URL</li>
+        <li>Add it to your calendar app (Google Calendar, Outlook, Apple Calendar)</li>
+        <li>Your calendar will automatically update with new meetings</li>
+      </ol>
+    </section>
+
+    <div class="district-finder">
+      Not sure what community board, council district, or precinct you live in?
+      <a href="https://boundaries.beta.nyc/" target="_blank" rel="noopener">Check this map</a> to find your boundaries.
+    </div>
+
+    <section class="organizations">
+      <div class="section-label">SELECT ORGANIZATIONS</div>
+      <div id="org-tree"></div>
+    </section>
+
+    <section class="calendar-url" id="calendar-section" style="display: none;">
+      <div class="section-label">YOUR CALENDAR URL</div>
+      <div class="url-box">
+        <input type="text" id="calendar-url" readonly>
+        <button id="copy-btn" onclick="copyUrl()">Copy</button>
+      </div>
+      <p class="url-hint">Add this URL as a calendar subscription in your calendar app</p>
+
+      <div class="calendar-instructions">
+        <details>
+          <summary>Google Calendar</summary>
+          <ol>
+            <li>Open Google Calendar</li>
+            <li>Click the + next to "Other calendars"</li>
+            <li>Select "From URL"</li>
+            <li>Paste your calendar URL</li>
+            <li>Click "Add calendar"</li>
+          </ol>
+        </details>
+        <details>
+          <summary>Apple Calendar</summary>
+          <ol>
+            <li>Open Calendar app</li>
+            <li>Go to File → New Calendar Subscription</li>
+            <li>Paste your calendar URL</li>
+            <li>Click Subscribe</li>
+          </ol>
+        </details>
+        <details>
+          <summary>Outlook</summary>
+          <ol>
+            <li>Open Outlook Calendar</li>
+            <li>Click "Add calendar" → "Subscribe from web"</li>
+            <li>Paste your calendar URL</li>
+            <li>Click "Import"</li>
+          </ol>
+        </details>
+      </div>
+
+      <div class="refresh-note">
+        <strong>Note:</strong> Calendar apps refresh subscriptions on their own schedule (usually every 12–24 hours).
+        If you change your selections and want to see updates immediately, remove the calendar subscription and re-add it with your new URL.
+      </div>
+    </section>
+
+  </main>
+
+  <p class="footer-stats" id="active-users"></p>
+
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-copy">
+        Data refreshed weekly from official NYC sources ·
+        <a href="mailto:laeo.cr@gmail.com">laeo.cr@gmail.com</a>
+      </span>
+      <div class="footer-links">
+        <a href="https://laeo.net" target="_blank" rel="noopener">laeo.net</a>
+        <a href="https://x.com/laeo_cr" target="_blank" rel="noopener">Twitter</a>
+        <a href="https://diffusebenefits.substack.com/" target="_blank" rel="noopener">Substack</a>
+      </div>
+    </div>
+  </footer>
 
   <script src="app.js"></script>
 </body>

@@ -1,0 +1,14 @@
+{
+  "name": "NYC Civic Calendar",
+  "short_name": "NYC Civic",
+  "icons": [
+    {
+      "src": "/favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#F7F6F2",
+  "background_color": "#F7F6F2",
+  "display": "standalone"
+}
