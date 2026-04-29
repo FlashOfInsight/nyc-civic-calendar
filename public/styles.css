@@ -115,6 +115,15 @@ main {
   margin-bottom: var(--space-sm);
 }
 
+.section-header {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  margin-bottom: var(--space-sm);
+}
+
 /* ── Migration Banner ───────────────────────────────────── */
 html[data-host="nycciviccalendar.com"] .migration-banner,
 html[data-host="www.nycciviccalendar.com"] .migration-banner {
@@ -154,6 +163,11 @@ html[data-host="www.nycciviccalendar.com"] .migration-banner {
 }
 
 /* ── Instructions ───────────────────────────────────────── */
+.instructions {
+  border: 1px solid var(--border-light);
+  padding: var(--space-md);
+}
+
 .instructions ol {
   margin-left: var(--space-md);
 }
