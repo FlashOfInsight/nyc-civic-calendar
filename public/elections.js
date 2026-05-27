@@ -326,10 +326,10 @@ function renderCalendar() {
     if (end > maxDate) maxDate = end;
   }
 
-  // Compute uniform day-cell height from the busiest visible day
+  // Uniform chip-body height: sized to busiest visible day (date-num row is separate)
   const maxChips = computeMaxDayEvents(minDate, maxDate);
-  // chip: ~17px (0.55rem * 1.45 line-height + 4px padding); gap: 2px; day-num+gap: 19px; padding: 7px
-  const dayH = Math.max(88, 7 + 19 + maxChips * 17 + Math.max(0, maxChips - 1) * 2);
+  // chip: ~17px (0.55rem * 1.45 + 4px padding); gap: 2px; padding: 6px
+  const dayH = Math.max(44, 6 + maxChips * 17 + Math.max(0, maxChips - 1) * 2);
   container.style.setProperty("--cal-day-height", `${dayH}px`);
 
   // Column headers (with matching left spacer for month-label column)
@@ -459,7 +459,29 @@ function renderWeek(weekStart, today, prevMonth) {
   weekEl.className = "cal-week";
   weekEl.dataset.weekStart = weekStart;
 
-  // Multi-day tracks
+  // Row 1: date number cells
+  for (let col = 0; col < 7; col++) {
+    const dateStr = addDays(weekStart, col);
+    const [, m, d] = dateStr.split("-").map(Number);
+    const topEl = document.createElement("div");
+    topEl.className = "cal-day-top" +
+      (dateStr === today ? " cal-day--today" : "") +
+      (dateStr < today ? " cal-day--past" : "") +
+      (col === 6 ? " cal-day--last" : "");
+    const numEl = document.createElement("span");
+    numEl.className = "cal-day-num";
+    if (dateStr === today) {
+      numEl.textContent = "TODAY";
+    } else if (d === 1) {
+      numEl.textContent = `${MONTHS_SHORT[m - 1]} 1`;
+    } else {
+      numEl.textContent = String(d);
+    }
+    topEl.appendChild(numEl);
+    weekEl.appendChild(topEl);
+  }
+
+  // Row 2: multi-day bars spanning all 7 columns
   if (multidaySegs.length > 0) {
     const tracks = document.createElement("div");
     tracks.className = "cal-multiday-tracks";
@@ -470,32 +492,17 @@ function renderWeek(weekStart, today, prevMonth) {
     weekEl.appendChild(tracks);
   }
 
-  // Day cells
+  // Row 3: chip body cells
   for (let col = 0; col < 7; col++) {
     const dateStr = addDays(weekStart, col);
-    const dayEl = document.createElement("div");
-    const [, m, d] = dateStr.split("-").map(Number);
-    dayEl.className = "cal-day" +
-      (dateStr === today ? " cal-day--today" : "") +
-      (dateStr < today ? " cal-day--past" : "");
-    dayEl.dataset.date = dateStr;
-
-    const numEl = document.createElement("span");
-    numEl.className = "cal-day-num";
-    if (dateStr === today) {
-      numEl.textContent = "TODAY";
-    } else if (d === 1) {
-      numEl.textContent = `${MONTHS_SHORT[m - 1]} 1`;
-    } else {
-      numEl.textContent = String(d);
-    }
-    dayEl.appendChild(numEl);
-
+    const bodyEl = document.createElement("div");
+    bodyEl.className = "cal-day-body" +
+      (dateStr < today ? " cal-day--past" : "") +
+      (col === 6 ? " cal-day--last" : "");
     for (const event of dayEvents[col]) {
-      dayEl.appendChild(createEventChip(event, today));
+      bodyEl.appendChild(createEventChip(event, today));
     }
-
-    weekEl.appendChild(dayEl);
+    weekEl.appendChild(bodyEl);
   }
 
   wrapEl.appendChild(weekEl);
