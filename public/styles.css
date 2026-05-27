@@ -106,7 +106,7 @@ main {
   gap: var(--space-lg);
 }
 
-#tab-meetings {
+#tab-meetings:not([hidden]) {
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
