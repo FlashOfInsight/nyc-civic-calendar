@@ -736,7 +736,7 @@ footer {
 
 .cal-col-headers {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   border-bottom: 1px solid var(--border);
   background: var(--bg);
 }
@@ -752,7 +752,7 @@ footer {
 
 .cal-week {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   border-bottom: 1px solid var(--border-light);
 }
 
@@ -774,13 +774,15 @@ footer {
 .cal-multiday-tracks {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   padding: 3px 2px;
   row-gap: 2px;
 }
 
 .cal-event-bar {
   height: 20px;
+  min-width: 0;
+  max-width: 100%;
   padding: 0 5px;
   font-family: var(--font-mono);
   font-size: 0.58rem;
@@ -827,12 +829,14 @@ footer {
 }
 
 .cal-day {
-  min-height: 56px;
+  height: 88px;
+  min-width: 0;
   padding: 4px 3px;
   border-right: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
   gap: 2px;
+  overflow: hidden;
 }
 
 .cal-day:last-child {
@@ -864,6 +868,7 @@ footer {
 
 .cal-event-chip {
   width: 100%;
+  min-width: 0;
   text-align: left;
   padding: 2px 4px;
   font-family: var(--font-mono);
@@ -875,6 +880,7 @@ footer {
   cursor: pointer;
   border: none;
   line-height: 1.45;
+  flex-shrink: 0;
   transition: opacity 0.12s;
 }
 
