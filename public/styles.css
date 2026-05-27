@@ -171,44 +171,11 @@ html[data-host="www.nycciviccalendar.com"] .migration-banner {
 /* ── Instructions ───────────────────────────────────────── */
 .instructions {
   border: 1px solid var(--border-light);
-}
-
-.instructions summary {
-  padding: 12px var(--space-md);
-  cursor: pointer;
-  list-style: none;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  color: var(--ink-mid);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: background 0.15s, color 0.15s;
-}
-
-.instructions summary::-webkit-details-marker { display: none; }
-
-.instructions summary::before {
-  content: '▶';
-  font-size: 0.55rem;
-  color: var(--ink-light);
-}
-
-.instructions[open] summary::before {
-  content: '▼';
-}
-
-.instructions summary:hover {
-  background: #EEEEE8;
-  color: var(--ink);
+  padding: var(--space-md);
 }
 
 .instructions ol {
-  padding: 0 var(--space-md) var(--space-md) calc(var(--space-md) + var(--space-md));
-  border-top: 1px solid var(--border-light);
-  padding-top: var(--space-sm);
+  margin-left: var(--space-md);
 }
 
 .instructions li {
@@ -219,6 +186,40 @@ html[data-host="www.nycciviccalendar.com"] .migration-banner {
 
 .instructions li:last-child {
   margin-bottom: 0;
+}
+
+/* ── App instructions collapsible ───────────────────────── */
+.app-instructions {
+  margin-top: var(--space-sm);
+}
+
+.app-instructions > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-light);
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+
+.app-instructions > summary::-webkit-details-marker { display: none; }
+
+.app-instructions > summary::before {
+  content: '▶';
+  font-size: 0.5rem;
+}
+
+.app-instructions[open] > summary::before {
+  content: '▼';
+}
+
+.app-instructions > summary:hover {
+  color: var(--ink-mid);
 }
 
 /* ── District Finder ────────────────────────────────────── */
