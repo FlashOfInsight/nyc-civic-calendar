@@ -30,7 +30,16 @@
     </div>
   </header>
 
+  <div class="tab-strip">
+    <div class="tab-strip-inner">
+      <button class="tab-btn active" data-tab="meetings">MEETINGS</button>
+      <button class="tab-btn" data-tab="elections">ELECTIONS</button>
+    </div>
+  </div>
+
   <main>
+
+  <div id="tab-meetings">
 
     <!--
       MIGRATION NOTICE — remove this entire <section> after the cutoff date.
@@ -123,6 +132,85 @@
       </div>
     </section>
 
+  </div><!-- #tab-meetings -->
+
+  <div id="tab-elections" hidden>
+
+    <section class="elections-section">
+      <div class="section-header">2026 POLITICAL CALENDAR</div>
+      <p class="elections-source">
+        Source: <a href="https://elections.ny.gov" target="_blank" rel="noopener">NYS Board of Elections</a> ·
+        Revised 12/09/2025 · All dates subject to change by the State Legislature.
+      </p>
+
+      <div class="elections-controls">
+        <div class="audience-toggle">
+          <button class="audience-btn active" data-audience="all">ALL</button>
+          <button class="audience-btn" data-audience="voter">VOTER</button>
+          <button class="audience-btn" data-audience="candidate">CANDIDATE</button>
+        </div>
+        <div class="election-toggle">
+          <button class="election-btn active" data-election="all">ALL</button>
+          <button class="election-btn" data-election="primary">PRIMARY</button>
+          <button class="election-btn" data-election="general">GENERAL</button>
+        </div>
+        <div class="elections-bulk">
+          <button id="elect-select-all" class="bulk-btn">Select all visible</button>
+          <button id="elect-clear-all" class="bulk-btn">Clear all visible</button>
+        </div>
+      </div>
+
+      <div id="cal-container"></div>
+
+      <section class="calendar-url" id="elections-calendar-section" style="display: none;">
+        <div class="section-label">YOUR ELECTIONS CALENDAR URL</div>
+        <div class="url-box">
+          <input type="text" id="elections-calendar-url" readonly>
+          <button id="elections-copy-btn">Copy</button>
+        </div>
+        <p class="url-hint">Add this URL as a calendar subscription in your calendar app</p>
+
+        <div class="calendar-instructions">
+          <details>
+            <summary>Google Calendar</summary>
+            <ol>
+              <li>Open Google Calendar</li>
+              <li>Click the + next to "Other calendars"</li>
+              <li>Select "From URL"</li>
+              <li>Paste your calendar URL</li>
+              <li>Click "Add calendar"</li>
+            </ol>
+          </details>
+          <details>
+            <summary>Apple Calendar</summary>
+            <ol>
+              <li>Open Calendar app</li>
+              <li>Go to File → New Calendar Subscription</li>
+              <li>Paste your calendar URL</li>
+              <li>Click Subscribe</li>
+            </ol>
+          </details>
+          <details>
+            <summary>Outlook</summary>
+            <ol>
+              <li>Open Outlook Calendar</li>
+              <li>Click "Add calendar" → "Subscribe from web"</li>
+              <li>Paste your calendar URL</li>
+              <li>Click "Import"</li>
+            </ol>
+          </details>
+        </div>
+
+        <div class="refresh-note">
+          <strong>Note:</strong> These are fixed 2026 dates from the NYS Board of Elections —
+          your calendar app will not need to refresh them, but adding the URL as a subscription
+          keeps the calendar in one place alongside your other feeds.
+        </div>
+      </section>
+    </section>
+
+  </div><!-- #tab-elections -->
+
   </main>
 
   <p class="footer-stats" id="active-users"></p>
@@ -141,6 +229,15 @@
     </div>
   </footer>
 
+  <div id="cal-tooltip" hidden aria-hidden="true">
+    <div class="cal-tt-label"></div>
+    <div class="cal-tt-date"></div>
+    <div class="cal-tt-legal"></div>
+    <div class="cal-tt-category"></div>
+    <div class="cal-tt-hint"></div>
+  </div>
+
   <script src="app.js"></script>
+  <script src="elections.js"></script>
 </body>
 </html>

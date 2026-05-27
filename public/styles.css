@@ -291,7 +291,8 @@ html[data-host="www.nycciviccalendar.com"] .migration-banner {
   margin-bottom: var(--space-xs);
 }
 
-#calendar-url {
+#calendar-url,
+#elections-calendar-url {
   flex: 1;
   padding: 10px var(--space-sm);
   font-family: var(--font-mono);
@@ -303,11 +304,13 @@ html[data-host="www.nycciviccalendar.com"] .migration-banner {
   outline: none;
 }
 
-#calendar-url:focus {
+#calendar-url:focus,
+#elections-calendar-url:focus {
   background: #EEEEE8;
 }
 
-#copy-btn {
+#copy-btn,
+#elections-copy-btn {
   padding: 10px var(--space-md);
   background: var(--ink);
   color: var(--bg);
@@ -321,11 +324,13 @@ html[data-host="www.nycciviccalendar.com"] .migration-banner {
   white-space: nowrap;
 }
 
-#copy-btn:hover {
+#copy-btn:hover,
+#elections-copy-btn:hover {
   opacity: 0.75;
 }
 
-#copy-btn.copied {
+#copy-btn.copied,
+#elections-copy-btn.copied {
   opacity: 0.55;
 }
 
@@ -460,6 +465,513 @@ footer {
   color: var(--ink);
 }
 
+/* ── Tab strip ──────────────────────────────────────────────── */
+.tab-strip {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.tab-strip-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+  display: flex;
+}
+
+.tab-btn {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  padding: 12px var(--space-md);
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  cursor: pointer;
+  color: var(--ink-mid);
+  transition: color 0.15s;
+}
+
+.tab-btn:hover {
+  color: var(--ink);
+}
+
+.tab-btn.active {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+/* ── Elections section ──────────────────────────────────────── */
+.elections-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.elections-source {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-light);
+}
+
+.elections-source a {
+  color: var(--ink-mid);
+  border-bottom: 1px solid var(--border-light);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.elections-source a:hover {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+.elections-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.audience-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+}
+
+.audience-btn {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  padding: 7px 14px;
+  border: none;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  color: var(--ink-mid);
+  transition: background 0.15s, color 0.15s;
+}
+
+.audience-btn:last-child {
+  border-right: none;
+}
+
+.audience-btn:hover {
+  background: #EEEEE8;
+  color: var(--ink);
+}
+
+.audience-btn.active {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.elections-bulk {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.bulk-btn {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  padding: 7px 12px;
+  border: 1px solid var(--border-light);
+  background: var(--bg);
+  cursor: pointer;
+  color: var(--ink-mid);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.bulk-btn:hover {
+  background: #EEEEE8;
+  color: var(--ink);
+  border-color: var(--border);
+}
+
+/* ── Election entries ───────────────────────────────────────── */
+#elections-list {
+  border: 1px solid var(--border);
+}
+
+.election-entry {
+  border-top: 1px solid var(--border-light);
+}
+
+.election-entry:first-child {
+  border-top: none;
+}
+
+.election-entry--hidden {
+  display: none;
+}
+
+.election-entry-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: 12px var(--space-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.election-entry-inner:hover {
+  background: #EEEEE8;
+}
+
+.election-entry-inner .org-checkbox {
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.election-entry-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.election-entry-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.election-date {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.election-badge {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  padding: 1px 6px;
+}
+
+.election-badge--primary {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.election-badge--general {
+  border: 1px solid var(--border);
+  color: var(--ink);
+}
+
+.election-badge--both {
+  border: 1px solid var(--border-light);
+  color: var(--ink-mid);
+}
+
+.election-category {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-light);
+}
+
+.election-entry-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.election-legal {
+  font-size: 0.8rem;
+  color: var(--ink-mid);
+  line-height: 1.5;
+}
+
+.election-citation {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-light);
+  white-space: nowrap;
+}
+
+/* ── Election filter toggle ─────────────────────────────────── */
+.election-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+}
+
+.election-btn {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  padding: 7px 14px;
+  border: none;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  color: var(--ink-mid);
+  transition: background 0.15s, color 0.15s;
+}
+
+.election-btn:last-child {
+  border-right: none;
+}
+
+.election-btn:hover {
+  background: #EEEEE8;
+  color: var(--ink);
+}
+
+.election-btn.active {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+/* ── Calendar grid ───────────────────────────────────────────── */
+
+#cal-container {
+  border: 1px solid var(--border);
+  user-select: none;
+}
+
+.cal-col-headers {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.cal-col-header {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-light);
+  padding: 5px 4px;
+  text-align: center;
+}
+
+.cal-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.cal-week:last-child {
+  border-bottom: none;
+}
+
+.cal-month-label {
+  grid-column: 1 / -1;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--ink);
+  padding: 6px 8px 4px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.cal-multiday-tracks {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 3px 2px;
+  row-gap: 2px;
+}
+
+.cal-event-bar {
+  height: 20px;
+  padding: 0 5px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.03em;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  margin: 0 1px;
+  align-self: start;
+  transition: opacity 0.12s;
+}
+
+.cal-event-bar.cal-voter {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.cal-event-bar.cal-candidate {
+  background: transparent;
+  color: var(--ink);
+  outline: 1px solid var(--ink);
+  outline-offset: -1px;
+}
+
+.cal-event-bar.cal-voter.cal-selected {
+  outline: 2px solid var(--ink-light);
+  outline-offset: 1px;
+}
+
+.cal-event-bar.cal-candidate.cal-selected {
+  background: rgba(0, 0, 0, 0.08);
+  outline: 2px solid var(--ink);
+  outline-offset: -1px;
+}
+
+.cal-event-bar.cal-past {
+  opacity: 0.38;
+}
+
+.cal-event-bar:hover {
+  opacity: 0.72;
+}
+
+.cal-day {
+  min-height: 56px;
+  padding: 4px 3px;
+  border-right: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cal-day:last-child {
+  border-right: none;
+}
+
+.cal-day--today .cal-day-num {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 0 3px;
+}
+
+.cal-day--past {
+  background: rgba(0, 0, 0, 0.01);
+}
+
+.cal-day-num {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-mid);
+  min-width: 20px;
+  height: 17px;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.cal-event-chip {
+  width: 100%;
+  text-align: left;
+  padding: 2px 4px;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  border: none;
+  line-height: 1.45;
+  transition: opacity 0.12s;
+}
+
+.cal-event-chip.cal-voter {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.cal-event-chip.cal-candidate {
+  background: transparent;
+  color: var(--ink);
+  outline: 1px solid var(--border);
+  outline-offset: -1px;
+}
+
+.cal-event-chip.cal-voter.cal-selected {
+  outline: 2px solid var(--ink-light);
+  outline-offset: 1px;
+}
+
+.cal-event-chip.cal-candidate.cal-selected {
+  background: rgba(0, 0, 0, 0.08);
+  outline: 2px solid var(--ink);
+  outline-offset: -1px;
+}
+
+.cal-event-chip.cal-past {
+  opacity: 0.38;
+}
+
+.cal-event-chip:hover {
+  opacity: 0.72;
+}
+
+/* ── Show-past button ────────────────────────────────────────── */
+.show-past-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  border: none;
+  border-bottom: 1px solid var(--border-light);
+  padding: 10px;
+}
+
+/* ── Calendar tooltip ────────────────────────────────────────── */
+#cal-tooltip {
+  position: absolute;
+  z-index: 200;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: var(--space-sm);
+  width: 280px;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.06);
+  pointer-events: none;
+}
+
+.cal-tt-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 4px;
+  line-height: 1.35;
+}
+
+.cal-tt-date {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.cal-tt-legal {
+  font-size: 0.78rem;
+  color: var(--ink-mid);
+  line-height: 1.45;
+  margin-bottom: 6px;
+}
+
+.cal-tt-category {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.cal-tt-hint {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-mid);
+  border-top: 1px solid var(--border-light);
+  padding-top: 6px;
+}
+
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 680px) {
   .header-inner {
@@ -482,5 +994,14 @@ footer {
 
   .footer-links {
     display: none;
+  }
+
+  .elections-controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tab-btn {
+    padding: 10px var(--space-sm);
   }
 }
