@@ -312,7 +312,12 @@ function renderCalendar() {
     if (end > maxDate) maxDate = end;
   }
 
-  // Column headers
+  // Column headers (with matching left spacer for month-label column)
+  const headerWrapper = document.createElement("div");
+  headerWrapper.className = "cal-col-headers-wrapper";
+  const headerSpacer = document.createElement("div");
+  headerSpacer.className = "cal-month-label";
+  headerWrapper.appendChild(headerSpacer);
   const headerRow = document.createElement("div");
   headerRow.className = "cal-col-headers";
   DAYS.forEach(d => {
@@ -321,7 +326,8 @@ function renderCalendar() {
     cell.textContent = d;
     headerRow.appendChild(cell);
   });
-  container.appendChild(headerRow);
+  headerWrapper.appendChild(headerRow);
+  container.appendChild(headerWrapper);
 
   // Collect week starts
   const allWeeks = [];
@@ -415,19 +421,23 @@ function renderWeek(weekStart, today, prevMonth) {
   const weekEnd = addDays(weekStart, 6);
   const { multidaySegs, dayEvents, trackCount } = getWeekData(weekStart);
 
+  const wrapEl = document.createElement("div");
+  wrapEl.className = "cal-week-wrapper";
+
+  // Vertical month label on the left — text only on month transitions
+  const weekMonth = parseDate(weekStart).getMonth();
+  const weekYear = parseDate(weekStart).getFullYear();
+  const monthLabel = document.createElement("div");
+  monthLabel.className = "cal-month-label";
+  if (weekMonth !== prevMonth) {
+    monthLabel.textContent = MONTHS_LONG[weekMonth];
+    monthLabel.classList.add("cal-month-label--active");
+  }
+  wrapEl.appendChild(monthLabel);
+
   const weekEl = document.createElement("div");
   weekEl.className = "cal-week";
   weekEl.dataset.weekStart = weekStart;
-
-  // Month label when month changes
-  const weekMonth = parseDate(weekStart).getMonth();
-  const weekYear = parseDate(weekStart).getFullYear();
-  if (weekMonth !== prevMonth) {
-    const label = document.createElement("div");
-    label.className = "cal-month-label";
-    label.textContent = `${MONTHS_LONG[weekMonth]} ${weekYear}`;
-    weekEl.appendChild(label);
-  }
 
   // Multi-day tracks
   if (multidaySegs.length > 0) {
@@ -452,8 +462,13 @@ function renderWeek(weekStart, today, prevMonth) {
 
     const numEl = document.createElement("span");
     numEl.className = "cal-day-num";
-    // Show month/day on the 1st of each month, otherwise just day
-    numEl.textContent = d === 1 ? `${MONTHS_SHORT[m - 1]} 1` : String(d);
+    if (dateStr === today) {
+      numEl.textContent = "TODAY";
+    } else if (d === 1) {
+      numEl.textContent = `${MONTHS_SHORT[m - 1]} 1`;
+    } else {
+      numEl.textContent = String(d);
+    }
     dayEl.appendChild(numEl);
 
     for (const event of dayEvents[col]) {
@@ -463,7 +478,8 @@ function renderWeek(weekStart, today, prevMonth) {
     weekEl.appendChild(dayEl);
   }
 
-  return weekEl;
+  wrapEl.appendChild(weekEl);
+  return wrapEl;
 }
 
 // ── ICS URL ───────────────────────────────────────────────────
