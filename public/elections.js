@@ -588,15 +588,19 @@ function clearAllVisible() {
 
 // ── Tabs ──────────────────────────────────────────────────────
 
+function activateTab(tab) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+  document.getElementById("tab-meetings").hidden = tab !== "meetings";
+  document.getElementById("tab-elections").hidden = tab !== "elections";
+  history.replaceState(null, "", tab === "elections" ? "/elections" : "/");
+}
+
 function initTabs() {
   document.querySelectorAll(".tab-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const tab = btn.dataset.tab;
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
-      document.getElementById("tab-meetings").hidden = tab !== "meetings";
-      document.getElementById("tab-elections").hidden = tab !== "elections";
-    });
+    btn.addEventListener("click", () => activateTab(btn.dataset.tab));
   });
+  const path = location.pathname.replace(/\/$/, "");
+  if (path === "/elections") activateTab("elections");
 }
 
 // ── Filter toggles ────────────────────────────────────────────
