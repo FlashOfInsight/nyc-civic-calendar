@@ -608,8 +608,13 @@ function initTabs() {
   document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.addEventListener("click", () => activateTab(btn.dataset.tab));
   });
-  const path = location.pathname.replace(/\/$/, "");
-  if (path === "/elections") activateTab("elections");
+  const ssTab = sessionStorage.getItem("ncc-tab");
+  const pathTab = location.pathname.replace(/\/$/, "") === "/elections" ? "elections" : null;
+  const tab = ssTab || pathTab;
+  if (tab === "elections") {
+    sessionStorage.removeItem("ncc-tab");
+    activateTab("elections");
+  }
 }
 
 // ── Filter toggles ────────────────────────────────────────────
