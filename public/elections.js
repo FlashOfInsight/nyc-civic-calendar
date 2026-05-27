@@ -373,17 +373,24 @@ function addCalendarListeners(container) {
 }
 
 function computeCalMetrics(minDate, maxDate) {
-  let maxItems = 0;
+  let maxH = 0;
   let w = startOfWeek(minDate);
   const lastWeek = startOfWeek(maxDate);
   while (w <= lastWeek) {
     const { dayEvents } = getWeekData(w);
     for (let col = 0; col < 7; col++) {
-      if (dayEvents[col].length > maxItems) maxItems = dayEvents[col].length;
+      const items = dayEvents[col];
+      if (!items.length) continue;
+      let h = 6;
+      for (let i = 0; i < items.length; i++) {
+        if (i > 0) h += 2;
+        h += items[i]._bar ? 20 : 17;
+      }
+      if (h > maxH) maxH = h;
     }
     w = addDays(w, 7);
   }
-  return { maxItems };
+  return { maxH };
 }
 
 function renderCalendar() {
@@ -408,11 +415,9 @@ function renderCalendar() {
     return;
   }
 
-  // Uniform body height: tallest day across all visible weeks (bars + chips combined)
-  const { maxItems } = computeCalMetrics(minDate, maxDate);
-  // bar: 20px; chip: ~17px; gap: 2px; padding: 6px — use 20px per item as safe max
-  const dayH = Math.max(44, 6 + maxItems * 20 + Math.max(0, maxItems - 1) * 2);
-  container.style.setProperty("--cal-day-height", `${dayH}px`);
+  // Uniform body height: tallest day across all visible weeks
+  const { maxH } = computeCalMetrics(minDate, maxDate);
+  container.style.setProperty("--cal-day-height", `${Math.max(44, maxH)}px`);
 
   // Column headers (with matching left spacer for month-label column)
   const headerWrapper = document.createElement("div");
@@ -534,7 +539,11 @@ function renderWeek(weekStart, today, prevMonth) {
   for (let col = 0; col < 7; col++) {
     const dateStr = addDays(weekStart, col);
     const bodyEl = document.createElement("div");
+    // If a bar continues into the next cell, drop the right border so
+    // adjacent bar segments visually touch with no gap.
+    const hasContinuingBar = dayEvents[col].some(e => e._bar && !e._last);
     bodyEl.className = "cal-day-body" +
+      (hasContinuingBar ? " cal-day-body--bar-continues" : "") +
       (dateStr < today ? " cal-day--past" : "") +
       (col === 6 ? " cal-day--last" : "");
     for (const event of dayEvents[col]) {

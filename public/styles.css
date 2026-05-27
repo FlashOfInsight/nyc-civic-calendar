@@ -880,6 +880,10 @@ footer {
   border-right: none;
 }
 
+.cal-day-body--bar-continues {
+  border-right: none;
+}
+
 .cal-day-body.cal-day--past {
   background: rgba(0, 0, 0, 0.015);
 }
