@@ -180,48 +180,52 @@ function isVisible(event) {
 
 function getWeekData(weekStart) {
   const weekEnd = addDays(weekStart, 6);
-  const multidaySegs = [];
-  const dayEvents = [[], [], [], [], [], [], []];
+  const dayBars  = [[], [], [], [], [], [], []];
+  const dayChips = [[], [], [], [], [], [], []];
 
   for (const event of ELECTION_EVENTS) {
     if (!isVisible(event)) continue;
-    const isRange = !!event.endDate;
     const eventEnd = event.endDate || event.date;
 
-    if (isRange) {
+    if (event.endDate) {
       if (eventEnd < weekStart || event.date > weekEnd) continue;
-      const startCol = event.date <= weekStart ? 0 : dowOf(event.date);
-      const endCol = eventEnd >= weekEnd ? 6 : dowOf(eventEnd);
-      const continuesLeft = event.date < weekStart;
+      const firstCol = event.date < weekStart ? 0 : dowOf(event.date);
+      const lastCol  = eventEnd > weekEnd ? 6 : dowOf(eventEnd);
+      const continuesLeft  = event.date < weekStart;
       const continuesRight = eventEnd > weekEnd;
-      const isFirstSeg = event.date >= weekStart && event.date <= weekEnd;
-      multidaySegs.push({ event, startCol, endCol, continuesLeft, continuesRight, isFirstSeg, trackIndex: 0 });
+      for (let col = firstCol; col <= lastCol; col++) {
+        dayBars[col].push({ ...event, _bar: true,
+          _first: col === firstCol, _last: col === lastCol,
+          _continuesLeft:  col === firstCol && continuesLeft,
+          _continuesRight: col === lastCol  && continuesRight });
+      }
     } else {
       if (event.date < weekStart || event.date > weekEnd) continue;
-      dayEvents[dowOf(event.date)].push(event);
+      dayChips[dowOf(event.date)].push(event);
     }
   }
 
-  // Assign tracks (vertical stacking rows) for overlapping multi-day bars
-  const sorted = [...multidaySegs].sort((a, b) => a.startCol - b.startCol);
-  const trackEnds = []; // endCol of last segment assigned to each track
-  for (const seg of sorted) {
-    let placed = false;
-    for (let t = 0; t < trackEnds.length; t++) {
-      if (trackEnds[t] < seg.startCol) {
-        seg.trackIndex = t;
-        trackEnds[t] = seg.endCol;
-        placed = true;
-        break;
-      }
-    }
-    if (!placed) {
-      seg.trackIndex = trackEnds.length;
-      trackEnds.push(seg.endCol);
+  // Bars first, then chips in each column
+  const dayEvents = dayBars.map((bars, i) => [...bars, ...dayChips[i]]);
+  return { dayEvents };
+}
+
+function getDayEvents(dateStr) {
+  const bars = [], chips = [];
+  for (const event of ELECTION_EVENTS) {
+    if (!isVisible(event)) continue;
+    if (event.endDate) {
+      if (dateStr < event.date || dateStr > event.endDate) continue;
+      bars.push({ ...event, _bar: true,
+        _first: dateStr === event.date,
+        _last:  dateStr === event.endDate,
+        _continuesLeft:  dateStr !== event.date,
+        _continuesRight: dateStr !== event.endDate });
+    } else {
+      if (event.date === dateStr) chips.push(event);
     }
   }
-
-  return { multidaySegs, dayEvents, trackCount: trackEnds.length };
+  return [...bars, ...chips];
 }
 
 // ── DOM helpers ───────────────────────────────────────────────
@@ -230,28 +234,23 @@ function eventAudienceClass(event) {
   return event.audience === "candidate" ? "cal-candidate" : "cal-voter";
 }
 
-function createEventBar(seg, today) {
-  const { event, startCol, endCol, continuesLeft, continuesRight, isFirstSeg, trackIndex } = seg;
-  const el = document.createElement("div");
-  el.className = `cal-event-bar ${eventAudienceClass(event)}${selectedElectionEvents.has(event.index) ? " cal-selected" : ""}${event.date < today ? " cal-past" : ""}`;
-  el.style.gridColumn = `${startCol + 1} / ${endCol + 2}`;
-  el.style.gridRow = `${trackIndex + 1}`;
-  el.dataset.index = event.index;
-
-  const left = continuesLeft ? "← " : "";
-  const right = continuesRight ? " →" : "";
-  const label = isFirstSeg ? event.label : "";
-  el.textContent = left + label + right;
-
-  return el;
-}
-
-function createEventChip(event, today) {
+function createEventItem(event, today) {
   const el = document.createElement("button");
-  el.className = `cal-event-chip ${eventAudienceClass(event)}${selectedElectionEvents.has(event.index) ? " cal-selected" : ""}${event.date < today ? " cal-past" : ""}`;
-  el.dataset.index = event.index;
-  el.textContent = event.label;
   el.type = "button";
+  el.dataset.index = event.index;
+  const audClass = eventAudienceClass(event);
+  const sel = selectedElectionEvents.has(event.index) ? " cal-selected" : "";
+  const past = event.date < today ? " cal-past" : "";
+
+  if (event._bar) {
+    el.className = `cal-event-bar ${audClass}${sel}${past}`;
+    const left  = event._continuesLeft  ? "← " : "";
+    const right = event._continuesRight ? " →" : "";
+    el.textContent = event._first ? (left + event.label + right) : (left || right || "");
+  } else {
+    el.className = `cal-event-chip ${audClass}${sel}${past}`;
+    el.textContent = event.label;
+  }
   return el;
 }
 
@@ -296,18 +295,95 @@ function hideTooltip() {
 
 // ── Calendar render ───────────────────────────────────────────
 
-function computeMaxDayEvents(minDate, maxDate) {
-  let max = 0;
+function renderMobileContent(container, minDate, maxDate, today) {
+  container.classList.add("cal-mobile");
+  let d = minDate;
+  while (d <= maxDate) {
+    const [, m, day] = d.split("-").map(Number);
+    const isToday = d === today;
+    const isPast = d < today;
+    const events = getDayEvents(d);
+
+    const col = document.createElement("div");
+    col.className = "cal-mobile-col";
+    col.dataset.date = d;
+
+    const hdr = document.createElement("div");
+    hdr.className = "cal-mobile-hdr" +
+      (isToday ? " cal-day--today" : "") +
+      (isPast ? " cal-day--past" : "");
+    const dowEl = document.createElement("span");
+    dowEl.className = "cal-mobile-dow";
+    dowEl.textContent = DAYS[parseDate(d).getDay()];
+    const numEl = document.createElement("span");
+    numEl.className = "cal-mobile-num";
+    if (isToday) numEl.textContent = "TODAY";
+    else if (day === 1) numEl.textContent = `${MONTHS_SHORT[m - 1]} 1`;
+    else numEl.textContent = String(day);
+    hdr.appendChild(dowEl);
+    hdr.appendChild(numEl);
+    col.appendChild(hdr);
+
+    const body = document.createElement("div");
+    body.className = "cal-mobile-body" + (isPast ? " cal-day--past" : "");
+    for (const ev of events) body.appendChild(createEventItem(ev, today));
+    col.appendChild(body);
+    container.appendChild(col);
+    d = addDays(d, 1);
+  }
+
+  requestAnimationFrame(() => {
+    const todayCol = container.querySelector(`[data-date="${today}"]`);
+    if (todayCol) todayCol.scrollIntoView({ behavior: "instant", inline: "start", block: "nearest" });
+  });
+}
+
+function addCalendarListeners(container) {
+  container.addEventListener("mouseover", e => {
+    const el = e.target.closest("[data-index]");
+    if (!el) return;
+    const event = ELECTION_EVENTS[Number(el.dataset.index)];
+    if (event) showTooltip(event, el);
+  });
+  container.addEventListener("mouseout", e => {
+    if (!e.target.closest("[data-index]")) return;
+    hideTooltip();
+  });
+  container.addEventListener("click", e => {
+    const el = e.target.closest("[data-index]");
+    if (!el) return;
+    const idx = Number(el.dataset.index);
+    if (selectedElectionEvents.has(idx)) {
+      selectedElectionEvents.delete(idx);
+    } else {
+      selectedElectionEvents.add(idx);
+    }
+    saveElectionSelections();
+    updateElectionsUrl();
+    container.querySelectorAll(`[data-index="${idx}"]`).forEach(node => {
+      node.classList.toggle("cal-selected", selectedElectionEvents.has(idx));
+    });
+    const tt = document.getElementById("cal-tooltip");
+    if (tt && !tt.hidden) {
+      tt.querySelector(".cal-tt-hint").textContent = selectedElectionEvents.has(idx)
+        ? "Click to remove from your calendar"
+        : "Click to add to your calendar";
+    }
+  });
+}
+
+function computeCalMetrics(minDate, maxDate) {
+  let maxItems = 0;
   let w = startOfWeek(minDate);
   const lastWeek = startOfWeek(maxDate);
   while (w <= lastWeek) {
     const { dayEvents } = getWeekData(w);
     for (let col = 0; col < 7; col++) {
-      if (dayEvents[col].length > max) max = dayEvents[col].length;
+      if (dayEvents[col].length > maxItems) maxItems = dayEvents[col].length;
     }
     w = addDays(w, 7);
   }
-  return max;
+  return { maxItems };
 }
 
 function renderCalendar() {
@@ -326,10 +402,16 @@ function renderCalendar() {
     if (end > maxDate) maxDate = end;
   }
 
-  // Uniform chip-body height: sized to busiest visible day (date-num row is separate)
-  const maxChips = computeMaxDayEvents(minDate, maxDate);
-  // chip: ~17px (0.55rem * 1.45 + 4px padding); gap: 2px; padding: 6px
-  const dayH = Math.max(44, 6 + maxChips * 17 + Math.max(0, maxChips - 1) * 2);
+  if (window.innerWidth <= 640) {
+    renderMobileContent(container, minDate, maxDate, today);
+    addCalendarListeners(container);
+    return;
+  }
+
+  // Uniform body height: tallest day across all visible weeks (bars + chips combined)
+  const { maxItems } = computeCalMetrics(minDate, maxDate);
+  // bar: 20px; chip: ~17px; gap: 2px; padding: 6px — use 20px per item as safe max
+  const dayH = Math.max(44, 6 + maxItems * 20 + Math.max(0, maxItems - 1) * 2);
   container.style.setProperty("--cal-day-height", `${dayH}px`);
 
   // Column headers (with matching left spacer for month-label column)
@@ -401,45 +483,12 @@ function renderCalendar() {
   });
   container.appendChild(futureContainer);
 
-  // Wire up event interactions
-  container.addEventListener("mouseover", e => {
-    const el = e.target.closest("[data-index]");
-    if (!el) return;
-    const event = ELECTION_EVENTS[Number(el.dataset.index)];
-    if (event) showTooltip(event, el);
-  });
-  container.addEventListener("mouseout", e => {
-    if (!e.target.closest("[data-index]")) return;
-    hideTooltip();
-  });
-  container.addEventListener("click", e => {
-    const el = e.target.closest("[data-index]");
-    if (!el) return;
-    const idx = Number(el.dataset.index);
-    if (selectedElectionEvents.has(idx)) {
-      selectedElectionEvents.delete(idx);
-    } else {
-      selectedElectionEvents.add(idx);
-    }
-    saveElectionSelections();
-    updateElectionsUrl();
-    // Update all elements with this index
-    container.querySelectorAll(`[data-index="${idx}"]`).forEach(node => {
-      node.classList.toggle("cal-selected", selectedElectionEvents.has(idx));
-    });
-    // Update tooltip hint if visible
-    const tt = document.getElementById("cal-tooltip");
-    if (tt && !tt.hidden) {
-      tt.querySelector(".cal-tt-hint").textContent = selectedElectionEvents.has(idx)
-        ? "Click to remove from your calendar"
-        : "Click to add to your calendar";
-    }
-  });
+  addCalendarListeners(container);
 }
 
 function renderWeek(weekStart, today, prevMonth) {
   const weekEnd = addDays(weekStart, 6);
-  const { multidaySegs, dayEvents, trackCount } = getWeekData(weekStart);
+  const { dayEvents } = getWeekData(weekStart);
 
   const wrapEl = document.createElement("div");
   wrapEl.className = "cal-week-wrapper";
@@ -481,18 +530,7 @@ function renderWeek(weekStart, today, prevMonth) {
     weekEl.appendChild(topEl);
   }
 
-  // Row 2: multi-day bars spanning all 7 columns
-  if (multidaySegs.length > 0) {
-    const tracks = document.createElement("div");
-    tracks.className = "cal-multiday-tracks";
-    tracks.style.gridTemplateRows = `repeat(${trackCount}, 22px)`;
-    for (const seg of multidaySegs) {
-      tracks.appendChild(createEventBar(seg, today));
-    }
-    weekEl.appendChild(tracks);
-  }
-
-  // Row 3: chip body cells
+  // Row 2: body cells — bars first, then chips, all in one unified flow
   for (let col = 0; col < 7; col++) {
     const dateStr = addDays(weekStart, col);
     const bodyEl = document.createElement("div");
@@ -500,7 +538,7 @@ function renderWeek(weekStart, today, prevMonth) {
       (dateStr < today ? " cal-day--past" : "") +
       (col === 6 ? " cal-day--last" : "");
     for (const event of dayEvents[col]) {
-      bodyEl.appendChild(createEventChip(event, today));
+      bodyEl.appendChild(createEventItem(event, today));
     }
     weekEl.appendChild(bodyEl);
   }
