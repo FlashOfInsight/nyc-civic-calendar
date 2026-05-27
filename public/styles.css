@@ -106,6 +106,12 @@ main {
   gap: var(--space-lg);
 }
 
+#tab-meetings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
 /* ── Section label ──────────────────────────────────────── */
 .section-label {
   font-family: var(--font-mono);
@@ -175,7 +181,7 @@ html[data-host="www.nycciviccalendar.com"] .migration-banner {
 .instructions li {
   font-size: 0.9rem;
   color: var(--ink-mid);
-  margin-bottom: var(--space-xs);
+  margin-bottom: 0.75rem;
 }
 
 /* ── District Finder ────────────────────────────────────── */
@@ -211,7 +217,7 @@ html[data-host="www.nycciviccalendar.com"] .migration-banner {
 .org-header {
   display: flex;
   align-items: center;
-  padding: 8px var(--space-sm);
+  padding: 11px var(--space-sm);
   cursor: pointer;
   transition: background 0.15s;
 }
