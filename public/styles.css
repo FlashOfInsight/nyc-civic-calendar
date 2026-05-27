@@ -171,17 +171,54 @@ html[data-host="www.nycciviccalendar.com"] .migration-banner {
 /* ── Instructions ───────────────────────────────────────── */
 .instructions {
   border: 1px solid var(--border-light);
-  padding: var(--space-md);
+}
+
+.instructions summary {
+  padding: 12px var(--space-md);
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--ink-mid);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.instructions summary::-webkit-details-marker { display: none; }
+
+.instructions summary::before {
+  content: '▶';
+  font-size: 0.55rem;
+  color: var(--ink-light);
+}
+
+.instructions[open] summary::before {
+  content: '▼';
+}
+
+.instructions summary:hover {
+  background: #EEEEE8;
+  color: var(--ink);
 }
 
 .instructions ol {
-  margin-left: var(--space-md);
+  padding: 0 var(--space-md) var(--space-md) calc(var(--space-md) + var(--space-md));
+  border-top: 1px solid var(--border-light);
+  padding-top: var(--space-sm);
 }
 
 .instructions li {
   font-size: 0.9rem;
   color: var(--ink-mid);
   margin-bottom: 0.75rem;
+}
+
+.instructions li:last-child {
+  margin-bottom: 0;
 }
 
 /* ── District Finder ────────────────────────────────────── */
