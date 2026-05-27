@@ -296,6 +296,20 @@ function hideTooltip() {
 
 // ── Calendar render ───────────────────────────────────────────
 
+function computeMaxDayEvents(minDate, maxDate) {
+  let max = 0;
+  let w = startOfWeek(minDate);
+  const lastWeek = startOfWeek(maxDate);
+  while (w <= lastWeek) {
+    const { dayEvents } = getWeekData(w);
+    for (let col = 0; col < 7; col++) {
+      if (dayEvents[col].length > max) max = dayEvents[col].length;
+    }
+    w = addDays(w, 7);
+  }
+  return max;
+}
+
 function renderCalendar() {
   const container = document.getElementById("cal-container");
   container.innerHTML = "";
@@ -311,6 +325,12 @@ function renderCalendar() {
     const end = e.endDate || e.date;
     if (end > maxDate) maxDate = end;
   }
+
+  // Compute uniform day-cell height from the busiest visible day
+  const maxChips = computeMaxDayEvents(minDate, maxDate);
+  // chip: ~17px (0.55rem * 1.45 line-height + 4px padding); gap: 2px; day-num+gap: 19px; padding: 7px
+  const dayH = Math.max(88, 7 + 19 + maxChips * 17 + Math.max(0, maxChips - 1) * 2);
+  container.style.setProperty("--cal-day-height", `${dayH}px`);
 
   // Column headers (with matching left spacer for month-label column)
   const headerWrapper = document.createElement("div");

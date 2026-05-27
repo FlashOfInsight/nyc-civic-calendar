@@ -851,13 +851,14 @@ footer {
 }
 
 .cal-day {
-  min-height: 88px;
+  height: var(--cal-day-height, 88px);
   min-width: 0;
   padding: 4px 3px;
   border-right: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
   gap: 2px;
+  overflow: hidden;
 }
 
 .cal-day:last-child {
