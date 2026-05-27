@@ -98,6 +98,7 @@ function generateEventLines(event, dtstamp) {
     `SUMMARY:${escapeICS(event.label)}`,
     `DESCRIPTION:${description}`,
     `CATEGORIES:${escapeICS(event.category)}`,
+    "URL:https://elections.ny.gov/",
     "END:VEVENT"
   ];
 }
