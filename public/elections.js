@@ -539,11 +539,7 @@ function renderWeek(weekStart, today, prevMonth) {
   for (let col = 0; col < 7; col++) {
     const dateStr = addDays(weekStart, col);
     const bodyEl = document.createElement("div");
-    // If a bar continues into the next cell, drop the right border so
-    // adjacent bar segments visually touch with no gap.
-    const hasContinuingBar = dayEvents[col].some(e => e._bar && !e._last);
     bodyEl.className = "cal-day-body" +
-      (hasContinuingBar ? " cal-day-body--bar-continues" : "") +
       (dateStr < today ? " cal-day--past" : "") +
       (col === 6 ? " cal-day--last" : "");
     for (const event of dayEvents[col]) {
