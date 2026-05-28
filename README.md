@@ -123,17 +123,32 @@ node scripts/run-scrapers.js     # writes to the real Gist
 rm .env.vercel
 ```
 
+## Elections tab
+
+A second tab at `/elections` serves the **2026 NYS Political Calendar** (71 events sourced from the NYS Board of Elections, revised 2025-12-09). Users select individual dates and get a bitmask-encoded ICS subscription URL.
+
+- **Data:** `lib/data/political-calendar-2026.js` — 71 events with date, endDate (for multi-day bars), label, legalText, citation, category, election (primary/general), audience (voter/candidate/both)
+- **Frontend:** `public/elections.js` — self-contained calendar grid renderer, filter toggles (audience + election type), select/clear, ICS URL builder. `public/elections/index.html` is a tiny hash-redirect shim so `nycciviccalendar.com/elections` opens the tab directly.
+- **ICS endpoint:** `functions/api/elections.ics.js` — decodes `?e=<base64url-bitmask>`, returns a valid VCALENDAR with one VEVENT per selected date. Each event links to `https://elections.ny.gov/`.
+- **Desktop layout:** weekly grid with multi-day bars (bleeds to cell edges), 1px day separators on bars, computed row height so bars don't inflate the grid.
+- **Mobile layout:** 2-column horizontal scroll-snap, auto-scrolls to today on load, ICS section floats above the calendar.
+- **URL routing:** `nycciviccalendar.com/elections` → 308 to `/elections/` → `elections/index.html` → `location.replace('/#elections')` → main app reads `location.hash` in `initTabs()` → activates elections tab, then `history.replaceState` cleans URL to `/elections`.
+
 ## Project structure
 
 ```
 nyc-civic-calendar/
 ├── public/                      # Static frontend (served by both Pages and Vercel)
-│   ├── index.html               #   Has migration banner, hidden on new domain
-│   ├── app.js
-│   ├── styles.css               #   CSS rule hides banner when data-host matches
+│   ├── index.html               #   Two-tab SPA; migration banner hidden on new domain
+│   ├── app.js                   #   Meetings tab: org tree, ICS URL builder, stats
+│   ├── elections.js             #   Elections tab: calendar grid, filters, ICS builder
+│   ├── styles.css               #   Shared styles; mobile breakpoint at 640px
+│   ├── elections/
+│   │   └── index.html           #   Hash-redirect shim for /elections URL routing
 │   └── _headers                 #   Cloudflare Pages cache-control rules
 ├── functions/api/               # Cloudflare Pages Functions (new primary)
-│   ├── calendar.ics.js          #   Clean ICS, no migration prefix
+│   ├── calendar.ics.js          #   Meetings ICS: clean feed, no migration prefix
+│   ├── elections.ics.js         #   Elections ICS: bitmask-encoded ?e= param
 │   ├── active-orgs.js
 │   └── debug.js
 ├── api/                         # Vercel serverless functions (legacy, grace period)
@@ -148,12 +163,15 @@ nyc-civic-calendar/
 │   ├── ics-generator.js         # generateICS(meetings, name, { migrationPrefix })
 │   ├── organizations.js         # Org hierarchy for the frontend
 │   ├── scrapers/                # The 8 scrapers above
-│   └── data/                    # Static pattern data (MTA, NYPD)
+│   └── data/
+│       ├── mta-schedule.json    #   MTA meeting pattern data
+│       ├── nypd-precincts.json  #   77 NYPD precinct schedules
+│       └── political-calendar-2026.js  # 71 NYS BOE election dates
 ├── .github/workflows/
 │   └── scrape.yml               # Daily cron, runs scripts/run-scrapers.js
 ├── vercel.json                  # Headers + function config (crons removed)
 ├── BUGS.md                      # Low-priority known issues
-├── DEVELOPMENT_STATUS.md        # Historical migration log
+├── DEVELOPMENT_STATUS.md        # Historical change log
 └── README.md                    # This file
 ```
 

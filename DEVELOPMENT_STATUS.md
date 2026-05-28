@@ -4,6 +4,37 @@ Historical log of major changes. For current architecture, env vars, and operati
 
 ---
 
+## 2026-05-27/28 — Elections tab + UX polish
+
+### Elections tab (new)
+Added a full 2026 NYS Political Calendar tab. Data is 71 events from the NYS Board of Elections (revised 2025-12-09) stored in `lib/data/political-calendar-2026.js`. Each event has date, optional endDate, label, legalText, citation, category, election (primary/general/both), and audience (voter/candidate/both).
+
+Frontend (`public/elections.js`):
+- Weekly calendar grid with multi-day event bars (bleed technique: `width: calc(100% + 6px); margin: 0 -3px`) and 1px day separators between bar segments
+- Row height computed from actual event counts (20px bars, 17px chips, 2px gaps, 6px padding) so rows are compact instead of padded for worst-case
+- Audience toggle (all/voter/candidate) and election toggle (all/primary/general)
+- Select all visible / clear all visible bulk actions
+- Bitmask-encoded ICS URL: each of the 71 events maps to a bit; URL-safe base64 encodes the byte array
+- Mobile layout: 2-column horizontal scroll-snap (`scroll-snap-type: x mandatory`), 65vh height, auto-scrolls to today on load via `requestAnimationFrame` + `scrollIntoView`
+
+ICS endpoint (`functions/api/elections.ics.js`):
+- Decodes `?e=<base64url>` bitmask, returns RFC 5545 VCALENDAR
+- Each VEVENT includes DTSTART/DTEND (all-day), SUMMARY, DESCRIPTION (legalText + citation + source), CATEGORIES, URL (elections.ny.gov)
+- Proper RFC 5545 line folding at 75 octets
+
+### URL routing
+`nycciviccalendar.com/elections` now opens the elections tab directly. Implementation: `public/elections/index.html` is a tiny shim that does `location.replace('/#elections')`. Main app's `initTabs()` reads `location.hash === "#elections"` and activates the tab, then `history.replaceState` cleans the URL to `/elections`. Previous approach (sessionStorage) was abandoned because it fails with stricter browser privacy settings.
+
+### Meetings tab UX
+- Generated calendar URL box moved to top of the tab (above HOW IT WORKS)
+- Per-app instructions (Google/Apple/Outlook) collapsed behind `<details class="app-instructions">` toggle; HOW IT WORKS section stays visible
+- Meetings tab uses `display: flex; flex-direction: column; gap: var(--space-lg)` via `#tab-meetings:not([hidden])` — the `:not([hidden])` is required to avoid `display: flex` overriding the `hidden` attribute and bleeding the meetings tab into the elections tab view
+- Org row header padding and instruction list spacing increased for readability
+
+Commits: `dea5aed` through `1d73c2b`.
+
+---
+
 ## 2026-04-23 — Migrated off Vercel
 
 Following Vercel's security incident (our data was not affected — proactive move), the app was migrated to a split architecture:
