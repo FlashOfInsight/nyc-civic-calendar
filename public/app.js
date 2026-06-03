@@ -398,7 +398,6 @@ const organizations = {
           },
           "5": {
             name: "CB5 - Midtown",
-            estimated: true, url: "https://www.cb5.org/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -570,7 +569,6 @@ const organizations = {
           },
           "5": {
             name: "CB5 - East New York, Cypress Hills",
-            estimated: true, url: "https://www.nyc.gov/site/brooklyncb5/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
