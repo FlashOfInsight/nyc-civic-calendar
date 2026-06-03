@@ -1387,7 +1387,7 @@ function buildTree(orgs, prefix = "") {
 
     // Name
     const name = document.createElement("span");
-    name.className = "org-name";
+    name.className = org.estimated ? "org-name org-name--flagged" : "org-name";
     name.textContent = org.name;
     name.onclick = () => checkbox.click();
     header.appendChild(name);
