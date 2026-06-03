@@ -584,7 +584,6 @@ const organizations = {
           },
           "6": {
             name: "CB6 - Park Slope, Carroll Gardens, Red Hook, Gowanus",
-            estimated: true, url: "https://cbbrooklyn.cityofnewyork.us/cb6/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
