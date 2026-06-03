@@ -453,7 +453,6 @@ const organizations = {
           },
           "9": {
             name: "CB9 - Morningside Heights, Hamilton Heights",
-            estimated: true, url: "https://www.cb9m.org/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
