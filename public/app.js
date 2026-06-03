@@ -588,7 +588,6 @@ const organizations = {
           },
           "7": {
             name: "CB7 - Sunset Park, Windsor Terrace",
-            estimated: true, url: "https://www.nyc.gov/site/brooklyncb7/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -756,7 +755,6 @@ const organizations = {
           },
           "18": {
             name: "CB18 - Canarsie, Mill Basin, Flatlands, Marine Park",
-            estimated: true, url: "https://www.nyc.gov/site/brooklyncb18/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
