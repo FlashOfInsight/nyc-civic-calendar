@@ -35,7 +35,7 @@ Subscribe to a personalized ICS calendar feed of NYC government meetings — pic
 └──────────────────┘         └──────────────────┘
 ```
 
-**Why two hosts?** The site migrated off Vercel on 2026-04-23 following Vercel's security incident. Our data was not affected — the move was proactive. Vercel stays live for 60 days serving a migration notice to existing subscribers, then gets decommissioned on **2026-06-30**.
+**Why two hosts?** The site migrated off Vercel on 2026-04-23 following Vercel's security incident. Our data was not affected — the move was proactive. Vercel stays live serving a migration notice to existing subscribers, then gets decommissioned on **2026-06-30**.
 
 ## Stack
 
@@ -43,7 +43,7 @@ Subscribe to a personalized ICS calendar feed of NYC government meetings — pic
 - **Endpoints:** Cloudflare Pages Functions in `functions/api/` (new) and Vercel serverless functions in `api/` (legacy)
 - **Scraper:** Node.js script in `scripts/run-scrapers.js` invoked by `.github/workflows/scrape.yml`
 - **Storage:** GitHub Gist (free, unlimited public reads, gist-scope PAT for writes)
-- **Scraping:** Cheerio for HTML parsing; some scrapers are pattern-based (MTA, NYPD) and make no HTTP calls
+- **Scraping:** Cheerio for HTML parsing; `pdf-parse` v2 for PDF text extraction; some scrapers are pattern-based (MTA, NYPD) and make no HTTP calls
 
 ## Scrapers (8)
 
@@ -52,13 +52,15 @@ Subscribe to a personalized ICS calendar feed of NYC government meetings — pic
 | `lib/scrapers/city-council.js` | NYC Council | Legistar API primary; HTML fallback when API blocked |
 | `lib/scrapers/mta.js` | MTA Board + committees | Pattern generator from `lib/data/mta-schedule.json` |
 | `lib/scrapers/agencies.js` | DOB + DOE | HTML scraping |
-| `lib/scrapers/community-boards.js` | 59 community boards × 5 boroughs | 10+ site types, one central `createMeeting()` |
+| `lib/scrapers/community-boards.js` | 59 community boards × 5 boroughs | 20+ scraper types; see [COMMUNITY-BOARD-SCRAPERS.md](COMMUNITY-BOARD-SCRAPERS.md) |
 | `lib/scrapers/oversight-boards.js` | CCRB, LPC, BSA, RGB | HTML scraping |
 | `lib/scrapers/nyc-rules.js` | rules.cityofnewyork.us | Extracts `hearing_array` from JS |
 | `lib/scrapers/city-government.js` | CPC, Comptroller, DCAS, Borough Presidents, DOB industry | Mixed scraping + pattern generation |
 | `lib/scrapers/nypd.js` | 77 NYPD precincts | Pattern generator from `lib/data/nypd-precincts.json` |
 
-Current production size: ~1,600 meetings, ~290 active orgs.
+Current production size: ~1,800+ meetings, ~300 active orgs.
+
+See **[COMMUNITY-BOARD-SCRAPERS.md](COMMUNITY-BOARD-SCRAPERS.md)** for the full per-board breakdown — data sources, scraper types, and live vs. estimated status for all 59 boards.
 
 ## Environment variables
 
@@ -134,6 +136,13 @@ A second tab at `/elections` serves the **2026 NYS Political Calendar** (71 even
 - **Mobile layout:** 2-column horizontal scroll-snap, auto-scrolls to today on load, ICS section floats above the calendar.
 - **URL routing:** `nycciviccalendar.com/elections` → 308 to `/elections/` → `elections/index.html` → `location.replace('/#elections')` → main app reads `location.hash` in `initTabs()` → activates elections tab, then `history.replaceState` cleans URL to `/elections`.
 
+## UI — Org tree
+
+The org tree in `public/app.js` is built from `const organizations = { ... }` (mirrored from `lib/organizations.js`). Each community board entry supports two optional properties:
+
+- **`url`** — shown as a small gray `↗` link next to the board name, pointing to the live data source. Set on all boards where we have a known website.
+- **`estimated: true`** — shown as a red `*` asterisk with tooltip "Dates are estimated from a typical schedule — verify at the official website". Set on the ~12 boards that use pattern-only fallback schedules.
+
 ## Project structure
 
 ```
@@ -161,23 +170,24 @@ nyc-civic-calendar/
 ├── lib/
 │   ├── gist-storage.js          # Reads env at call time (Node + Workers compat)
 │   ├── ics-generator.js         # generateICS(meetings, name, { migrationPrefix })
-│   ├── organizations.js         # Org hierarchy for the frontend
+│   ├── organizations.js         # Org hierarchy for the server-side ICS generator
 │   ├── scrapers/                # The 8 scrapers above
 │   └── data/
 │       ├── mta-schedule.json    #   MTA meeting pattern data
 │       ├── nypd-precincts.json  #   77 NYPD precinct schedules
 │       └── political-calendar-2026.js  # 71 NYS BOE election dates
 ├── .github/workflows/
-│   └── scrape.yml               # Daily cron, runs scripts/run-scrapers.js
+│   └── scrape.yml               # Daily cron at 6 AM UTC, runs scripts/run-scrapers.js
 ├── vercel.json                  # Headers + function config (crons removed)
 ├── BUGS.md                      # Low-priority known issues
+├── COMMUNITY-BOARD-SCRAPERS.md  # Per-board scraper status and data sources
 ├── DEVELOPMENT_STATUS.md        # Historical change log
 └── README.md                    # This file
 ```
 
 ## Known issues
 
-See `BUGS.md`. All medium+ bugs are fixed; the remaining low-priority items are non-urgent (hardcoded DOB locations, 3 NYPD precincts with moderate-confidence schedules, no holiday handling, CC HTML fallback scrapes only current year, duplicated scraper utils).
+See `BUGS.md`. All medium+ bugs are fixed; the remaining low-priority items are non-urgent (hardcoded DOB locations, 3 NYPD precincts with moderate-confidence schedules, no holiday handling for pattern-based scrapers, CC HTML fallback scrapes only current year, duplicated scraper utility functions).
 
 ## Decommission checklist (execute on/after 2026-06-30)
 
@@ -194,7 +204,16 @@ When the 60-day grace period ends:
    - `MIGRATION_NOTICE_TEXT` and `migrationPrefix` option in `lib/ics-generator.js`
 3. Commit + push; Cloudflare redeploys the cleaned-up site
 
-## Adding a new scraper
+## Adding a new community board scraper
+
+1. Determine the board's data source (see [COMMUNITY-BOARD-SCRAPERS.md](COMMUNITY-BOARD-SCRAPERS.md) for examples of each type)
+2. Add a new `type` string to the board entry in `BROOKLYN_BOARDS` / `QUEENS_BOARDS` / etc. at the top of `lib/scrapers/community-boards.js`
+3. Write a scraper function that returns `Meeting[]` using the shared `createMeeting()` helper
+4. Add a `case` for your type in the relevant `scrapeBrooklynCBs()` / `scrapeQueensCBs()` / etc. switch statement
+5. Add `url` to the board's entry in `public/app.js` organizations data
+6. Run `gh workflow run scrape.yml --repo FlashOfInsight/nyc-civic-calendar` to populate the Gist
+
+## Adding a new non-CB scraper
 
 1. Add the org hierarchy to `lib/organizations.js` and mirror in `public/app.js`
 2. Create `lib/scrapers/your-source.js` exporting an async function that returns `Array<Meeting>`
