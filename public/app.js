@@ -343,6 +343,7 @@ const organizations = {
         children: {
           "1": {
             name: "CB1 - Financial District, Battery Park City, Tribeca",
+            estimated: true, url: "https://www.nyc.gov/site/manhattancb1/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -397,6 +398,7 @@ const organizations = {
           },
           "5": {
             name: "CB5 - Midtown",
+            estimated: true, url: "https://www.cb5.org/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -423,6 +425,7 @@ const organizations = {
           },
           "7": {
             name: "CB7 - Upper West Side, Lincoln Square",
+            estimated: true, url: "https://www.mcb7.org/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -436,6 +439,7 @@ const organizations = {
           },
           "8": {
             name: "CB8 - Upper East Side, Roosevelt Island",
+            estimated: true, url: "https://www.cb8m.com/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -451,6 +455,7 @@ const organizations = {
           },
           "9": {
             name: "CB9 - Morningside Heights, Hamilton Heights",
+            estimated: true, url: "https://www.cb9m.org/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -477,6 +482,7 @@ const organizations = {
           },
           "11": {
             name: "CB11 - East Harlem",
+            estimated: true, url: "https://www.nyc.gov/site/manhattancb11/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -535,6 +541,7 @@ const organizations = {
           },
           "3": {
             name: "CB3 - Bedford-Stuyvesant",
+            estimated: true, url: "https://www.nyc.gov/site/brooklyncb3/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -549,6 +556,7 @@ const organizations = {
           },
           "4": {
             name: "CB4 - Bushwick",
+            estimated: true, url: "https://www.nyc.gov/site/brooklyncb4/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -563,6 +571,7 @@ const organizations = {
           },
           "5": {
             name: "CB5 - East New York, Cypress Hills",
+            estimated: true, url: "https://www.nyc.gov/site/brooklyncb5/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -576,6 +585,7 @@ const organizations = {
           },
           "6": {
             name: "CB6 - Park Slope, Carroll Gardens, Red Hook, Gowanus",
+            estimated: true, url: "https://cbbrooklyn.cityofnewyork.us/cb6/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -587,6 +597,7 @@ const organizations = {
           },
           "7": {
             name: "CB7 - Sunset Park, Windsor Terrace",
+            estimated: true, url: "https://www.nyc.gov/site/brooklyncb7/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -616,6 +627,7 @@ const organizations = {
           },
           "9": {
             name: "CB9 - Crown Heights, Prospect Lefferts Gardens",
+            estimated: true, url: "https://www.nyc.gov/site/brooklyncb9/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -661,6 +673,7 @@ const organizations = {
           },
           "12": {
             name: "CB12 - Borough Park, Kensington",
+            estimated: true, url: "https://www.nyc.gov/site/brooklyncb12/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -673,6 +686,7 @@ const organizations = {
           },
           "13": {
             name: "CB13 - Coney Island, Brighton Beach, Gravesend",
+            estimated: true, url: "https://www.nyc.gov/site/brooklyncb13/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -704,6 +718,7 @@ const organizations = {
           },
           "15": {
             name: "CB15 - Sheepshead Bay, Manhattan Beach, Gerritsen Beach",
+            estimated: true, url: "https://www.nyc.gov/site/brooklyncb15/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -752,6 +767,7 @@ const organizations = {
           },
           "18": {
             name: "CB18 - Canarsie, Mill Basin, Flatlands, Marine Park",
+            estimated: true, url: "https://www.nyc.gov/site/brooklyncb18/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -790,6 +806,7 @@ const organizations = {
           },
           "2": {
             name: "CB2 - Woodside, Sunnyside, Long Island City",
+            estimated: true, url: "https://www.nyc.gov/site/queenscb2/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -803,6 +820,7 @@ const organizations = {
           },
           "3": {
             name: "CB3 - Jackson Heights, East Elmhurst",
+            estimated: true, url: "https://queenscb3.cityofnewyork.us/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -817,6 +835,7 @@ const organizations = {
           },
           "4": {
             name: "CB4 - Corona, Elmhurst",
+            estimated: true, url: "https://www.nyc.gov/site/queenscb4/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -833,6 +852,7 @@ const organizations = {
           },
           "5": {
             name: "CB5 - Ridgewood, Glendale, Maspeth, Middle Village",
+            estimated: true, url: "https://www.nyc.gov/site/queenscb5/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -847,6 +867,7 @@ const organizations = {
           },
           "6": {
             name: "CB6 - Forest Hills, Rego Park",
+            estimated: true, url: "https://www.nyc.gov/site/queenscb6/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -861,6 +882,7 @@ const organizations = {
           },
           "7": {
             name: "CB7 - Flushing, Whitestone, College Point",
+            estimated: true, url: "https://www.nyc.gov/site/queenscb7/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -930,6 +952,7 @@ const organizations = {
           },
           "12": {
             name: "CB12 - Jamaica, Hollis, St. Albans",
+            estimated: true, url: "https://www.nyc.gov/site/queenscb12/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -945,6 +968,7 @@ const organizations = {
           },
           "13": {
             name: "CB13 - Queens Village, Cambria Heights, Laurelton, Rosedale",
+            estimated: true, url: "https://www.nyc.gov/site/queenscb13/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -978,6 +1002,7 @@ const organizations = {
         children: {
           "1": {
             name: "CB1 - Mott Haven, Port Morris, Melrose",
+            estimated: true, url: "https://www.nyc.gov/site/bronxcb1/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -992,6 +1017,7 @@ const organizations = {
           },
           "2": {
             name: "CB2 - Hunts Point, Longwood",
+            estimated: true, url: "https://www.nyc.gov/site/bronxcb2/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -1005,6 +1031,7 @@ const organizations = {
           },
           "3": {
             name: "CB3 - Crotona Park, Claremont, Morrisania",
+            estimated: true, url: "https://www.nyc.gov/site/bronxcb3/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -1018,6 +1045,7 @@ const organizations = {
           },
           "4": {
             name: "CB4 - Highbridge, Concourse, Mount Eden",
+            estimated: true, url: "https://www.nyc.gov/site/bronxcb4/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -1031,6 +1059,7 @@ const organizations = {
           },
           "5": {
             name: "CB5 - Fordham, University Heights, Morris Heights",
+            estimated: true, url: "https://www.nyc.gov/site/bronxcb5/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -1057,6 +1086,7 @@ const organizations = {
           },
           "7": {
             name: "CB7 - Kingsbridge, Bedford Park, Norwood",
+            estimated: true, url: "https://www.nyc.gov/site/bronxcb7/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -1083,6 +1113,7 @@ const organizations = {
           },
           "9": {
             name: "CB9 - Soundview, Parkchester, Castle Hill",
+            estimated: true, url: "https://www.nyc.gov/site/bronxcb9/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -1122,6 +1153,7 @@ const organizations = {
           },
           "12": {
             name: "CB12 - Williamsbridge, Wakefield, Woodlawn",
+            estimated: true, url: "https://www.nyc.gov/site/bronxcb12/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -1140,6 +1172,7 @@ const organizations = {
         children: {
           "1": {
             name: "CB1 - St. George, Port Richmond, Stapleton",
+            estimated: true, url: "https://www.nyc.gov/site/statenislandcb1/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -1153,6 +1186,7 @@ const organizations = {
           },
           "2": {
             name: "CB2 - New Dorp, Midland Beach, Dongan Hills",
+            estimated: true, url: "https://www.nyc.gov/site/statenislandcb2/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -1166,6 +1200,7 @@ const organizations = {
           },
           "3": {
             name: "CB3 - Tottenville, Great Kills, Eltingville",
+            estimated: true, url: "https://www.nyc.gov/site/statenislandcb3/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -1357,6 +1392,19 @@ function buildTree(orgs, prefix = "") {
     name.textContent = org.name;
     name.onclick = () => checkbox.click();
     header.appendChild(name);
+
+    // Estimated-schedule flag for boards where live scraping isn't available
+    if (org.estimated && org.url) {
+      const est = document.createElement("a");
+      est.className = "org-estimated";
+      est.href = org.url;
+      est.target = "_blank";
+      est.rel = "noopener";
+      est.textContent = "est. →";
+      est.title = "Dates are estimated from a typical schedule — verify at the official website";
+      est.onclick = e => e.stopPropagation();
+      header.appendChild(est);
+    }
 
     li.appendChild(header);
 
