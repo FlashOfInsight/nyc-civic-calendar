@@ -343,7 +343,6 @@ const organizations = {
         children: {
           "1": {
             name: "CB1 - Financial District, Battery Park City, Tribeca",
-            estimated: true, url: "https://www.nyc.gov/site/manhattancb1/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
