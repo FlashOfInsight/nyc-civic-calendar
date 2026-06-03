@@ -864,7 +864,6 @@ const organizations = {
           },
           "7": {
             name: "CB7 - Flushing, Whitestone, College Point",
-            estimated: true, url: "https://www.nyc.gov/site/queenscb7/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -1026,7 +1025,6 @@ const organizations = {
           },
           "4": {
             name: "CB4 - Highbridge, Concourse, Mount Eden",
-            estimated: true, url: "https://www.nyc.gov/site/bronxcb4/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -1094,7 +1092,6 @@ const organizations = {
           },
           "9": {
             name: "CB9 - Soundview, Parkchester, Castle Hill",
-            estimated: true, url: "https://www.nyc.gov/site/bronxcb9/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
