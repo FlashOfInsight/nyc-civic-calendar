@@ -437,7 +437,6 @@ const organizations = {
           },
           "8": {
             name: "CB8 - Upper East Side, Roosevelt Island",
-            estimated: true, url: "https://www.cb8m.com/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -710,7 +709,6 @@ const organizations = {
           },
           "15": {
             name: "CB15 - Sheepshead Bay, Manhattan Beach, Gerritsen Beach",
-            estimated: true, url: "https://www.nyc.gov/site/brooklyncb15/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -825,7 +823,6 @@ const organizations = {
           },
           "4": {
             name: "CB4 - Corona, Elmhurst",
-            estimated: true, url: "https://www.nyc.gov/site/queenscb4/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -842,7 +839,6 @@ const organizations = {
           },
           "5": {
             name: "CB5 - Ridgewood, Glendale, Maspeth, Middle Village",
-            estimated: true, url: "https://www.nyc.gov/site/queenscb5/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -857,7 +853,6 @@ const organizations = {
           },
           "6": {
             name: "CB6 - Forest Hills, Rego Park",
-            estimated: true, url: "https://www.nyc.gov/site/queenscb6/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -958,7 +953,6 @@ const organizations = {
           },
           "13": {
             name: "CB13 - Queens Village, Cambria Heights, Laurelton, Rosedale",
-            estimated: true, url: "https://www.nyc.gov/site/queenscb13/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
