@@ -425,7 +425,6 @@ const organizations = {
           },
           "7": {
             name: "CB7 - Upper West Side, Lincoln Square",
-            estimated: true, url: "https://www.mcb7.org/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
