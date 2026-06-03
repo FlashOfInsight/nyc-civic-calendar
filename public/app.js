@@ -539,7 +539,6 @@ const organizations = {
           },
           "3": {
             name: "CB3 - Bedford-Stuyvesant",
-            estimated: true, url: "https://www.nyc.gov/site/brooklyncb3/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -802,7 +801,6 @@ const organizations = {
           },
           "2": {
             name: "CB2 - Woodside, Sunnyside, Long Island City",
-            estimated: true, url: "https://www.nyc.gov/site/queenscb2/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -816,7 +814,6 @@ const organizations = {
           },
           "3": {
             name: "CB3 - Jackson Heights, East Elmhurst",
-            estimated: true, url: "https://queenscb3.cityofnewyork.us/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
