@@ -301,24 +301,33 @@ html[data-host="www.nycciviccalendar.com"] .migration-banner {
   font-size: 0.875rem;
 }
 
-.org-name--flagged {
+.org-name--has-link {
   flex: none;
 }
 
-.org-estimated {
-  font-size: 0.7rem;
-  color: #8B1A1A;
+.org-source-link {
+  font-size: 0.65rem;
+  color: var(--ink-mid, #666);
   text-decoration: none;
   margin-left: 4px;
-  opacity: 0.8;
-  white-space: nowrap;
+  opacity: 0.45;
   flex-shrink: 0;
   align-self: center;
 }
 
-.org-estimated:hover {
-  opacity: 1;
-  text-decoration: underline;
+.org-source-link:hover {
+  opacity: 0.9;
+}
+
+.org-estimated-marker {
+  color: #8B1A1A;
+  font-size: 0.75rem;
+  margin-left: 1px;
+  cursor: help;
+  font-weight: 600;
+  flex-shrink: 0;
+  align-self: center;
+  line-height: 1;
 }
 
 .org-children {

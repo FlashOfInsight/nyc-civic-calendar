@@ -343,6 +343,7 @@ const organizations = {
         children: {
           "1": {
             name: "CB1 - Financial District, Battery Park City, Tribeca",
+            url: "https://manhattancb1.cityofnewyork.us/meetings/calendar/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -357,6 +358,7 @@ const organizations = {
           },
           "2": {
             name: "CB2 - Greenwich Village, SoHo, NoHo",
+            url: "https://cbmanhattan.cityofnewyork.us/cb2/calendar/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -371,6 +373,7 @@ const organizations = {
           },
           "3": {
             name: "CB3 - East Village, Lower East Side, Chinatown",
+            url: "https://www.nyc.gov/site/manhattancb3/calendar/calendar.page",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -384,6 +387,7 @@ const organizations = {
           },
           "4": {
             name: "CB4 - Chelsea, Hell's Kitchen",
+            url: "https://cbmanhattan.cityofnewyork.us/cb4/calendar/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -397,6 +401,7 @@ const organizations = {
           },
           "5": {
             name: "CB5 - Midtown",
+            url: "https://cb5.org/events/list/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -409,6 +414,7 @@ const organizations = {
           },
           "6": {
             name: "CB6 - Murray Hill, Gramercy Park, Stuyvesant Town",
+            url: "https://cbsix.org/meetings-calendar/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -423,6 +429,7 @@ const organizations = {
           },
           "7": {
             name: "CB7 - Upper West Side, Lincoln Square",
+            url: "https://www.mcb7.org/#/meetings",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -436,6 +443,7 @@ const organizations = {
           },
           "8": {
             name: "CB8 - Upper East Side, Roosevelt Island",
+            url: "https://www.cb8m.com/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -451,6 +459,7 @@ const organizations = {
           },
           "9": {
             name: "CB9 - Morningside Heights, Hamilton Heights",
+            url: "https://www.cb9m.org/cal_events",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -462,6 +471,7 @@ const organizations = {
           },
           "10": {
             name: "CB10 - Central Harlem",
+            url: "https://cbmanhattan.cityofnewyork.us/cb10/events/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -489,6 +499,7 @@ const organizations = {
           },
           "12": {
             name: "CB12 - Washington Heights, Inwood",
+            url: "https://cbmanhattan.cityofnewyork.us/cb12/calendar/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -524,6 +535,7 @@ const organizations = {
           },
           "2": {
             name: "CB2 - Downtown Brooklyn, Brooklyn Heights, DUMBO, Fort Greene",
+            url: "https://cbbrooklyn.cityofnewyork.us/cb2/calendar/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -634,6 +646,7 @@ const organizations = {
           },
           "10": {
             name: "CB10 - Bay Ridge, Dyker Heights, Fort Hamilton",
+            url: "https://cbbrooklyn.cityofnewyork.us/cb10/calendar/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -646,6 +659,7 @@ const organizations = {
           },
           "11": {
             name: "CB11 - Bensonhurst, Bath Beach, Gravesend",
+            url: "https://www.brooklyncb11.org/category/meeting-notice/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -694,6 +708,7 @@ const organizations = {
           },
           "14": {
             name: "CB14 - Flatbush, Midwood",
+            url: "https://cb14brooklyn.com/meetings/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -722,6 +737,7 @@ const organizations = {
           },
           "16": {
             name: "CB16 - Brownsville, Ocean Hill",
+            url: "https://www.nyc.gov/site/brooklyncb16/about/calendar.page",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -740,6 +756,7 @@ const organizations = {
           },
           "17": {
             name: "CB17 - East Flatbush",
+            url: "https://cbbrooklyn.cityofnewyork.us/cb17/events/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -892,6 +909,7 @@ const organizations = {
           },
           "9": {
             name: "CB9 - Richmond Hill, Woodhaven, Ozone Park, Kew Gardens",
+            url: "https://www.nyc.gov/site/queenscb9/calendar/calendar.page",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -906,6 +924,7 @@ const organizations = {
           },
           "10": {
             name: "CB10 - Howard Beach, Ozone Park, South Ozone Park",
+            url: "https://www.nyc.gov/site/queenscb10/calendar/calendar.page",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -919,6 +938,7 @@ const organizations = {
           },
           "11": {
             name: "CB11 - Bayside, Douglaston, Little Neck",
+            url: "https://www.nyc.gov/site/queenscb11/meetings/meetings.page",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -963,6 +983,7 @@ const organizations = {
           },
           "14": {
             name: "CB14 - Far Rockaway, Rockaway, Arverne",
+            url: "https://www.nyc.gov/site/queenscb14/calendar/calendar.page",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -1052,6 +1073,7 @@ const organizations = {
           },
           "6": {
             name: "CB6 - Belmont, West Farms, East Tremont",
+            url: "https://cbbronx.cityofnewyork.us/cb6/calendar/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -1079,6 +1101,7 @@ const organizations = {
           },
           "8": {
             name: "CB8 - Riverdale, Fieldston, Kingsbridge",
+            url: "https://cbbronx.cityofnewyork.us/cb8/calendar/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -1131,7 +1154,7 @@ const organizations = {
           },
           "12": {
             name: "CB12 - Williamsbridge, Wakefield, Woodlawn",
-            estimated: true, url: "https://www.nyc.gov/site/bronxcb12/",
+            url: "https://www.nyc.gov/site/bronxcb12/calendar/calendar.page",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -1366,22 +1389,31 @@ function buildTree(orgs, prefix = "") {
 
     // Name
     const name = document.createElement("span");
-    name.className = org.estimated ? "org-name org-name--flagged" : "org-name";
+    name.className = org.url ? "org-name org-name--has-link" : "org-name";
     name.textContent = org.name;
     name.onclick = () => checkbox.click();
     header.appendChild(name);
 
-    // Estimated-schedule flag for boards where live scraping isn't available
-    if (org.estimated && org.url) {
-      const est = document.createElement("a");
-      est.className = "org-estimated";
-      est.href = org.url;
-      est.target = "_blank";
-      est.rel = "noopener";
-      est.textContent = "est. →";
-      est.title = "Dates are estimated from a typical schedule — verify at the official website";
-      est.onclick = e => e.stopPropagation();
-      header.appendChild(est);
+    // Source link — shown for every board with a known website
+    if (org.url) {
+      const link = document.createElement("a");
+      link.className = "org-source-link";
+      link.href = org.url;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = "↗";
+      link.title = "Visit official website";
+      link.onclick = e => e.stopPropagation();
+      header.appendChild(link);
+    }
+
+    // Estimated marker — red * for boards where dates are approximate
+    if (org.estimated) {
+      const marker = document.createElement("span");
+      marker.className = "org-estimated-marker";
+      marker.textContent = "*";
+      marker.title = "Dates are estimated from a typical schedule — verify at the official website";
+      header.appendChild(marker);
     }
 
     li.appendChild(header);
