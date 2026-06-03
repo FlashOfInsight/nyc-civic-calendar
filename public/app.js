@@ -479,7 +479,7 @@ const organizations = {
           },
           "11": {
             name: "CB11 - East Harlem",
-            estimated: true, url: "https://www.nyc.gov/site/manhattancb11/",
+            estimated: true, url: "https://www.cb11m.org/calendar/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -552,7 +552,6 @@ const organizations = {
           },
           "4": {
             name: "CB4 - Bushwick",
-            estimated: true, url: "https://www.nyc.gov/site/brooklyncb4/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -621,7 +620,6 @@ const organizations = {
           },
           "9": {
             name: "CB9 - Crown Heights, Prospect Lefferts Gardens",
-            estimated: true, url: "https://www.nyc.gov/site/brooklyncb9/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
