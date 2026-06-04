@@ -325,6 +325,13 @@ const organizations = {
       }
     }
   },
+  "charter-revision": {
+    name: "COGE Charter Revision Commission",
+    url: "https://www.nyc.gov/site/charter/meetings/public-meetings-hearings.page",
+    children: {
+      "hearings": { name: "Public Meetings & Hearings" }
+    }
+  },
   "borough-presidents": {
     name: "Borough Presidents",
     children: {
