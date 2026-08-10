@@ -5,6 +5,11 @@ on:
     # Daily at 6 AM UTC (matches the original Vercel cron schedule)
     - cron: "0 6 * * *"
   workflow_dispatch:
+    inputs:
+      simulate_failure:
+        description: "Force a failure to test the alert email"
+        type: boolean
+        default: false
 
 concurrency:
   group: scrape
@@ -27,6 +32,10 @@ jobs:
 
       - run: npm ci
 
+      - name: Simulate failure (test only)
+        if: inputs.simulate_failure == true
+        run: exit 1
+
       - name: Run scrapers
         env:
           GIST_ID: ${{ secrets.GIST_ID }}
@@ -37,3 +46,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GIST_GITHUB_TOKEN }}
           LEGISTAR_TOKEN: ${{ secrets.LEGISTAR_TOKEN }}
         run: node scripts/run-scrapers.js
+
+      - name: Email on failure
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "NYC Civic Calendar: daily scrape failed"
+          to: laeo.cr@gmail.com
+          from: NYC Civic Calendar Scraper
+          body: |
+            The daily scrape run failed (scrapers may still have run but the Gist write likely didn't).
+
+            Common cause: GIST_GITHUB_TOKEN expired (classic PATs expire on a fixed schedule and this fails silently otherwise).
+
+            Run: https://github.com/FlashOfInsight/nyc-civic-calendar/actions/runs/${{ github.run_id }}
