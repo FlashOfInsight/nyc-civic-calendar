@@ -1,6 +1,10 @@
 # NYC Civic Calendar — Bug Tracker
 
-Last reviewed: March 16, 2026
+Last reviewed: August 10, 2026
+
+## Fixed (August 10, 2026)
+
+- ~~Duplicated utility functions across scrapers~~ — `fetchHTML`, `parseMonth`, `formatDate`, `getNthWeekday`, and `isInRange` were copy-pasted (with drift) across 7 files. Extracted to `lib/scraper-utils.js`; `city-council.js` and `community-boards.js` keep thin local wrappers for their custom headers/User-Agent. Also fixed two latent bugs surfaced during consolidation: three files never drained the response body on non-2xx (potential socket leak), and `agencies.js` had a dead, never-called `getNthWeekday`.
 
 ## Fixed (March 13, 2026)
 
@@ -68,7 +72,3 @@ Generated meetings appear on holidays (MLK Day, Thanksgiving, etc.) when they al
 In late December, January meetings won't appear from the HTML fallback scraper.
 - **File:** `lib/scrapers/city-council.js`
 - **Action:** Scrape next year's page when current month >= November
-
-### 10. Duplicated utility functions across scrapers
-`parseMonth`, `formatDate`, `fetchHTML`, `getNthWeekday` are copy-pasted across 7 files.
-- **Action:** Extract to a shared `lib/scraper-utils.js` module

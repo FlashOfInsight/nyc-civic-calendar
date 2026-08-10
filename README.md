@@ -153,6 +153,7 @@ nyc-civic-calendar/
 │   ├── gist-storage.js          # Reads env at call time (Node + Workers compat)
 │   ├── ics-generator.js         # generateICS(meetings, name)
 │   ├── organizations.js         # Org hierarchy for the server-side ICS generator
+│   ├── scraper-utils.js         # Shared fetchHTML/parseMonth/formatDate/getNthWeekday/isInRange
 │   ├── scrapers/                # The 8 scrapers above
 │   └── data/
 │       ├── mta-schedule.json    #   MTA meeting pattern data
