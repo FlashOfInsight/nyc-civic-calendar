@@ -13,11 +13,6 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <link rel="stylesheet" href="styles.css">
-  <script>
-    document.documentElement.dataset.host = location.hostname;
-    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-  </script>
-  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -40,32 +35,6 @@
   <main>
 
   <div id="tab-meetings">
-
-    <!--
-      MIGRATION NOTICE — remove this entire <section> after the cutoff date.
-      See also: lib/ics-generator.js (migration prefix on events) and
-      the Vercel project (turn off once cutover passes).
-    -->
-    <section class="migration-banner" role="alert">
-      <div class="section-label">NOTICE</div>
-      <p>
-        Following Vercel's recent security incident, we are proactively
-        migrating NYC Civic Calendar off Vercel to Cloudflare. <strong>Our
-        data was not affected</strong> — we are switching hosts out of an
-        abundance of caution.
-      </p>
-      <p>
-        The new home is <a href="https://nycciviccalendar.com"><strong>nycciviccalendar.com</strong></a>.
-        Please re-subscribe your calendar feed there before
-        <strong>June 30, 2026</strong>. Subscriptions to the old URL will
-        stop updating after that date.
-      </p>
-      <p class="migration-steps">
-        <strong>Important:</strong> remove your existing subscription first,
-        then add the new one. Adding the new feed without removing the old
-        will cause duplicate events in your calendar.
-      </p>
-    </section>
 
     <section class="calendar-url" id="calendar-section" style="display: none;">
       <div class="section-label">YOUR CALENDAR URL</div>

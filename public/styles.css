@@ -130,44 +130,6 @@ main {
   margin-bottom: var(--space-sm);
 }
 
-/* ── Migration Banner ───────────────────────────────────── */
-html[data-host="nycciviccalendar.com"] .migration-banner,
-html[data-host="www.nycciviccalendar.com"] .migration-banner {
-  display: none;
-}
-
-.migration-banner {
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--ink);
-  padding: var(--space-md);
-}
-
-.migration-banner p {
-  font-size: 0.9rem;
-  color: var(--ink-mid);
-  margin-bottom: var(--space-xs);
-}
-
-.migration-banner p:last-child {
-  margin-bottom: 0;
-}
-
-.migration-banner a {
-  color: var(--ink);
-  border-bottom: 1px solid var(--border-light);
-}
-
-.migration-banner a:hover {
-  border-bottom-color: var(--ink);
-}
-
-.migration-steps {
-  padding: var(--space-xs) var(--space-sm);
-  border-left: 2px solid var(--border-light);
-  color: var(--ink);
-  font-size: 0.9rem;
-}
-
 /* ── Instructions ───────────────────────────────────────── */
 .instructions {
   border: 1px solid var(--border-light);

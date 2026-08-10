@@ -1,8 +1,7 @@
 // Cloudflare Pages Function — /api/debug
 // Operator-only endpoint protected by REFRESH_SECRET. Shows Gist URL,
 // meeting count, and a preview of the generated ICS so we can sanity-check
-// the pipeline. No migration prefix — the operator wants to see the clean
-// output this endpoint will deliver once subscribers move.
+// the pipeline.
 
 import { readFromGist, getGistRawUrl } from "../../lib/gist-storage.js";
 import { generateICS } from "../../lib/ics-generator.js";

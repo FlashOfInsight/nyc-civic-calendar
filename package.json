@@ -4,7 +4,7 @@
   "description": "NYC Civic Meeting Calendar Notifier",
   "main": "index.js",
   "scripts": {
-    "dev": "vercel dev",
+    "dev": "wrangler pages dev public",
     "scrape": "node scripts/scrape.js"
   },
   "dependencies": {

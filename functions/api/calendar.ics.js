@@ -1,6 +1,5 @@
 // Cloudflare Pages Function — /api/calendar.ics
-// Serves the personalized ICS feed. No migration prefix on events (the
-// legacy Vercel endpoint still adds it). Requires nodejs_compat in the
+// Serves the personalized ICS feed. Requires nodejs_compat in the
 // Pages project settings so process.env and Buffer are available.
 
 import { readFromGist } from "../../lib/gist-storage.js";

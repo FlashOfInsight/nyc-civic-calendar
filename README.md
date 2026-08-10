@@ -3,7 +3,6 @@
 Subscribe to a personalized ICS calendar feed of NYC government meetings — pick the bodies you care about, get a URL, add it to your calendar app.
 
 **Live:** https://nycciviccalendar.com
-**Legacy (grace period until 2026-06-30):** https://nyc-civic-calendar.vercel.app
 
 ## Architecture
 
@@ -20,27 +19,24 @@ Subscribe to a personalized ICS calendar feed of NYC government meetings — pic
               │  (public reads)   │  all meeting data
               └─────────┬─────────┘
                         │ read
-         ┌──────────────┴──────────────┐
-         ▼                             ▼
-┌──────────────────┐         ┌──────────────────┐
-│ Cloudflare Pages │         │     Vercel       │
-│ nycciviccalendar │         │ (legacy, grace   │
-│      .com        │         │  period only)    │
-│                  │         │                  │
-│ /api/calendar.ics│         │ /api/calendar.ics│
-│ /api/active-orgs │         │   injects        │
-│ /api/debug       │         │   migration      │
-│ clean ICS        │         │   prefix into    │
-│                  │         │   every event    │
-└──────────────────┘         └──────────────────┘
+                        ▼
+              ┌───────────────────┐
+              │ Cloudflare Pages  │
+              │ nycciviccalendar  │
+              │      .com         │
+              │                   │
+              │ /api/calendar.ics │
+              │ /api/active-orgs  │
+              │ /api/debug        │
+              └───────────────────┘
 ```
 
-**Why two hosts?** The site migrated off Vercel on 2026-04-23 following Vercel's security incident. Our data was not affected — the move was proactive. Vercel stays live serving a migration notice to existing subscribers, then gets decommissioned on **2026-06-30**.
+The site migrated off Vercel on 2026-04-23 following Vercel's security incident (our data was not affected — the move was proactive) and the legacy Vercel deployment was fully decommissioned on 2026-08-10.
 
 ## Stack
 
 - **Frontend:** Vanilla JS / HTML / CSS in `public/`
-- **Endpoints:** Cloudflare Pages Functions in `functions/api/` (new) and Vercel serverless functions in `api/` (legacy)
+- **Endpoints:** Cloudflare Pages Functions in `functions/api/`
 - **Scraper:** Node.js script in `scripts/run-scrapers.js` invoked by `.github/workflows/scrape.yml`
 - **Storage:** GitHub Gist (free, unlimited public reads, gist-scope PAT for writes)
 - **Scraping:** Cheerio for HTML parsing; `pdf-parse` v2 for PDF text extraction; some scrapers are pattern-based (MTA, NYPD) and make no HTTP calls
@@ -83,9 +79,6 @@ Set in Cloudflare dashboard → Pages → `nyc-civic-calendar` → Settings → 
 
 Compatibility flag **`nodejs_compat`** must be enabled (Production *and* Preview) so `process.env` and `Buffer` work in Functions.
 
-### Vercel environment variables (legacy)
-Still present, untouched. `GITHUB_TOKEN` in Vercel is expired but harmless since Vercel's cron is disabled. All Vercel env vars get deleted when the project is decommissioned on 2026-06-30.
-
 ## Common operations
 
 **Trigger scraper manually:**
@@ -108,21 +101,15 @@ curl -sS "https://gist.githubusercontent.com/FlashOfInsight/<GIST_ID>/raw/city-c
 
 **Test ICS endpoint:**
 ```bash
-# New (clean):
 curl "https://nycciviccalendar.com/api/calendar.ics?orgs=city-council.stated" | head -30
-# Legacy (with migration prefix):
-curl "https://nyc-civic-calendar.vercel.app/api/calendar.ics?orgs=city-council.stated" | head -30
 ```
 
 **Local dev of scrapers:**
 ```bash
 cd ~/nyc-civic-calendar
 npm install
-# Pull env from Vercel (still has GIST_ID, LEGISTAR_TOKEN):
-vercel env pull .env.vercel --environment production --yes
-set -a; . ./.env.vercel; set +a
+# Set GIST_ID, GIST_GITHUB_TOKEN (as GITHUB_TOKEN), LEGISTAR_TOKEN in your shell env
 node scripts/run-scrapers.js     # writes to the real Gist
-rm .env.vercel
 ```
 
 ## Elections tab
@@ -147,29 +134,24 @@ The org tree in `public/app.js` is built from `const organizations = { ... }` (m
 
 ```
 nyc-civic-calendar/
-├── public/                      # Static frontend (served by both Pages and Vercel)
-│   ├── index.html               #   Two-tab SPA; migration banner hidden on new domain
+├── public/                      # Static frontend, served by Cloudflare Pages
+│   ├── index.html               #   Two-tab SPA
 │   ├── app.js                   #   Meetings tab: org tree, ICS URL builder, stats
 │   ├── elections.js             #   Elections tab: calendar grid, filters, ICS builder
 │   ├── styles.css               #   Shared styles; mobile breakpoint at 640px
 │   ├── elections/
 │   │   └── index.html           #   Hash-redirect shim for /elections URL routing
 │   └── _headers                 #   Cloudflare Pages cache-control rules
-├── functions/api/               # Cloudflare Pages Functions (new primary)
-│   ├── calendar.ics.js          #   Meetings ICS: clean feed, no migration prefix
+├── functions/api/               # Cloudflare Pages Functions
+│   ├── calendar.ics.js          #   Meetings ICS
 │   ├── elections.ics.js         #   Elections ICS: bitmask-encoded ?e= param
 │   ├── active-orgs.js
 │   └── debug.js
-├── api/                         # Vercel serverless functions (legacy, grace period)
-│   ├── calendar.ics.js          #   Opts into { migrationPrefix: true }
-│   ├── active-orgs.js
-│   ├── debug.js
-│   └── cron.js                  #   No longer invoked (Vercel cron disabled)
 ├── scripts/
-│   └── run-scrapers.js          # CLI version of the old api/cron.js
+│   └── run-scrapers.js          # Daily scraper runner, invoked by GitHub Actions
 ├── lib/
 │   ├── gist-storage.js          # Reads env at call time (Node + Workers compat)
-│   ├── ics-generator.js         # generateICS(meetings, name, { migrationPrefix })
+│   ├── ics-generator.js         # generateICS(meetings, name)
 │   ├── organizations.js         # Org hierarchy for the server-side ICS generator
 │   ├── scrapers/                # The 8 scrapers above
 │   └── data/
@@ -178,7 +160,6 @@ nyc-civic-calendar/
 │       └── political-calendar-2026.js  # 71 NYS BOE election dates
 ├── .github/workflows/
 │   └── scrape.yml               # Daily cron at 6 AM UTC, runs scripts/run-scrapers.js
-├── vercel.json                  # Headers + function config (crons removed)
 ├── BUGS.md                      # Low-priority known issues
 ├── COMMUNITY-BOARD-SCRAPERS.md  # Per-board scraper status and data sources
 ├── DEVELOPMENT_STATUS.md        # Historical change log
@@ -188,21 +169,6 @@ nyc-civic-calendar/
 ## Known issues
 
 See `BUGS.md`. All medium+ bugs are fixed; the remaining low-priority items are non-urgent (hardcoded DOB locations, 3 NYPD precincts with moderate-confidence schedules, no holiday handling for pattern-based scrapers, CC HTML fallback scrapes only current year, duplicated scraper utility functions).
-
-## Decommission checklist (execute on/after 2026-06-30)
-
-When the 60-day grace period ends:
-
-1. Delete the Vercel project (`vercel projects remove nyc-civic-calendar`)
-2. Remove these from the repo:
-   - `api/` directory (all legacy endpoints)
-   - `vercel.json`
-   - Vercel Analytics `<script>` + `window.va` setup in `public/index.html`
-   - Migration banner `<section class="migration-banner">` in `public/index.html`
-   - `.migration-banner` CSS rules in `public/styles.css`
-   - `document.documentElement.dataset.host` JS line (now unused)
-   - `MIGRATION_NOTICE_TEXT` and `migrationPrefix` option in `lib/ics-generator.js`
-3. Commit + push; Cloudflare redeploys the cleaned-up site
 
 ## Adding a new community board scraper
 
