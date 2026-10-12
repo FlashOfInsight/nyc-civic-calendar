@@ -44,7 +44,7 @@ Status as of **October 2026**. The single scraper file `lib/scrapers/community-b
 | **CB5** | **Midtown** | `cb5-rest` | **`cb5.org` — Cloudflare bot protection 403s every scripted request, even from residential IPs** | **⚠️ pattern only** |
 | CB6 | Murray Hill, Gramercy, Stuyvesant Town | `cbsix` | `cbsix.org` HTML | ✅ |
 | CB7 | Upper West Side, Lincoln Square | `mcb7-bundle` | `mcb7.org` Vite/React JS bundle | ✅ 36 events |
-| CB8 | Upper East Side, Roosevelt Island | `cb8m-rest` | `cb8m.com` Tribe REST; Cloudflare challenges GitHub Actions IPs, so it falls back to our relay `/api/cb8m-events` (`functions/api/cb8m-events.js`) | ✅ 27 events |
+| CB8 | Upper East Side, Roosevelt Island | `cb8m-rest` | `cb8m.com` Tribe REST; Cloudflare challenges GitHub Actions IPs, so it falls back to our relay `nyc-civic-calendar.pages.dev/api/cb8m-events` (`functions/api/cb8m-events.js`; use the pages.dev host, since the custom domain also challenges Actions IPs) | ✅ 27 events |
 | CB9 | Morningside Heights, Hamilton Heights | `cb9m-gcal` | Google Calendar + pattern fallback | 🔶 GCal often empty |
 | CB10 | Central Harlem | `cbmanhattan` | `cbmanhattan.cityofnewyork.us` Tribe HTML | ✅ |
 | **CB11** | **East Harlem** | `cb11m` | **Airtable embed — auth blocked** | **⚠️ pattern only** |
