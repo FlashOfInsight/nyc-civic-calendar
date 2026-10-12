@@ -1,13 +1,13 @@
 # Community Board Scraper Reference
 
-Status as of **June 2026**. The single scraper file `lib/scrapers/community-boards.js` handles all 59 community boards across 5 boroughs. Each board has a `type` that selects its scraping strategy.
+Status as of **October 2026**. The single scraper file `lib/scrapers/community-boards.js` handles all 59 community boards across 5 boroughs. Each board has a `type` that selects its scraping strategy.
 
 ## Scraper Types
 
 | Type | Strategy |
 |---|---|
-| `cb1m-rest` / `cb5-rest` / `cb6brooklyn-api` / `cb8m-rest` / `queens-cb6-gcal` etc. | Tribe Events REST API — `{site}/wp-json/tribe/events/v1/events` |
-| `cbmanhattan` / `cbbrooklyn` / `cbbronx` | Tribe Events HTML — monthly URL pagination |
+| `cb1m-rest` / `cb5-rest` / `cb6brooklyn-api` / `cb8m-rest` / `cbbronx` / `queenscb3` | Tribe Events REST API — `{site}/wp-json/tribe/events/v1/events` |
+| `cbmanhattan` / `cbbrooklyn` | Tribe Events HTML — monthly URL pagination (a month with no events 404s; harmless) |
 | `cbsix` / `nyc-gov-cb3` | Custom HTML scraper (h3/p structure) |
 | `mcb7-bundle` | React/Vite JS bundle — fetch HTML, extract bundle URL, regex JSON objects |
 | `cb9m-gcal` / `cb3brooklyn-gcal` / `queens-cb2-gcal` / `queens-cb6-gcal` / `queens-cb13-gcal` | Google Calendar public ICS feed via `scrapeGCalICS()` helper |
@@ -18,6 +18,7 @@ Status as of **June 2026**. The single scraper file `lib/scrapers/community-boar
 | `nyc-gov-queens` / `nyc-gov-bronx` | nyc.gov calendar pages — h2/h3 section tracking + `matchAll` for year-less dates |
 | `queens-cb7-static` / `bronx-cb4-calendar` / `bronx-cb9-calendar` | Dedicated parsers for specific nyc.gov page formats |
 | `nyc-gov` / `nyc-gov-cb1` / `nyc-gov-si` | Generic nyc.gov scraper — falls back to pattern when no data |
+| `pattern` | No fetch — board has no calendar page; goes straight to the pattern fallback. `url` should still point at a live page (it's the event link) |
 
 **Fallback mechanism:** If any scraper returns fewer than 2 meetings, a recurring pattern generator kicks in using hardcoded weekday/nth schedules. These are displayed in the UI with a red `*` marker.
 
@@ -32,7 +33,7 @@ Status as of **June 2026**. The single scraper file `lib/scrapers/community-boar
 
 ## Status by Board
 
-### Manhattan (11 live, 1 estimated)
+### Manhattan (10 live, 2 pattern)
 
 | Board | Neighborhoods | Type | Source | Status |
 |---|---|---|---|---|
@@ -40,10 +41,10 @@ Status as of **June 2026**. The single scraper file `lib/scrapers/community-boar
 | CB2 | Greenwich Village, SoHo, NoHo | `cbmanhattan` | `cbmanhattan.cityofnewyork.us` Tribe HTML | ✅ |
 | CB3 | East Village, Lower East Side, Chinatown | `nyc-gov-cb3` | nyc.gov h3/p calendar | ✅ |
 | CB4 | Chelsea, Hell's Kitchen | `cbmanhattan` | `cbmanhattan.cityofnewyork.us` Tribe HTML | ✅ |
-| CB5 | Midtown | `cb5-rest` | `cb5.org` Tribe REST | ✅ 50 events |
+| **CB5** | **Midtown** | `cb5-rest` | **`cb5.org` — Cloudflare bot protection 403s every scripted request, even from residential IPs** | **⚠️ pattern only** |
 | CB6 | Murray Hill, Gramercy, Stuyvesant Town | `cbsix` | `cbsix.org` HTML | ✅ |
 | CB7 | Upper West Side, Lincoln Square | `mcb7-bundle` | `mcb7.org` Vite/React JS bundle | ✅ 36 events |
-| CB8 | Upper East Side, Roosevelt Island | `cb8m-rest` | `cb8m.com` Tribe REST | ✅ 67 events |
+| CB8 | Upper East Side, Roosevelt Island | `cb8m-rest` | `cb8m.com` Tribe REST; Cloudflare challenges GitHub Actions IPs, so it falls back to our relay `/api/cb8m-events` (`functions/api/cb8m-events.js`) | ✅ 27 events |
 | CB9 | Morningside Heights, Hamilton Heights | `cb9m-gcal` | Google Calendar + pattern fallback | 🔶 GCal often empty |
 | CB10 | Central Harlem | `cbmanhattan` | `cbmanhattan.cityofnewyork.us` Tribe HTML | ✅ |
 | **CB11** | **East Harlem** | `cb11m` | **Airtable embed — auth blocked** | **⚠️ pattern only** |
@@ -67,7 +68,7 @@ Status as of **June 2026**. The single scraper file `lib/scrapers/community-boar
 | CB10 | Bay Ridge, Dyker Heights, Fort Hamilton | `cbbrooklyn` | `cbbrooklyn.cityofnewyork.us` Tribe HTML | ✅ |
 | CB11 | Bensonhurst, Bath Beach, Gravesend | `cb11brooklyn` | `brooklyncb11.org` WordPress posts | ✅ |
 | **CB12** | **Borough Park, Kensington** | `nyc-gov` | **nyc.gov page empty** | **⚠️ pattern only** |
-| **CB13** | **Coney Island, Brighton Beach, Gravesend** | `nyc-gov` | **nyc.gov 404** | **⚠️ pattern only** |
+| **CB13** | **Coney Island, Brighton Beach, Gravesend** | `pattern` | **nyc.gov calendar page removed** | **⚠️ pattern only** |
 | CB14 | Flatbush, Midwood | `cb14brooklyn` | `cb14brooklyn.com` WordPress | ✅ |
 | CB15 | Sheepshead Bay, Manhattan Beach, Gerritsen Beach | `nyc-gov` | nyc.gov static HTML dates | 🔶 1 future date; pattern fills rest |
 | CB16 | Brownsville, Ocean Hill | `nyc-gov` | nyc.gov table scraper | ✅ |
@@ -89,7 +90,7 @@ Status as of **June 2026**. The single scraper file `lib/scrapers/community-boar
 | CB7 | Flushing, Whitestone, College Point | `queens-cb7-static` | nyc.gov static meetings page | 🔶 1 date only; pattern fills rest |
 | CB8 | Fresh Meadows, Briarwood, Jamaica Hills | `queens-cb8-pdf` | Annual schedule memo PDF | ✅ full board dates |
 | **CB9** | **Richmond Hill, Woodhaven, Ozone Park** | `nyc-gov-queens` | **nyc.gov empty page** | **⚠️ pattern only** |
-| **CB10** | **Howard Beach, Ozone Park, South Ozone Park** | `nyc-gov-queens` | **nyc.gov empty page** | **⚠️ pattern only** |
+| **CB10** | **Howard Beach, Ozone Park, South Ozone Park** | `pattern` | **nyc.gov calendar page removed; agendas archive only** | **⚠️ pattern only** |
 | CB11 | Bayside, Douglaston, Little Neck | `nyc-gov-queens` | nyc.gov `<li>` date list | ✅ full board dates |
 | **CB12** | **Jamaica, Hollis, St. Albans** | `nyc-gov-queens` | **PDF-only archive** | **⚠️ pattern only** |
 | CB13 | Queens Village, Cambria Heights, Laurelton, Rosedale | `queens-cb13-gcal` | GCal `seeqcb13@gmail.com` | ✅ 9 committee meetings |
@@ -106,9 +107,9 @@ Status as of **June 2026**. The single scraper file `lib/scrapers/community-boar
 | **CB3** | **Crotona Park, Claremont, Morrisania** | `nyc-gov-bronx` | **nyc.gov PDF archive** | **⚠️ pattern only** |
 | CB4 | Highbridge, Concourse, Mount Eden | `bronx-cb4-calendar` | nyc.gov `<li>` list, no year | ✅ 7 meetings |
 | **CB5** | **Fordham, University Heights, Morris Heights** | `nyc-gov-bronx` | **Image-based PDFs** | **⚠️ pattern only** |
-| CB6 | Belmont, West Farms, East Tremont | `cbbronx` | `cbbronx.cityofnewyork.us` Tribe HTML | ✅ |
+| CB6 | Belmont, West Farms, East Tremont | `cbbronx` | `cbbronx.cityofnewyork.us/cb6` Tribe REST | ✅ 41 events (was silently on pattern until Oct 2026) |
 | **CB7** | **Kingsbridge, Bedford Park, Norwood** | `nyc-gov-bronx` | **PDF archive only** | **⚠️ pattern only** |
-| CB8 | Riverdale, Fieldston, Kingsbridge | `cbbronx` | `cbbronx.cityofnewyork.us` Tribe HTML | ✅ |
+| CB8 | Riverdale, Fieldston, Kingsbridge | `cbbronx` | `cbbronx.cityofnewyork.us/cb8` Tribe REST (feed has duplicate rows; deduped) | ✅ 45 events (was silently on pattern until Oct 2026) |
 | CB9 | Soundview, Parkchester, Castle Hill | `bronx-cb9-calendar` | nyc.gov `<p>/<br>` structure, no year | ✅ 7 meetings |
 | CB10 | Throgs Neck, Co-op City, City Island | `bronx-cb10-pdf` | Monthly agenda PDF `agenda_month_year.pdf` | ✅ 6 meetings/month |
 | CB11 | Pelham Parkway, Morris Park, Allerton | `bronx-cb11-generated` | Hardcoded from published preferences doc | ✅ 9 committees |
@@ -121,7 +122,7 @@ Status as of **June 2026**. The single scraper file `lib/scrapers/community-boar
 | Board | Neighborhoods | Type | Source | Status |
 |---|---|---|---|---|
 | **CB1** | **St. George, Port Richmond, Stapleton** | `nyc-gov-si` | **Grid PDF calendar** | **⚠️ pattern only** |
-| **CB2** | **New Dorp, Midland Beach, Dongan Hills** | `nyc-gov-si` | **No data found** | **⚠️ pattern only** |
+| **CB2** | **New Dorp, Midland Beach, Dongan Hills** | `pattern` | **Annual schedule PDF (image); 3rd Tue 7pm pattern matches all Sep 2026–Jun 2027 dates** | **⚠️ pattern only** |
 | **CB3** | **Tottenville, Great Kills, Eltingville** | `nyc-gov-si` | **Grid PDF calendar** | **⚠️ pattern only** |
 
 ---
@@ -130,10 +131,10 @@ Status as of **June 2026**. The single scraper file `lib/scrapers/community-boar
 
 | Category | Count | Notes |
 |---|---|---|
-| ✅ Live scrapers | 35 | Real meeting data from APIs, HTML, PDFs, JS/CSV files, GCal |
+| ✅ Live scrapers | 34 | Real meeting data from APIs, HTML, PDFs, JS/CSV files, GCal |
 | 🔶 Partial (live + fallback) | 7 | Scraper runs first; falls to pattern when < 2 events found |
 | ✅ Hardcoded-accurate | 3 | Derived from official published schedule documents |
-| ⚠️ Pattern-only | 14 | Generic nth-weekday fallback; marked with `*` in the UI |
+| ⚠️ Pattern-only | 15 | Generic nth-weekday fallback; marked with `*` in the UI |
 
 **Total: 59 boards across 5 boroughs**
 
@@ -145,5 +146,6 @@ Status as of **June 2026**. The single scraper file `lib/scrapers/community-boar
 - **Queens CB4 CSV**: Updated monthly by the board; check `/assets/queenscb4/data/queenscb4-calendar.csv` each month.
 - **Brooklyn CB8 GCal**: The board posts meetings on a rolling basis (not far in advance). Calendar should be checked; if consistently empty, fallback is the 2nd Thursday schedule.
 - **Staten Island**: All three boards publish grid-format PDF calendars that are not text-extractable. PDF parsing is not feasible; manual schedule entry would be needed.
+- **Relay for bot-blocked sites**: `functions/api/cb8m-events.js` fetches a fixed upstream URL from Cloudflare's network, which bot protection lets through when it challenges GitHub Actions IPs. Copy it for any other board that starts returning "Just a moment..." 403s in Actions but works locally. Doesn't help CB5 (blocked everywhere).
 - **pdf-parse v2 API**: Uses `new PDFParse({ url })` — takes a URL directly, no buffer fetch needed. Dependency: `npm install pdf-parse`.
 - **GCal holiday filtering**: Use `HOLIDAY_RE` as `titleExclude` in `scrapeGCalICS()` for GCals that mix board meetings with US holidays (e.g., CB9 Manhattan).

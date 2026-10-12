@@ -408,7 +408,7 @@ const organizations = {
           },
           "5": {
             name: "CB5 - Midtown",
-            url: "https://cb5.org/events/list/",
+            estimated: true, url: "https://cb5.org/events/list/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },
@@ -931,7 +931,7 @@ const organizations = {
           },
           "10": {
             name: "CB10 - Howard Beach, Ozone Park, South Ozone Park",
-            url: "https://www.nyc.gov/site/queenscb10/calendar/calendar.page",
+            estimated: true, url: "https://www.nyc.gov/site/queenscb10/meetings/agendas-minutes.page",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },

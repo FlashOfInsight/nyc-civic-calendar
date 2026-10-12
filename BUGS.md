@@ -1,6 +1,16 @@
 # NYC Civic Calendar — Bug Tracker
 
-Last reviewed: August 10, 2026
+Last reviewed: October 12, 2026
+
+## Fixed (October 12, 2026)
+
+- ~~Daily scrape silently stopped~~ — GitHub disabled `scrape.yml` for 60 days of repo inactivity (`disabled_inactivity`); failure email can't fire when no run happens. Added a "Keep schedule alive" step that calls the workflow-enable API each run.
+- ~~City Council HTML fallback showed deferred hearings and only the current month~~ — Two bugs, live in production since the Legistar API started 403ing from Actions (~2026-07-15). Both bugs are fixed, and the fallback still covers future API outages. (a) Status was read from column 2 (the iCal icon); Legistar puts "Deferred" in the time column, so nothing was ever filtered — this regressed the March 16 Bug #3 fix. (b) `?Mode=List&Year=YYYY` narrows the page to the current month; the bare URL returns the full session (newest first, 100 rows). Fallback now matches the API exactly (49 upcoming meetings on 2026-10-12). Also fixes former #9 (year rollover).
+- ~~Bronx CB6/CB8 always on pattern fallback~~ — `/calendar/YYYY-MM/` URLs 404 (the page is a shortcode, not the Tribe archive). Switched `scrapeCBBronx` to the Tribe REST API; deduped CB8's repeated rows.
+- ~~Bronx BP 404~~ — Site moved from WordPress to Revize CMS; now reads the Revize calendar JSON handler. (The BP office hasn't posted an event since May 2026, so this returns 0 for now.)
+- ~~Legistar API 403 in Actions since ~2026-07-15~~ — The `LEGISTAR_TOKEN` Actions secret held a different key from `.env.local` that Legistar stopped accepting. Re-set it from `.env.local`; API path works again (106 meetings).
+- ~~Manhattan CB8 403 from GitHub Actions~~ — cb8m.com's Cloudflare bot check challenges runner IPs. Added a Pages Function relay (`/api/cb8m-events`), and the scraper falls back to it when the direct fetch fails. 27 events vs. 2 estimated.
+- ~~QN CB10 / BK CB13 / SI CB2 404 every run, events linked to 404 pages~~ — Calendar pages removed from nyc.gov. New `pattern` board type skips the fetch; `url` points at a live page.
 
 ## Fixed (August 10, 2026)
 
@@ -68,7 +78,6 @@ Three precincts (46th, 50th, 52nd) had conflicting schedule info.
 Generated meetings appear on holidays (MLK Day, Thanksgiving, etc.) when they almost certainly won't happen.
 - **Action:** Add a holiday calendar and skip those dates
 
-### 9. City Council HTML fallback only scrapes current year
-In late December, January meetings won't appear from the HTML fallback scraper.
-- **File:** `lib/scrapers/city-council.js`
-- **Action:** Scrape next year's page when current month >= November
+### 11. Manhattan CB5 blocked by Cloudflare
+`cb5.org` 403s every scripted request, even from residential IPs, and the Pages Function relay (see CB8) doesn't help. On pattern fallback; marked `estimated` in the UI.
+- **Action:** Look for an alternate feed, or ask the board to exempt `/wp-json/` from bot protection
