@@ -37,6 +37,7 @@ The site migrated off Vercel on 2026-04-23 following Vercel's security incident 
 
 - **Frontend:** Vanilla JS / HTML / CSS in `public/`
 - **Endpoints:** Cloudflare Pages Functions in `functions/api/`
+- **Relay Worker:** `workers/cb8m-relay/` — standalone Cloudflare Worker (not part of Pages) that fetches Manhattan CB8's feed from an East Coast Durable Object, since cb8m.com's bot protection blocks GitHub Actions. Deploy with `cd workers/cb8m-relay && npx wrangler@4.149.0 deploy`. See BUGS.md #12.
 - **Scraper:** Node.js script in `scripts/run-scrapers.js` invoked by `.github/workflows/scrape.yml`
 - **Storage:** GitHub Gist (free, unlimited public reads, gist-scope PAT for writes)
 - **Scraping:** Cheerio for HTML parsing; `pdf-parse` v2 for PDF text extraction; some scrapers are pattern-based (MTA, NYPD) and make no HTTP calls
@@ -147,6 +148,7 @@ nyc-civic-calendar/
 │   ├── elections.ics.js         #   Elections ICS: bitmask-encoded ?e= param
 │   ├── active-orgs.js
 │   └── debug.js
+├── workers/cb8m-relay/          # Standalone Worker: CB8 Manhattan relay (Durable Object, locationHint enam)
 ├── scripts/
 │   └── run-scrapers.js          # Daily scraper runner, invoked by GitHub Actions
 ├── lib/

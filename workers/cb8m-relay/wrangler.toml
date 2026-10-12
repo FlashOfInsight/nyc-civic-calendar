@@ -1,0 +1,13 @@
+# Standalone Worker (not part of the Pages project). Deploy from this directory:
+#   npx wrangler@4.149.0 deploy
+name = "cb8m-relay"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+[[durable_objects.bindings]]
+name = "RELAY"
+class_name = "Cb8mRelay"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Cb8mRelay"]

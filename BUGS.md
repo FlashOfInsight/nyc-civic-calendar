@@ -9,6 +9,7 @@ Last reviewed: October 12, 2026
 - ~~Bronx CB6/CB8 always on pattern fallback~~ — `/calendar/YYYY-MM/` URLs 404 (the page is a shortcode, not the Tribe archive). Switched `scrapeCBBronx` to the Tribe REST API; deduped CB8's repeated rows.
 - ~~Bronx BP 404~~ — Site moved from WordPress to Revize CMS; now reads the Revize calendar JSON handler. (The BP office hasn't posted an event since May 2026, so this returns 0 for now.)
 - ~~Legistar API 403 in Actions since ~2026-07-15~~ — The `LEGISTAR_TOKEN` Actions secret held a different key from `.env.local` that Legistar stopped accepting. Re-set it from `.env.local`; API path works again (106 meetings).
+- ~~Manhattan CB8 blocked from GitHub Actions~~ — cb8m.com's Cloudflare bot check challenges Actions runners. A Pages Function relay was challenged too. Diagnostics: cb8m sees Cloudflare's Workers IP `2a06:98c0:3600::103` either way, but challenges it via LAX (where Actions lands) and not via EWR. Headers and the original caller made no difference. Fix: the standalone `workers/cb8m-relay` Worker fetches from a Durable Object created with `locationHint: "enam"`. Tested from an Actions runner: 8/8 nodes (IAD/EWR/ATL) got 200, and the relay returned 27 events. Fallback schedule also corrected from CB8's real 2026 calendar (13/15 Oct–Dec dates).
 - ~~Manhattan CB5 showed 0 meetings~~ — `cb5-rest` had no pattern fallback; now uses `generateCB5Meetings()` (6 committees) when blocked.
 - ~~QN CB10 / BK CB13 / SI CB2 404 every run, events linked to 404 pages~~ — Calendar pages removed from nyc.gov. New `pattern` board type skips the fetch; `url` points at a live page.
 
@@ -77,13 +78,6 @@ Three precincts (46th, 50th, 52nd) had conflicting schedule info.
 ### 8. NYPD and pattern-based scrapers have no holiday handling
 Generated meetings appear on holidays (MLK Day, Thanksgiving, etc.) when they almost certainly won't happen.
 - **Action:** Add a holiday calendar and skip those dates
-
-### 12. Manhattan CB8 blocked from GitHub Actions
-cb8m.com's Cloudflare bot check challenges Actions runner IPs (works from residential IPs). The Pages Function relay (`functions/api/cb8m-events.js`) is challenged too. Diagnostics (2026-10-12, temporary branch, since deleted):
-- cb8m.com sees the relay as Cloudflare's shared Workers IP `2a06:98c0:3600::103` no matter who calls it.
-- Called from a laptop, the function runs in **EWR** and gets 200. Called from Actions, it runs in **LAX** and gets 403 `cf-mitigated: challenge`.
-- The user agent and headers make no difference (4 variants). Chaining function→function so the caller is Cloudflare itself still got 403 in LAX. So the challenge depends on the Cloudflare location, not on the original caller.
-- **Fix options:** pin the fetch to an eastern location (a separate Worker with a Durable Object `locationHint: "enam"`; needs wrangler, and might still be challenged), or ask CB8 to add a WAF skip rule for `/wp-json/tribe/events/*`. Until then: pattern fallback, corrected 2026-10-12 to match CB8's real schedule (13/15 Oct–Dec dates).
 
 ### 11. Manhattan CB5 blocked by Cloudflare
 `cb5.org` 403s every scripted request, even from residential IPs, and the Pages Function relay (see CB8) doesn't help. On pattern fallback; marked `estimated` in the UI.
