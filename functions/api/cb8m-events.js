@@ -25,7 +25,8 @@ export async function onRequest(context) {
       "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
       "Accept": "application/json"
     },
-    cf: { cacheTtl: 3600, cacheEverything: true }
+    // Cache successes only — a cached challenge page would be served for an hour
+    cf: { cacheEverything: true, cacheTtlByStatus: { "200-299": 3600, "300-599": 0 } }
   });
 
   // Pass the upstream status through so the scraper sees a 403 as a failure

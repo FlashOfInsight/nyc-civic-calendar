@@ -450,7 +450,7 @@ const organizations = {
           },
           "8": {
             name: "CB8 - Upper East Side, Roosevelt Island",
-            url: "https://www.cb8m.com/",
+            estimated: true, url: "https://www.cb8m.com/",
             children: {
               "full-board": { name: "Full Board" },
               "executive": { name: "Executive Committee" },

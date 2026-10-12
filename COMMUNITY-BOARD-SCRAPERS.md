@@ -33,7 +33,7 @@ Status as of **October 2026**. The single scraper file `lib/scrapers/community-b
 
 ## Status by Board
 
-### Manhattan (10 live, 2 pattern)
+### Manhattan (9 live, 1 partial, 2 pattern)
 
 | Board | Neighborhoods | Type | Source | Status |
 |---|---|---|---|---|
@@ -44,7 +44,7 @@ Status as of **October 2026**. The single scraper file `lib/scrapers/community-b
 | **CB5** | **Midtown** | `cb5-rest` | **`cb5.org` — Cloudflare bot protection 403s every scripted request, even from residential IPs** | **⚠️ pattern only** |
 | CB6 | Murray Hill, Gramercy, Stuyvesant Town | `cbsix` | `cbsix.org` HTML | ✅ |
 | CB7 | Upper West Side, Lincoln Square | `mcb7-bundle` | `mcb7.org` Vite/React JS bundle | ✅ 36 events |
-| CB8 | Upper East Side, Roosevelt Island | `cb8m-rest` | `cb8m.com` Tribe REST; Cloudflare challenges GitHub Actions IPs, so it falls back to our relay `nyc-civic-calendar.pages.dev/api/cb8m-events` (`functions/api/cb8m-events.js`; use the pages.dev host, since the custom domain also challenges Actions IPs) | ✅ 27 events |
+| CB8 | Upper East Side, Roosevelt Island | `cb8m-rest` | `cb8m.com` Tribe REST; Cloudflare challenges GitHub Actions IPs. Relay `nyc-civic-calendar.pages.dev/api/cb8m-events` works when called from a residential IP but is also challenged when called from Actions | 🔶 pattern in production (works locally) |
 | CB9 | Morningside Heights, Hamilton Heights | `cb9m-gcal` | Google Calendar + pattern fallback | 🔶 GCal often empty |
 | CB10 | Central Harlem | `cbmanhattan` | `cbmanhattan.cityofnewyork.us` Tribe HTML | ✅ |
 | **CB11** | **East Harlem** | `cb11m` | **Airtable embed — auth blocked** | **⚠️ pattern only** |
@@ -131,8 +131,8 @@ Status as of **October 2026**. The single scraper file `lib/scrapers/community-b
 
 | Category | Count | Notes |
 |---|---|---|
-| ✅ Live scrapers | 34 | Real meeting data from APIs, HTML, PDFs, JS/CSV files, GCal |
-| 🔶 Partial (live + fallback) | 7 | Scraper runs first; falls to pattern when < 2 events found |
+| ✅ Live scrapers | 33 | Real meeting data from APIs, HTML, PDFs, JS/CSV files, GCal |
+| 🔶 Partial (live + fallback) | 8 | Scraper runs first; falls to pattern when < 2 events found |
 | ✅ Hardcoded-accurate | 3 | Derived from official published schedule documents |
 | ⚠️ Pattern-only | 15 | Generic nth-weekday fallback; marked with `*` in the UI |
 
@@ -146,6 +146,6 @@ Status as of **October 2026**. The single scraper file `lib/scrapers/community-b
 - **Queens CB4 CSV**: Updated monthly by the board; check `/assets/queenscb4/data/queenscb4-calendar.csv` each month.
 - **Brooklyn CB8 GCal**: The board posts meetings on a rolling basis (not far in advance). Calendar should be checked; if consistently empty, fallback is the 2nd Thursday schedule.
 - **Staten Island**: All three boards publish grid-format PDF calendars that are not text-extractable. PDF parsing is not feasible; manual schedule entry would be needed.
-- **Relay for bot-blocked sites**: `functions/api/cb8m-events.js` fetches a fixed upstream URL from Cloudflare's network, which bot protection lets through when it challenges GitHub Actions IPs. Copy it for any other board that starts returning "Just a moment..." 403s in Actions but works locally. Doesn't help CB5 (blocked everywhere).
+- **Relay for bot-blocked sites**: `functions/api/cb8m-events.js` fetches a fixed upstream URL from Cloudflare's network, **Doesn't work from Actions yet**: called from a residential IP it gets through, but called from Actions the relay's own upstream fetch is challenged too (presumably the function runs in a Cloudflare colo near the caller). Kept because the scraper falls back to the pattern either way. Doesn't help CB5 (blocked everywhere).
 - **pdf-parse v2 API**: Uses `new PDFParse({ url })` — takes a URL directly, no buffer fetch needed. Dependency: `npm install pdf-parse`.
 - **GCal holiday filtering**: Use `HOLIDAY_RE` as `titleExclude` in `scrapeGCalICS()` for GCals that mix board meetings with US holidays (e.g., CB9 Manhattan).

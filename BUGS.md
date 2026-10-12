@@ -9,7 +9,7 @@ Last reviewed: October 12, 2026
 - ~~Bronx CB6/CB8 always on pattern fallback~~ — `/calendar/YYYY-MM/` URLs 404 (the page is a shortcode, not the Tribe archive). Switched `scrapeCBBronx` to the Tribe REST API; deduped CB8's repeated rows.
 - ~~Bronx BP 404~~ — Site moved from WordPress to Revize CMS; now reads the Revize calendar JSON handler. (The BP office hasn't posted an event since May 2026, so this returns 0 for now.)
 - ~~Legistar API 403 in Actions since ~2026-07-15~~ — The `LEGISTAR_TOKEN` Actions secret held a different key from `.env.local` that Legistar stopped accepting. Re-set it from `.env.local`; API path works again (106 meetings).
-- ~~Manhattan CB8 403 from GitHub Actions~~ — cb8m.com's Cloudflare bot check challenges runner IPs. Added a Pages Function relay (`/api/cb8m-events`), and the scraper falls back to it when the direct fetch fails. 27 events vs. 2 estimated.
+- ~~Manhattan CB5 showed 0 meetings~~ — `cb5-rest` had no pattern fallback; now uses `generateCB5Meetings()` (6 committees) when blocked.
 - ~~QN CB10 / BK CB13 / SI CB2 404 every run, events linked to 404 pages~~ — Calendar pages removed from nyc.gov. New `pattern` board type skips the fetch; `url` points at a live page.
 
 ## Fixed (August 10, 2026)
@@ -77,6 +77,10 @@ Three precincts (46th, 50th, 52nd) had conflicting schedule info.
 ### 8. NYPD and pattern-based scrapers have no holiday handling
 Generated meetings appear on holidays (MLK Day, Thanksgiving, etc.) when they almost certainly won't happen.
 - **Action:** Add a holiday calendar and skip those dates
+
+### 12. Manhattan CB8 blocked from GitHub Actions
+cb8m.com's Cloudflare bot check challenges Actions runner IPs (works from residential IPs). Tried a Pages Function relay (`functions/api/cb8m-events.js`): it gets through when called from a residential IP, but when called from Actions its upstream fetch is challenged too (tried both the custom domain and the pages.dev host). Production is on the pattern fallback; marked `estimated`.
+- **Ideas:** add diagnostics to the relay (colo, upstream status) to see what differs; or ask CB8 to exempt `/wp-json/` from bot protection
 
 ### 11. Manhattan CB5 blocked by Cloudflare
 `cb5.org` 403s every scripted request, even from residential IPs, and the Pages Function relay (see CB8) doesn't help. On pattern fallback; marked `estimated` in the UI.
