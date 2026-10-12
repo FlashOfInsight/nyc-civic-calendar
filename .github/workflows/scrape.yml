@@ -17,6 +17,8 @@ concurrency:
 
 permissions:
   contents: read
+  # Needed by the keepalive step to call the workflow-enable API.
+  actions: write
 
 jobs:
   scrape:
@@ -46,6 +48,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GIST_GITHUB_TOKEN }}
           LEGISTAR_TOKEN: ${{ secrets.LEGISTAR_TOKEN }}
         run: node scripts/run-scrapers.js
+
+      # GitHub auto-disables scheduled workflows after 60 days without a commit
+      # to the repo (state: disabled_inactivity). No run happens, so the failure
+      # email below never fires. Re-enabling via the API resets that timer.
+      - name: Keep schedule alive
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT repos/${{ github.repository }}/actions/workflows/scrape.yml/enable
 
       - name: Email on failure
         if: failure()
