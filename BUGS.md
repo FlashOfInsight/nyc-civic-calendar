@@ -7,6 +7,13 @@ Last reviewed: November 15, 2026
 - ~~Queens CB14 always on estimated dates~~ — The board lists its full-board dates as "December 8th, 2026"; the Queens nyc.gov date pattern didn't allow "st/nd/rd/th", so every date was skipped. Fixed; a "Full Board / …" section heading is now named "Full Board Meeting" (also renames Queens CB1's six full-board entries, same dates and times). Queens CB14 0 → 1 real meeting (the rest of 2026's list is past; 2027 not posted yet).
 - MTA: mta.info lists nothing after December 16, 2026 yet; `mta-schedule.json` unchanged. The health check will start warning about it ~November 16.
 
+## Fixed (November 15, 2026) — bug-list pass
+
+- ~~City Planning Commission dates were guessed~~ (was #14) — The every-other-Wednesday guess was a week off (it showed Nov 25; the real meetings are Nov 18 and Dec 2). `scrapeCPC` now reads the JSON file behind the department's calendar page: Commission public meetings and review sessions with real times, plus scoping meetings and information sessions under a new "Scoping Meetings & Information Sessions" entry. The department posts about a month ahead; nothing is guessed beyond that.
+- ~~Estimated meetings landed on holidays~~ (was #8) — The cleanup pass drops estimated meetings (pattern-only boards and all NYPD precinct councils) that fall on a federal holiday, the day after Thanksgiving, Dec 24 or Dec 31. NYPD meetings are now flagged `estimated` and say so.
+- ~~Queens CB1 meeting times off by 30 minutes~~ (was #17) — The Queens nyc.gov reader took the first time anywhere in a list of dates. It now uses a time only when it follows that date, otherwise the page's stated usual time (6:30 PM). Also reads dates written without a space ("November 24,2026").
+- ~~`lib/organizations.js` unused~~ (was #15) — Deleted.
+
 ## Fixed (November 15, 2026) — long-term stability audit
 
 - ~~Gist token expired again (daily run failed Nov 9–15)~~ — Replaced with a gist-only token that has no expiration.
@@ -99,10 +106,6 @@ Three precincts (46th, 50th, 52nd) had conflicting schedule info.
 - **File:** `lib/data/nypd-precincts.json`
 - **Action:** Confirm at next community council meeting or contact precincts
 
-### 8. NYPD and pattern-based scrapers have no holiday handling
-Generated meetings appear on holidays (MLK Day, Thanksgiving, etc.) when they almost certainly won't happen.
-- **Action:** Add a holiday calendar and skip those dates
-
 ### 11. Manhattan CB5 blocked by Cloudflare
 `cb5.org` 403s every scripted request, even from residential IPs, and the Pages Function relay (see CB8) doesn't help. On pattern fallback; marked `estimated` in the UI.
 - **Action:** Look for an alternate feed, or ask the board to exempt `/wp-json/` from bot protection
@@ -112,15 +115,7 @@ Generated meetings appear on holidays (MLK Day, Thanksgiving, etc.) when they al
 - `lib/data/political-calendar-2026.js` — the Elections tab is the 2026 NYS calendar; a 2027 calendar is a new file plus a year switch.
 - Brooklyn CB1 and Queens CB8 read annual schedule PDFs with the year in the URL (`Press-Release-2026-2027.pdf`, `2026-Board-Meeting-Date.pdf`). When those run dry the health check flags the board as dark.
 
-### 14. City Planning Commission dates are estimated
-`scrapeCPC` generates every other Wednesday from a reference date; it does not read the commission's posted calendar (the page is rendered by JavaScript). Marked `estimated`.
-
-### 15. `lib/organizations.js` is unused
-Nothing imports it; `public/app.js` holds the list the site uses. Delete it or generate one from the other.
-
 ### 16. Queens CB3 blocked by a captcha on some requests
-`queenscb3.cityofnewyork.us` (SiteGround) answers some scripted requests with HTTP 202 and a redirect to `/.well-known/sgcaptcha/`. The events API itself is fine and lists monthly meetings through June 2027, but the daily run lands on estimated dates. Not worked around on purpose (no bot-check evasion).
+`queenscb3.cityofnewyork.us` (SiteGround) answers some scripted requests with HTTP 202 and a redirect to `/.well-known/sgcaptcha/`. The events API itself is fine and lists monthly meetings through June 2027. When a run gets through, the real dates are kept for 21 days (carry-over), so the board only drops to estimated dates if it is blocked for three weeks straight. Not worked around on purpose (no bot-check evasion).
 - **Action (owner):** ask the board or its web host to exempt `/wp-json/tribe/events/` from the bot check, or route through a relay like CB8's if the board agrees.
 
-### 17. Queens CB1 meeting times off by 30 minutes
-The page says board and committee meetings start at 6:30 PM; the scraper reports 6:00 or 7:00 PM (it takes the first time it sees, or defaults to 7:00). Dates are correct.

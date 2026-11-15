@@ -126,7 +126,7 @@ A second tab at `/elections` serves the **2026 NYS Political Calendar** (71 even
 
 ## UI — Org tree
 
-The org tree in `public/app.js` is built from `const organizations = { ... }` (mirrored from `lib/organizations.js`). Each community board entry supports two optional properties:
+The org tree in `public/app.js` is built from `const organizations = { ... }`. Each community board entry supports two optional properties:
 
 - **`url`** — shown as a small gray `↗` link next to the board name, pointing to the live data source. Set on all boards where we have a known website.
 - **`estimated: true`** — shown as a red `*` asterisk with tooltip "Dates are estimated from a typical schedule — verify at the official website". Set on the ~12 boards that use pattern-only fallback schedules.
@@ -154,7 +154,6 @@ nyc-civic-calendar/
 ├── lib/
 │   ├── gist-storage.js          # Reads env at call time (Node + Workers compat)
 │   ├── ics-generator.js         # generateICS(meetings, name)
-│   ├── organizations.js         # Org hierarchy for the server-side ICS generator
 │   ├── scraper-utils.js         # Shared fetchHTML/parseMonth/formatDate/getNthWeekday/isInRange
 │   ├── scrapers/                # The 8 scrapers above
 │   └── data/
@@ -184,7 +183,7 @@ See `BUGS.md`. All medium+ bugs are fixed; the remaining low-priority items are 
 
 ## Adding a new non-CB scraper
 
-1. Add the org hierarchy to `lib/organizations.js` and mirror in `public/app.js`
+1. Add the org hierarchy to `public/app.js` (committee keys the scrapers produce are added to a board automatically)
 2. Create `lib/scrapers/your-source.js` exporting an async function that returns `Array<Meeting>`
 3. Meeting shape: `{ id, org, title, date, time, endTime?, location, description?, url?, agendaUrl? }`
 4. Wire it into `scripts/run-scrapers.js` — add import, add to `Promise.allSettled`, add results handling, add to `MIN_EXPECTED_MEETINGS`

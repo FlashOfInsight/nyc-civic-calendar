@@ -95,7 +95,8 @@ const organizations = {
       "dcp": {
         name: "Department of City Planning (DCP)",
         children: {
-          "commission": { name: "City Planning Commission" }
+          "commission": { name: "City Planning Commission" },
+          "public-events": { name: "Scoping Meetings & Information Sessions" }
         }
       },
       "comptroller": {
