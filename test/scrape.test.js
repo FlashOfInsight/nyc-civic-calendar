@@ -71,7 +71,7 @@ test("a source that goes quiet keeps its real data, then raises one notice", () 
 test("pattern-only sources are never carried over or flagged", () => {
   const old = [{ id: "n1", org: "city-agencies.nypd.manhattan.pct-1", title: "1st Precinct", date: "2026-12-31", time: "18:00" }];
   const day1 = buildHealth({ f: old }, null, {}, "2026-11-15");
-  const fresh = [{ ...old[0], id: "n2", date: "2026-12-17", estimated: true }];
+  const fresh = [{ ...old[0], id: "n2", date: "2027-03-17", estimated: true }];
   const next = carryOver(fresh, { schema: 2, meetings: old }, day1, "2026-11-16");
   assert.deepStrictEqual(next.carriedGroups, []);
   const day2 = buildHealth({ f: next.meetings }, day1, {}, "2027-02-01");
