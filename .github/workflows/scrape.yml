@@ -77,6 +77,15 @@ jobs:
           from: NYC Civic Calendar Scraper
           body: file://health-alert.txt
 
+      # Only now are those notices recorded as sent; if the email step failed,
+      # they stay pending and go out with the next run.
+      - name: Record notices as sent
+        if: success() && hashFiles('health-alert-keys.json') != ''
+        env:
+          GIST_ID: ${{ secrets.GIST_ID }}
+          GITHUB_TOKEN: ${{ secrets.GIST_GITHUB_TOKEN }}
+        run: node scripts/confirm-notices.js
+
       - name: Email on failure
         if: failure()
         uses: dawidd6/action-send-mail@v3

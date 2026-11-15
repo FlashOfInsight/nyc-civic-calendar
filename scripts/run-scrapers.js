@@ -29,12 +29,13 @@ const {
   sanitizeMeetings,
   carryOver,
   buildHealth,
-  takeNewNotices,
+  newNotices,
   todayNY
 } = require("../lib/health");
 
 const DRY_RUN = process.argv.includes("--dry-run");
 const ALERT_FILE = path.join(process.cwd(), "health-alert.txt");
+const ALERT_KEYS_FILE = path.join(process.cwd(), "health-alert-keys.json");
 
 // Each Gist file, the scrapers that feed it, and the fewest meetings it should
 // ever hold (below that we assume the scrape broke and keep the previous data).
@@ -69,7 +70,10 @@ async function runSource(source) {
   const meetings = [];
   const errors = [];
   settled.forEach((r, i) => {
-    if (r.status === "fulfilled" && Array.isArray(r.value)) meetings.push(...r.value);
+    if (r.status === "fulfilled" && Array.isArray(r.value)) {
+      meetings.push(...r.value);
+      if (r.value.fallbackReason) meetings.fallbackReason = r.value.fallbackReason;
+    }
     else errors.push(`${names[i]}: ${r.reason?.message || "returned no list"}`);
   });
   for (const e of errors) console.error(`${source.key} scraper error — ${e}`);
@@ -85,7 +89,7 @@ async function main() {
     console.error("Missing required env var: GITHUB_TOKEN (or pass --dry-run)");
     process.exit(1);
   }
-  if (fs.existsSync(ALERT_FILE)) fs.unlinkSync(ALERT_FILE);
+  for (const f of [ALERT_FILE, ALERT_KEYS_FILE]) if (fs.existsSync(f)) fs.unlinkSync(f);
 
   const today = todayNY();
   console.log(`Starting parallel scrape of all sources${DRY_RUN ? " (dry run)" : ""}...`);
@@ -108,6 +112,13 @@ async function main() {
     const { meetings: raw, errors } = scraped[i];
     const prev = previous[i];
     const { meetings: clean, dropped } = sanitizeMeetings(raw, today);
+    if (raw.fallbackReason) {
+      fileIssues.push({
+        file: `${source.file}:fallback`,
+        message: `${source.file}: the primary source failed (${raw.fallbackReason}) and the backup scraper was used. ` +
+          "If this is the City Council, the LEGISTAR_TOKEN secret may have stopped working."
+      });
+    }
     if (Object.keys(dropped).length) {
       droppedByFile[source.file] = dropped;
       console.log(`[${source.file}] cleanup dropped: ${JSON.stringify(dropped)}`);
@@ -162,7 +173,7 @@ async function main() {
   });
 
   const health = buildHealth(finalMeetings, prevHealth, { fileIssues, dropped: droppedByFile }, today);
-  const newNotices = DRY_RUN ? [] : takeNewNotices(health);
+  const freshNotices = DRY_RUN ? [] : newNotices(health);
   files["health.json"] = prepareGistFile(health);
 
   let writeResult = { success: true };
@@ -181,13 +192,14 @@ async function main() {
   console.log(JSON.stringify(health.summary));
   for (const n of Object.values(health.notices)) console.log(`  • [since ${n.since}] ${n.message}`);
 
-  // New problems go in a file the workflow emails. Only written once the Gist
-  // write has succeeded, so "emailed" in health.json stays truthful.
-  if (newNotices.length && writeResult.success) {
+  // New problems go in a file the workflow emails. They are marked as emailed
+  // only afterwards, by scripts/confirm-notices.js, once the email step succeeded.
+  if (freshNotices.length && writeResult.success) {
+    fs.writeFileSync(ALERT_KEYS_FILE, JSON.stringify(freshNotices.map((n) => n.key)));
     const lines = [
       "NYC Civic Calendar found something that needs a look:",
       "",
-      ...newNotices.map((n) => `- ${n.message}`),
+      ...freshNotices.map((n) => `- ${n.message}`),
       "",
       "Each item is reported once. The full, current report is at https://nycciviccalendar.com/api/health"
     ];
@@ -202,7 +214,7 @@ async function main() {
     activeOrgCount: activeOrgs.length,
     gistWriteSuccess: writeResult.success,
     gistWriteError: writeResult.error || null,
-    newNotices: newNotices.length,
+    newNotices: freshNotices.length,
     results: summary
   }, null, 2));
 

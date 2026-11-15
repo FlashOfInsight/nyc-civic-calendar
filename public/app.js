@@ -123,6 +123,7 @@ const organizations = {
         children: {
           "rules": { name: "Rulemaking Hearings" },
           "after-hours": { name: "Buildings After Hours" },
+          "qa-sessions": { name: "Live Q&A Sessions (online)" },
           "industry-bronx": { name: "Industry Meeting - Bronx" },
           "industry-brooklyn": { name: "Industry Meeting - Brooklyn" },
           "industry-manhattan": { name: "Industry Meeting - Manhattan" },

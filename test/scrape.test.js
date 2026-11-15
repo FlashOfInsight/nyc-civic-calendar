@@ -2,7 +2,7 @@
 const test = require("node:test");
 const assert = require("node:assert");
 const { readICSEvents, expandRule, utcToNY } = require("../lib/ics-reader");
-const { sanitizeMeetings, carryOver, buildHealth, takeNewNotices, groupOf } = require("../lib/health");
+const { sanitizeMeetings, carryOver, buildHealth, newNotices, markEmailed, groupOf } = require("../lib/health");
 
 test("recurrence rules expand to the right dates", () => {
   assert.deepStrictEqual(expandRule("2026-01-21", { FREQ: "MONTHLY", BYDAY: "3WE" }, "2026-11-01", "2027-01-31"),
@@ -64,8 +64,12 @@ test("a source that goes quiet keeps its real data, then raises one notice", () 
   assert.deepStrictEqual(later.carriedGroups, []);
   const day3 = buildHealth({ f: later.meetings }, day2, {}, "2027-01-02");
   assert.ok(day3.notices["dark:community-boards.queens.13"]);
-  assert.ok(takeNewNotices(day3).some((n) => n.key === "dark:community-boards.queens.13"));
-  assert.strictEqual(takeNewNotices(day3).length, 0);
+  // A notice stays pending until the email is confirmed sent
+  const pending = newNotices(day3).map((n) => n.key);
+  assert.ok(pending.includes("dark:community-boards.queens.13"));
+  assert.strictEqual(newNotices(day3).length, pending.length);
+  markEmailed(day3, pending);
+  assert.strictEqual(newNotices(day3).length, 0);
 });
 
 test("pattern-only sources are never carried over or flagged", () => {
