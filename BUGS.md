@@ -1,6 +1,6 @@
 # NYC Civic Calendar — Bug Tracker
 
-Last reviewed: November 15, 2026
+Last reviewed: November 15, 2026 (final pass added #18–#27)
 
 ## Fixed (November 15, 2026) — monthly maintenance
 
@@ -119,3 +119,50 @@ Three precincts (46th, 50th, 52nd) had conflicting schedule info.
 `queenscb3.cityofnewyork.us` (SiteGround) answers some scripted requests with HTTP 202 and a redirect to `/.well-known/sgcaptcha/`. The events API itself is fine and lists monthly meetings through June 2027. When a run gets through, the real dates are kept for 21 days (carry-over), so the board only drops to estimated dates if it is blocked for three weeks straight. Not worked around on purpose (no bot-check evasion).
 - **Action (owner):** ask the board or its web host to exempt `/wp-json/tribe/events/` from the bot check, or route through a relay like CB8's if the board agrees.
 
+
+## Found in the final pass (November 15, 2026) — not yet fixed
+
+Spotted by scanning the live data after the fixes above. None is urgent; the monthly maintenance routine can pick these up.
+
+### 18. Brooklyn CB15: one meeting listed three times
+The Nov 17 board meeting appears as two "Full Board Meeting" entries (ids `…-board-meeting` and `…-general-board`) plus "District Meetings Calendar", which is the page heading, not a meeting. The nyc.gov Brooklyn reader (`scrapeBrooklynNYCGov`) matches the same date under several labels.
+- **Action:** dedupe by board + date + category, and reject page headings as titles.
+
+### 19. Brooklyn Borough President: announcements scraped as meetings
+"Call For Projects Is Now Open" shows as an event at 12:00 AM, and a working-group meeting at 8:00 AM looks like a default, not a posted time. `scrapeBrooklynBP` takes every item on the events page.
+- **Action:** keep only items with a real start time; check how times are parsed.
+
+### 20. NYC Rules: a hearing at 10:00 PM
+"DOHMH: Medical Room Standards in Schools" (Nov 2) is stored as 22:00. Rule hearings are daytime; this is probably 10:00 AM read wrongly, or a time-zone shift. Only one case seen.
+- **Action:** check the source entry and the time parsing in `lib/scrapers/nyc-rules.js`.
+
+### 21. DOE Panel for Educational Policy: every date on the page becomes a meeting
+`scrapeDOEPEP` treats any date in the page text as a panel meeting at 6:00 PM. Nov 16 (no location) and Nov 18 (Curtis High School) are both listed; one of them is probably a deadline or a different event.
+- **Action:** read dates only from the meetings table/list, and take the time from the page.
+
+### 22. LPC shows only one upcoming hearing
+The Landmarks Preservation Commission meets most Tuesdays, but only the next date on its page is picked up ("using 1 actual dates from page").
+- **Action:** check whether LPC publishes its annual hearing calendar in a readable form (it used to be `YYYY-lpc-calendar.pdf`).
+
+### 23. DOB Q&A sessions scraper returns nothing
+`scrapeDOB` in `lib/scrapers/agencies.js` has found 0 sessions on every run seen. Either the page has no table of sessions any more or its layout changed. (DOB after-hours and industry meetings come from `city-government.js` and are fine.)
+- **Action:** check the page; fix or remove the scraper.
+
+### 24. Real meetings with a placeholder location
+Queens CB1, Queens CB2, Brooklyn CB17 and Bronx CB8 have real dates but show "… CB Office" as the location, because their source lists no venue per meeting or the reader doesn't capture it.
+- **Action:** add each board's usual meeting address as the default (as done for Brooklyn CB2/CB5/CB8).
+
+### 25. NYC Rules agencies not in the menu
+Hearings from agencies the scraper doesn't recognise (Mayor's Office of Special Enforcement, City Clerk, Civil Service Commission, Office of Environmental Remediation and others) are all filed under "Other". Logged as "Unknown agency in NYC Rules" on each run.
+- **Action:** add the recurring ones to the agency map and the site menu.
+
+### 26. Small weaknesses in the new health check
+- A notice is marked as emailed when the data is saved, before the email step runs. If the email fails, that notice is never re-sent (it stays visible at `/api/health`).
+- If a source's last real data included a meeting that is later cancelled and the source then goes quiet, the cancelled meeting is kept for up to 21 days.
+- A board whose real feed ends (for example an annual PDF with no next-year version) is only flagged 35 days after its last real meeting passes.
+
+### 27. Things that depend on one person's accounts
+- `workers/cb8m-relay` (Manhattan CB8) is deployed by hand from the owner's Mac with `wrangler`; nothing redeploys it.
+- `LEGISTAR_TOKEN` (City Council API) has no known expiry, but if it stops working the scraper silently uses the web-page fallback. The health check does not flag that.
+- The failure and health emails use a Gmail app password (`SMTP_PASSWORD`); if it is revoked, alerts stop without notice. `/api/health` returning 503 is the backstop, but nothing outside GitHub watches it.
+- **Action:** point an uptime monitor at `https://nycciviccalendar.com/api/health?brief` (it returns 503 when the daily run has stopped).
