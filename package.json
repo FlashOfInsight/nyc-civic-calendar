@@ -5,13 +5,15 @@
   "main": "index.js",
   "scripts": {
     "dev": "wrangler pages dev public",
-    "scrape": "node scripts/scrape.js"
+    "scrape": "node scripts/run-scrapers.js",
+    "scrape:dry": "node scripts/run-scrapers.js --dry-run",
+    "test": "node --test"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
     "pdf-parse": "^2.4.5"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   }
 }

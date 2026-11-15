@@ -1,6 +1,6 @@
 {
   "description": "MTA Board and Committee meeting schedule. Source: mta.info/transparency/board-and-committee-meetings",
-  "lastVerified": "2026-04-10",
+  "lastVerified": "2026-11-15",
   "notes": {
     "format": "Each entry has committeeDay and boardDay. Single-day months have both on the same date.",
     "location": "MTA Board Room, 2 Broadway, 20th Floor, New York, NY",
@@ -13,7 +13,12 @@
       { "month": 3, "committeeDay": 23, "boardDay": 25 },
       { "month": 4, "committeeDay": 27, "boardDay": 29 },
       { "month": 5, "committeeDay": 18, "boardDay": 20 },
-      { "month": 6, "committeeDay": 22, "boardDay": 24 }
+      { "month": 6, "committeeDay": 22, "boardDay": 24 },
+      { "month": 7, "committeeDay": 27, "boardDay": 29 },
+      { "month": 9, "committeeDay": 28, "boardDay": 30 },
+      { "month": 10, "committeeDay": 26, "boardDay": 28 },
+      { "month": 11, "committeeDay": 16, "boardDay": 18 },
+      { "month": 12, "committeeDay": 14, "boardDay": 16 }
     ]
   }
 }

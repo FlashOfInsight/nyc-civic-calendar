@@ -25,14 +25,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
 
       - run: npm ci
+
+      - run: npm test
 
       - name: Simulate failure (test only)
         if: inputs.simulate_failure == true
@@ -58,6 +60,23 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh api -X PUT repos/${{ github.repository }}/actions/workflows/scrape.yml/enable
 
+      # The run itself succeeded, but the scraper's health check found something
+      # new: a board or agency that stopped delivering real data, or hand-entered
+      # data (the MTA schedule, year-stamped sources) about to run out. Each
+      # item is emailed once; the standing report is at /api/health.
+      - name: Email new health notices
+        if: success() && hashFiles('health-alert.txt') != ''
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "NYC Civic Calendar: something needs a look"
+          to: laeo.cr@gmail.com
+          from: NYC Civic Calendar Scraper
+          body: file://health-alert.txt
+
       - name: Email on failure
         if: failure()
         uses: dawidd6/action-send-mail@v3
@@ -72,6 +91,6 @@ jobs:
           body: |
             The daily scrape run failed (scrapers may still have run but the Gist write likely didn't).
 
-            Common cause: GIST_GITHUB_TOKEN expired (classic PATs expire on a fixed schedule and this fails silently otherwise).
+            Check the "Run scrapers" step in the log. If it says "401 Bad credentials", the GIST_GITHUB_TOKEN secret was revoked or replaced with one that expires (the current one, set 2026-11-15, has no expiration).
 
             Run: https://github.com/FlashOfInsight/nyc-civic-calendar/actions/runs/${{ github.run_id }}

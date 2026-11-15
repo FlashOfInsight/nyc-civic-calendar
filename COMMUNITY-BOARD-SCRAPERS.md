@@ -1,6 +1,6 @@
 # Community Board Scraper Reference
 
-Status as of **October 2026**. The single scraper file `lib/scrapers/community-boards.js` handles all 59 community boards across 5 boroughs. Each board has a `type` that selects its scraping strategy.
+Status as of **November 2026**. The per-board counts below drift; the live truth is `https://nycciviccalendar.com/api/health` (status `live`, `carried-over`, `estimated` per board). The single scraper file `lib/scrapers/community-boards.js` handles all 59 community boards across 5 boroughs. Each board has a `type` that selects its scraping strategy.
 
 ## Scraper Types
 
@@ -18,6 +18,8 @@ Status as of **October 2026**. The single scraper file `lib/scrapers/community-b
 | `nyc-gov-queens` / `nyc-gov-bronx` | nyc.gov calendar pages — h2/h3 section tracking + `matchAll` for year-less dates |
 | `queens-cb7-static` / `bronx-cb4-calendar` / `bronx-cb9-calendar` | Dedicated parsers for specific nyc.gov page formats |
 | `nyc-gov` / `nyc-gov-cb1` / `nyc-gov-si` | Generic nyc.gov scraper — falls back to pattern when no data |
+| `tribe-rest` | Generic events-API reader (`scrapeTribeREST`): Manhattan CB2/CB4/CB10, Brooklyn CB7/CB10/CB17. Board config needs `api` (site base URL) |
+| `mcb7-gcal` / `cb12m-ics` / `cb2brooklyn-gcal` / `cb5brooklyn-gcal` | Calendar feeds via `scrapeGCalICS()`, which also accepts a full https:// ICS URL (Manhattan CB12's `cb12m.org/api/calendar`) |
 | `pattern` | No fetch — board has no calendar page; goes straight to the pattern fallback. `url` should still point at a live page (it's the event link) |
 
 **Fallback mechanism:** If any scraper returns fewer than 2 meetings, a recurring pattern generator kicks in using hardcoded weekday/nth schedules. These are displayed in the UI with a red `*` marker.
@@ -141,6 +143,10 @@ Status as of **October 2026**. The single scraper file `lib/scrapers/community-b
 ---
 
 ## Maintenance Notes
+
+- **Prefer feeds over pages.** When a board breaks, look for (in this order) a Google Calendar embed on its calendar page, an events API (`/wp-json/tribe/events/v1/events`), or a site subscribe link (`webcal://`). All three are read by shared helpers and survive redesigns; page-HTML scrapers do not.
+- **Calendar feeds expand repeating events** (`lib/ics-reader.js`), so a board that enters committees as recurring events yields six months of dates.
+- **Dry run:** `npm run scrape:dry` scrapes everything and writes to `./scrape-output/` without touching the live data.
 
 - **Bronx CB2**: Has a JS `calEvents` file at `/assets/bronxcb2/js/calendar-events.js` that was last updated April 2026. When they update it, switching from `nyc-gov-bronx` to a `bronx-cb2-js` type (same pattern as BK CB4/18) would unlock the data.
 - **Queens CB4 CSV**: Updated monthly by the board; check `/assets/queenscb4/data/queenscb4-calendar.csv` each month.

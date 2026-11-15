@@ -1251,10 +1251,58 @@ async function loadActiveOrgs() {
       if (data.activeOrgs && data.activeOrgs.length > 0) {
         activeOrgs = new Set(data.activeOrgs);
         console.log(`Loaded ${activeOrgs.size} active orgs`);
+        addUnlistedOrgs();
       }
     }
   } catch (e) {
     console.log("Could not load active orgs, showing all committees");
+  }
+}
+
+// Names for committee categories the scrapers produce. Used when a board starts
+// holding a kind of meeting that isn't in the list above yet.
+const COMMITTEE_LABELS = {
+  "full-board": "Full Board",
+  "executive": "Executive Committee",
+  "land-use": "Land Use & Zoning",
+  "landmarks": "Landmarks & Preservation",
+  "transportation": "Transportation",
+  "parks": "Parks & Environment",
+  "licensing": "Licensing & Permits (SLA, Cannabis)",
+  "health": "Health, Seniors & Human Services",
+  "education": "Education & Youth",
+  "housing": "Housing",
+  "public-safety": "Public Safety & Sanitation",
+  "arts": "Arts & Culture",
+  "economic": "Economic Development",
+  "quality-of-life": "Quality of Life",
+  "other": "Other Committees"
+};
+
+// If the scrapers found meetings under a key that isn't in the list above
+// (a board added a committee, say), add it under its parent so it can still be
+// selected. Without this those meetings exist in the data but can't be picked.
+function addUnlistedOrgs() {
+  for (const key of activeOrgs) {
+    const parts = key.split(".");
+    let children = organizations;
+    let parent = null;
+    let found = true;
+    for (let i = 0; i < parts.length; i++) {
+      const node = children && children[parts[i]];
+      if (!node) {
+        found = false;
+        // Only add a leaf directly under an existing parent that already has children
+        if (i === parts.length - 1 && parent && parent.children) {
+          const pretty = parts[i].split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+          parent.children[parts[i]] = { name: COMMITTEE_LABELS[parts[i]] || pretty };
+        }
+        break;
+      }
+      parent = node;
+      children = node.children;
+    }
+    if (found) continue;
   }
 }
 

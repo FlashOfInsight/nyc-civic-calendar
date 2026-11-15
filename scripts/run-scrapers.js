@@ -1,8 +1,14 @@
 #!/usr/bin/env node
 // Daily scraper orchestrator for NYC Civic Calendar.
-// Runs all scrapers in parallel and writes results to GitHub Gist.
+// Runs all scrapers in parallel, cleans and health-checks the results, and
+// writes them to the GitHub Gist the site reads from.
 // Invoked by .github/workflows/scrape.yml or manually: `node scripts/run-scrapers.js`
+//
+//   --dry-run   scrape and report, but write nothing to the Gist (no token needed;
+//               output goes to ./scrape-output/ for inspection)
 
+const fs = require("fs");
+const path = require("path");
 const { readFromGist, writeToGist, prepareGistFile } = require("../lib/gist-storage");
 const { scrapeCityCouncil } = require("../lib/scrapers/city-council");
 const { scrapeMTA } = require("../lib/scrapers/mta");
@@ -18,457 +24,190 @@ const { scrapeOversightBoards } = require("../lib/scrapers/oversight-boards");
 const { scrapeNYCRules } = require("../lib/scrapers/nyc-rules");
 const { scrapeCityGovernment } = require("../lib/scrapers/city-government");
 const { generateNYPDMeetings } = require("../lib/scrapers/nypd");
+const {
+  SCHEMA_VERSION,
+  sanitizeMeetings,
+  carryOver,
+  buildHealth,
+  takeNewNotices,
+  todayNY
+} = require("../lib/health");
 
-const MIN_EXPECTED_MEETINGS = {
-  "city-council.json": 5,
-  "mta.json": 3,
-  "agencies.json": 3,
-  "community-boards.json": 10,
-  "oversight-boards.json": 5,
-  "nyc-rules.json": 1,
-  "city-government.json": 5,
-  "nypd.json": 50
-};
+const DRY_RUN = process.argv.includes("--dry-run");
+const ALERT_FILE = path.join(process.cwd(), "health-alert.txt");
 
-async function loadExistingMeetings(filename) {
-  try {
-    const data = await readFromGist(filename);
-    if (data) {
-      return { meetings: data.meetings || [], lastUpdated: data.lastUpdated || null };
+// Each Gist file, the scrapers that feed it, and the fewest meetings it should
+// ever hold (below that we assume the scrape broke and keep the previous data).
+const SOURCES = [
+  { key: "cityCouncil", file: "city-council.json", min: 5, scrapers: { "City Council": scrapeCityCouncil } },
+  { key: "mta", file: "mta.json", min: 3, scrapers: { "MTA": async () => scrapeMTA() } },
+  { key: "agencies", file: "agencies.json", min: 3, scrapers: { "Agencies": scrapeAgencies } },
+  {
+    key: "communityBoards", file: "community-boards.json", min: 10,
+    scrapers: {
+      "Manhattan": scrapeManhattanCBs,
+      "Brooklyn": scrapeBrooklynCBs,
+      "Queens": scrapeQueensCBs,
+      "Bronx": scrapeBronxCBs,
+      "Staten Island": scrapeStatenIslandCBs
     }
-  } catch (err) {
-    console.error(`Error loading existing ${filename}:`, err.message);
-  }
-  return { meetings: [], lastUpdated: null };
+  },
+  { key: "oversightBoards", file: "oversight-boards.json", min: 5, scrapers: { "Oversight Boards": scrapeOversightBoards } },
+  { key: "nycRules", file: "nyc-rules.json", min: 1, scrapers: { "NYC Rules": scrapeNYCRules } },
+  { key: "cityGovernment", file: "city-government.json", min: 5, scrapers: { "City Government": scrapeCityGovernment } },
+  { key: "nypd", file: "nypd.json", min: 50, scrapers: { "NYPD": async () => generateNYPDMeetings() } }
+];
+
+function byDate(a, b) {
+  return a.date.localeCompare(b.date) || String(a.time || "").localeCompare(String(b.time || ""));
 }
 
-function filterFutureMeetings(meetings) {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const cutoff = yesterday.toISOString().split("T")[0];
-  return meetings.filter((m) => m.date >= cutoff);
-}
-
-function mergeMeetings(existingMeetings, newMeetings) {
-  const meetingsById = new Map();
-  for (const meeting of filterFutureMeetings(existingMeetings)) {
-    meetingsById.set(meeting.id, meeting);
-  }
-  for (const meeting of newMeetings) {
-    meetingsById.set(meeting.id, meeting);
-  }
-  return [...meetingsById.values()].sort((a, b) => a.date.localeCompare(b.date));
-}
-
-async function prepareMeetingsData(filename, newMeetings) {
-  const minExpected = MIN_EXPECTED_MEETINGS[filename] || 1;
-  const existing = await loadExistingMeetings(filename);
-  const existingFuture = filterFutureMeetings(existing.meetings);
-
-  if (newMeetings.length >= minExpected) {
-    const data = {
-      meetings: newMeetings.sort((a, b) => a.date.localeCompare(b.date)),
-      lastUpdated: new Date().toISOString(),
-      lastScraperRun: {
-        timestamp: new Date().toISOString(),
-        scraperFound: newMeetings.length
-      }
-    };
-    console.log(`[${filename}] Prepared ${newMeetings.length} meetings (full replace)`);
-    return { data, result: { count: newMeetings.length, preserved: 0, reason: null } };
-  }
-
-  if (existingFuture.length > 0) {
-    console.warn(
-      `[${filename}] Scraper returned ${newMeetings.length} meetings (min: ${minExpected}). Preserving ${existingFuture.length} existing future meetings.`
-    );
-    const merged = mergeMeetings(existing.meetings, newMeetings);
-    const data = {
-      meetings: merged,
-      lastUpdated: existing.lastUpdated,
-      lastScraperRun: {
-        timestamp: new Date().toISOString(),
-        scraperFound: newMeetings.length,
-        belowThreshold: true,
-        preserved: existingFuture.length
-      }
-    };
-    return {
-      data,
-      result: { count: merged.length, preserved: existingFuture.length, reason: "below_threshold" }
-    };
-  }
-
-  console.warn(
-    `[${filename}] Scraper returned ${newMeetings.length} meetings (min: ${minExpected}). No existing data to preserve.`
-  );
-  const data = {
-    meetings: newMeetings,
-    lastUpdated: new Date().toISOString(),
-    lastScraperRun: {
-      timestamp: new Date().toISOString(),
-      scraperFound: newMeetings.length,
-      belowThreshold: true,
-      noExistingData: true
-    }
-  };
-  return { data, result: { count: newMeetings.length, preserved: 0, reason: "no_existing_data" } };
-}
-
-function extractActiveOrgs(allMeetings) {
-  const orgKeys = new Set();
-  for (const meeting of allMeetings) {
-    if (meeting.org) orgKeys.add(meeting.org);
-  }
-  return [...orgKeys].sort();
-}
-
-async function loadExistingActiveOrgs() {
-  try {
-    const data = await readFromGist("active-orgs.json");
-    if (data) return data.activeOrgs || [];
-  } catch (err) {
-    console.error("Error loading existing active orgs:", err.message);
-  }
-  return [];
-}
-
-async function prepareActiveOrgsData(newActiveOrgs, allScrapersSucceeded) {
-  if (allScrapersSucceeded) {
-    const data = {
-      activeOrgs: newActiveOrgs.sort(),
-      lastUpdated: new Date().toISOString(),
-      currentRunOrgs: newActiveOrgs.length,
-      totalOrgs: newActiveOrgs.length
-    };
-    console.log(
-      `Prepared ${newActiveOrgs.length} active org keys (full replace, all scrapers succeeded)`
-    );
-    return data;
-  }
-
-  const existingActiveOrgs = await loadExistingActiveOrgs();
-  const mergedOrgs = new Set([...existingActiveOrgs, ...newActiveOrgs]);
-  const data = {
-    activeOrgs: [...mergedOrgs].sort(),
-    lastUpdated: new Date().toISOString(),
-    currentRunOrgs: newActiveOrgs.length,
-    totalOrgs: mergedOrgs.size
-  };
-  console.log(
-    `Prepared ${mergedOrgs.size} active org keys (merged — ${newActiveOrgs.length} current, ${existingActiveOrgs.length} existing)`
-  );
-  return data;
+/** Run every scraper of a source; one failing doesn't sink the others. */
+async function runSource(source) {
+  const names = Object.keys(source.scrapers);
+  const settled = await Promise.allSettled(names.map((n) => source.scrapers[n]()));
+  const meetings = [];
+  const errors = [];
+  settled.forEach((r, i) => {
+    if (r.status === "fulfilled" && Array.isArray(r.value)) meetings.push(...r.value);
+    else errors.push(`${names[i]}: ${r.reason?.message || "returned no list"}`);
+  });
+  for (const e of errors) console.error(`${source.key} scraper error — ${e}`);
+  return { meetings, errors };
 }
 
 async function main() {
-  const requiredEnv = ["GIST_ID", "GITHUB_TOKEN"];
-  const missing = requiredEnv.filter((k) => !process.env[k]);
-  if (missing.length) {
-    console.error(`Missing required env vars: ${missing.join(", ")}`);
+  if (!process.env.GIST_ID) {
+    console.error("Missing required env var: GIST_ID");
     process.exit(1);
   }
+  if (!DRY_RUN && !process.env.GITHUB_TOKEN) {
+    console.error("Missing required env var: GITHUB_TOKEN (or pass --dry-run)");
+    process.exit(1);
+  }
+  if (fs.existsSync(ALERT_FILE)) fs.unlinkSync(ALERT_FILE);
 
-  const results = {
-    cityCouncil: { success: false, count: 0, error: null, meetings: [], preparedData: null },
-    mta: { success: false, count: 0, error: null, meetings: [], preparedData: null },
-    agencies: { success: false, count: 0, error: null, meetings: [], preparedData: null },
-    communityBoards: { success: false, count: 0, error: null, meetings: [], preparedData: null },
-    oversightBoards: { success: false, count: 0, error: null, meetings: [], preparedData: null },
-    nycRules: { success: false, count: 0, error: null, meetings: [], preparedData: null },
-    cityGovernment: { success: false, count: 0, error: null, meetings: [], preparedData: null },
-    nypd: { success: false, count: 0, error: null, meetings: [], preparedData: null }
-  };
-
-  console.log("Starting parallel scrape of all sources...");
+  const today = todayNY();
+  console.log(`Starting parallel scrape of all sources${DRY_RUN ? " (dry run)" : ""}...`);
   const startTime = Date.now();
 
-  const [
-    cityCouncilResult,
-    mtaResult,
-    agenciesResult,
-    manhattanResult,
-    brooklynResult,
-    queensResult,
-    bronxResult,
-    statenIslandResult,
-    oversightResult,
-    nycRulesResult,
-    cityGovResult
-  ] = await Promise.allSettled([
-    scrapeCityCouncil(),
-    scrapeMTA(),
-    scrapeAgencies(),
-    scrapeManhattanCBs(),
-    scrapeBrooklynCBs(),
-    scrapeQueensCBs(),
-    scrapeBronxCBs(),
-    scrapeStatenIslandCBs(),
-    scrapeOversightBoards(),
-    scrapeNYCRules(),
-    scrapeCityGovernment()
+  const [scraped, previous, prevHealth] = await Promise.all([
+    Promise.all(SOURCES.map(runSource)),
+    Promise.all(SOURCES.map((s) => readFromGist(s.file))),
+    readFromGist("health.json")
   ]);
-
   console.log(`All scrapers completed in ${Date.now() - startTime}ms`);
 
-  if (cityCouncilResult.status === "fulfilled") {
-    const meetings = cityCouncilResult.value;
-    const { data, result } = await prepareMeetingsData("city-council.json", meetings);
-    results.cityCouncil = {
-      success: true,
-      count: meetings.length,
-      error: null,
-      meetings,
-      preparedData: { data, result }
-    };
-  } else {
-    console.error("City Council scraper error:", cityCouncilResult.reason?.message);
-    const { data, result } = await prepareMeetingsData("city-council.json", []);
-    results.cityCouncil.error = cityCouncilResult.reason?.message;
-    results.cityCouncil.preparedData = { data, result };
-  }
+  const files = {};
+  const finalMeetings = {};
+  const summary = {};
+  const fileIssues = [];
+  const droppedByFile = {};
 
-  if (mtaResult.status === "fulfilled") {
-    const meetings = mtaResult.value;
-    const { data, result } = await prepareMeetingsData("mta.json", meetings);
-    results.mta = {
-      success: true,
-      count: meetings.length,
-      error: null,
-      meetings,
-      preparedData: { data, result }
-    };
-  } else {
-    console.error("MTA scraper error:", mtaResult.reason?.message);
-    const { data, result } = await prepareMeetingsData("mta.json", []);
-    results.mta.error = mtaResult.reason?.message;
-    results.mta.preparedData = { data, result };
-  }
-
-  if (agenciesResult.status === "fulfilled") {
-    const meetings = agenciesResult.value;
-    const { data, result } = await prepareMeetingsData("agencies.json", meetings);
-    results.agencies = {
-      success: true,
-      count: meetings.length,
-      error: null,
-      meetings,
-      preparedData: { data, result }
-    };
-  } else {
-    console.error("Agencies scraper error:", agenciesResult.reason?.message);
-    const { data, result } = await prepareMeetingsData("agencies.json", []);
-    results.agencies.error = agenciesResult.reason?.message;
-    results.agencies.preparedData = { data, result };
-  }
-
-  const cbResults = [manhattanResult, brooklynResult, queensResult, bronxResult, statenIslandResult];
-  const allCBMeetings = [];
-  const cbErrors = [];
-  cbResults.forEach((r, i) => {
-    const boroughs = ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"];
-    if (r.status === "fulfilled") {
-      allCBMeetings.push(...r.value);
-    } else {
-      cbErrors.push(`${boroughs[i]}: ${r.reason?.message}`);
+  SOURCES.forEach((source, i) => {
+    const { meetings: raw, errors } = scraped[i];
+    const prev = previous[i];
+    const { meetings: clean, dropped } = sanitizeMeetings(raw, today);
+    if (Object.keys(dropped).length) {
+      droppedByFile[source.file] = dropped;
+      console.log(`[${source.file}] cleanup dropped: ${JSON.stringify(dropped)}`);
     }
+
+    let meetings;
+    let preserved = 0;
+    if (clean.length >= source.min) {
+      const carried = carryOver(clean, prev, prevHealth, today);
+      meetings = carried.meetings;
+      if (carried.carriedGroups.length) {
+        console.log(`[${source.file}] kept previous real data for: ${carried.carriedGroups.join(", ")}`);
+      }
+      console.log(`[${source.file}] Prepared ${meetings.length} meetings`);
+    } else {
+      // The whole source came back (nearly) empty — keep what we had
+      const prevFuture = ((prev && prev.meetings) || []).filter((m) => m.date >= today);
+      const merged = new Map(prevFuture.map((m) => [m.id, m]));
+      for (const m of clean) merged.set(m.id, m);
+      meetings = [...merged.values()];
+      preserved = prevFuture.length;
+      const message = `${source.file}: scraper returned ${clean.length} meetings (expected at least ${source.min})` +
+        (errors.length ? ` — ${errors.join("; ").slice(0, 300)}` : "") +
+        `. Kept ${preserved} previously scraped upcoming meetings.`;
+      console.warn(`[${source.file}] ${message}`);
+      fileIssues.push({ file: source.file, message });
+    }
+
+    meetings.sort(byDate);
+    finalMeetings[source.file] = meetings;
+    files[source.file] = prepareGistFile({
+      schema: SCHEMA_VERSION,
+      meetings,
+      lastUpdated: new Date().toISOString(),
+      lastScraperRun: { timestamp: new Date().toISOString(), scraperFound: clean.length, preserved }
+    });
+    summary[source.key] = {
+      success: errors.length === 0,
+      count: meetings.length,
+      scraped: clean.length,
+      preserved,
+      error: errors.length ? errors.join("; ") : null
+    };
   });
-  const { data: cbData, result: cbResult } = await prepareMeetingsData(
-    "community-boards.json",
-    allCBMeetings
-  );
-  results.communityBoards = {
-    success: cbErrors.length === 0,
-    count: allCBMeetings.length,
-    error: cbErrors.length > 0 ? cbErrors.join("; ") : null,
-    meetings: allCBMeetings,
-    preparedData: { data: cbData, result: cbResult }
-  };
 
-  if (oversightResult.status === "fulfilled") {
-    const meetings = oversightResult.value;
-    const { data, result } = await prepareMeetingsData("oversight-boards.json", meetings);
-    results.oversightBoards = {
-      success: true,
-      count: meetings.length,
-      error: null,
-      meetings,
-      preparedData: { data, result }
-    };
+  const allMeetings = Object.values(finalMeetings).flat();
+  const activeOrgs = [...new Set(allMeetings.filter((m) => m.date >= today).map((m) => m.org))].sort();
+  files["active-orgs.json"] = prepareGistFile({
+    activeOrgs,
+    lastUpdated: new Date().toISOString(),
+    totalOrgs: activeOrgs.length
+  });
+
+  const health = buildHealth(finalMeetings, prevHealth, { fileIssues, dropped: droppedByFile }, today);
+  const newNotices = DRY_RUN ? [] : takeNewNotices(health);
+  files["health.json"] = prepareGistFile(health);
+
+  let writeResult = { success: true };
+  if (DRY_RUN) {
+    const outDir = path.join(process.cwd(), "scrape-output");
+    fs.mkdirSync(outDir, { recursive: true });
+    for (const [name, file] of Object.entries(files)) fs.writeFileSync(path.join(outDir, name), file.content);
+    console.log(`Dry run: wrote ${Object.keys(files).length} files to ${outDir} (Gist untouched)`);
   } else {
-    console.error("Oversight Boards scraper error:", oversightResult.reason?.message);
-    const { data, result } = await prepareMeetingsData("oversight-boards.json", []);
-    results.oversightBoards.error = oversightResult.reason?.message;
-    results.oversightBoards.preparedData = { data, result };
+    writeResult = await writeToGist(files);
+    if (!writeResult.success) console.error("Failed to write to Gist:", writeResult.error);
+    else console.log("Successfully wrote all files to Gist");
   }
 
-  if (nycRulesResult.status === "fulfilled") {
-    const meetings = nycRulesResult.value;
-    const { data, result } = await prepareMeetingsData("nyc-rules.json", meetings);
-    results.nycRules = {
-      success: true,
-      count: meetings.length,
-      error: null,
-      meetings,
-      preparedData: { data, result }
-    };
-  } else {
-    console.error("NYC Rules scraper error:", nycRulesResult.reason?.message);
-    const { data, result } = await prepareMeetingsData("nyc-rules.json", []);
-    results.nycRules.error = nycRulesResult.reason?.message;
-    results.nycRules.preparedData = { data, result };
+  console.log("\n=== HEALTH ===");
+  console.log(JSON.stringify(health.summary));
+  for (const n of Object.values(health.notices)) console.log(`  • [since ${n.since}] ${n.message}`);
+
+  // New problems go in a file the workflow emails. Only written once the Gist
+  // write has succeeded, so "emailed" in health.json stays truthful.
+  if (newNotices.length && writeResult.success) {
+    const lines = [
+      "NYC Civic Calendar found something that needs a look:",
+      "",
+      ...newNotices.map((n) => `- ${n.message}`),
+      "",
+      "Each item is reported once. The full, current report is at https://nycciviccalendar.com/api/health"
+    ];
+    fs.writeFileSync(ALERT_FILE, lines.join("\n"));
   }
 
-  if (cityGovResult.status === "fulfilled") {
-    const meetings = cityGovResult.value;
-    const { data, result } = await prepareMeetingsData("city-government.json", meetings);
-    results.cityGovernment = {
-      success: true,
-      count: meetings.length,
-      error: null,
-      meetings,
-      preparedData: { data, result }
-    };
-  } else {
-    console.error("City Government scraper error:", cityGovResult.reason?.message);
-    const { data, result } = await prepareMeetingsData("city-government.json", []);
-    results.cityGovernment.error = cityGovResult.reason?.message;
-    results.cityGovernment.preparedData = { data, result };
-  }
-
-  try {
-    const nypdMeetings = generateNYPDMeetings();
-    const { data, result } = await prepareMeetingsData("nypd.json", nypdMeetings);
-    results.nypd = {
-      success: true,
-      count: nypdMeetings.length,
-      error: null,
-      meetings: nypdMeetings,
-      preparedData: { data, result }
-    };
-  } catch (err) {
-    console.error("NYPD generator error:", err.message);
-    const { data, result } = await prepareMeetingsData("nypd.json", []);
-    results.nypd.error = err.message;
-    results.nypd.preparedData = { data, result };
-  }
-
-  const allMeetings = [
-    ...results.cityCouncil.meetings,
-    ...results.mta.meetings,
-    ...results.agencies.meetings,
-    ...results.communityBoards.meetings,
-    ...results.oversightBoards.meetings,
-    ...results.nycRules.meetings,
-    ...results.cityGovernment.meetings,
-    ...results.nypd.meetings
-  ];
-  const activeOrgs = extractActiveOrgs(allMeetings);
-  const allScrapersSucceeded =
-    results.cityCouncil.success &&
-    results.mta.success &&
-    results.agencies.success &&
-    results.communityBoards.success &&
-    results.oversightBoards.success &&
-    results.nycRules.success &&
-    results.cityGovernment.success &&
-    results.nypd.success;
-  const activeOrgsData = await prepareActiveOrgsData(activeOrgs, allScrapersSucceeded);
-
-  const filesToWrite = {
-    "city-council.json": prepareGistFile(results.cityCouncil.preparedData.data),
-    "mta.json": prepareGistFile(results.mta.preparedData.data),
-    "agencies.json": prepareGistFile(results.agencies.preparedData.data),
-    "community-boards.json": prepareGistFile(results.communityBoards.preparedData.data),
-    "oversight-boards.json": prepareGistFile(results.oversightBoards.preparedData.data),
-    "nyc-rules.json": prepareGistFile(results.nycRules.preparedData.data),
-    "city-government.json": prepareGistFile(results.cityGovernment.preparedData.data),
-    "nypd.json": prepareGistFile(results.nypd.preparedData.data),
-    "active-orgs.json": prepareGistFile(activeOrgsData)
-  };
-
-  const writeResult = await writeToGist(filesToWrite);
-  if (!writeResult.success) {
-    console.error("Failed to write to Gist:", writeResult.error);
-  } else {
-    console.log("Successfully wrote all files to Gist");
-  }
-
-  const totalMeetings =
-    results.cityCouncil.count +
-    results.mta.count +
-    results.agencies.count +
-    results.communityBoards.count +
-    results.oversightBoards.count +
-    results.nycRules.count +
-    results.cityGovernment.count +
-    results.nypd.count;
-
-  const summary = {
-    success: allScrapersSucceeded && writeResult.success,
+  console.log("\n=== RUN SUMMARY ===");
+  console.log(JSON.stringify({
+    success: writeResult.success && Object.values(summary).every((s) => s.success),
     timestamp: new Date().toISOString(),
-    totalMeetings,
+    totalMeetings: allMeetings.length,
     activeOrgCount: activeOrgs.length,
     gistWriteSuccess: writeResult.success,
     gistWriteError: writeResult.error || null,
-    results: {
-      cityCouncil: {
-        success: results.cityCouncil.success,
-        count: results.cityCouncil.count,
-        error: results.cityCouncil.error,
-        preserved: results.cityCouncil.preparedData?.result?.preserved || 0
-      },
-      mta: {
-        success: results.mta.success,
-        count: results.mta.count,
-        error: results.mta.error,
-        preserved: results.mta.preparedData?.result?.preserved || 0
-      },
-      agencies: {
-        success: results.agencies.success,
-        count: results.agencies.count,
-        error: results.agencies.error,
-        preserved: results.agencies.preparedData?.result?.preserved || 0
-      },
-      communityBoards: {
-        success: results.communityBoards.success,
-        count: results.communityBoards.count,
-        error: results.communityBoards.error,
-        preserved: results.communityBoards.preparedData?.result?.preserved || 0
-      },
-      oversightBoards: {
-        success: results.oversightBoards.success,
-        count: results.oversightBoards.count,
-        error: results.oversightBoards.error,
-        preserved: results.oversightBoards.preparedData?.result?.preserved || 0
-      },
-      nycRules: {
-        success: results.nycRules.success,
-        count: results.nycRules.count,
-        error: results.nycRules.error,
-        preserved: results.nycRules.preparedData?.result?.preserved || 0
-      },
-      cityGovernment: {
-        success: results.cityGovernment.success,
-        count: results.cityGovernment.count,
-        error: results.cityGovernment.error,
-        preserved: results.cityGovernment.preparedData?.result?.preserved || 0
-      },
-      nypd: {
-        success: results.nypd.success,
-        count: results.nypd.count,
-        error: results.nypd.error,
-        preserved: results.nypd.preparedData?.result?.preserved || 0
-      }
-    }
-  };
+    newNotices: newNotices.length,
+    results: summary
+  }, null, 2));
 
-  console.log("\n=== RUN SUMMARY ===");
-  console.log(JSON.stringify(summary, null, 2));
-
-  // Exit non-zero only if Gist write failed (data not persisted). Individual
-  // scraper failures are logged but don't fail the run — the preserved-data
-  // fallback keeps the calendar healthy across transient site outages.
+  // Exit non-zero only if the Gist write failed (data not persisted). Individual
+  // scraper failures are handled above: previous data is kept and a notice raised.
   process.exit(writeResult.success ? 0 : 1);
 }
 

@@ -1,6 +1,25 @@
 # NYC Civic Calendar — Bug Tracker
 
-Last reviewed: October 12, 2026
+Last reviewed: November 15, 2026
+
+## Fixed (November 15, 2026) — long-term stability audit
+
+- ~~Gist token expired again (daily run failed Nov 9–15)~~ — Replaced with a gist-only token that has no expiration.
+- ~~MTA showed no meetings since June~~ — `lib/data/mta-schedule.json` only ran through June 2026. Added July–December 2026. mta.info blocks scrapers, so this file is still hand-maintained; the health check now warns 30 days before it runs out.
+- ~~Recurring calendar events were dropped~~ — The Google Calendar reader only looked at each event's first date, so "Land Use, 2nd Wednesday" entered as a repeating event vanished after its first meeting. New `lib/ics-reader.js` expands repeats and honours skipped/moved dates. Manhattan CB9 3 → 74 meetings, Brooklyn CB3 7 → 73, Brooklyn CB8 6 → 59, Queens CB2 8 → 59.
+- ~~Impossible dates ("2026-12-00")~~ — The old UTC→Eastern conversion subtracted a day by hand. Now done with the system time-zone database.
+- ~~Manhattan CB7 missing entirely~~ — mcb7.org changed its data format and the bundle regex stopped matching (no fallback, so 0 meetings). Now reads the public Google Calendar the site is built from.
+- ~~Manhattan CB12 missing entirely~~ — The board moved to cb12m.org. Now reads the site's own subscribe feed (`/api/calendar`).
+- ~~Brooklyn CB2 on estimated dates~~ — Its calendar page now embeds a Google Calendar; reads that.
+- ~~Manhattan CB2/CB4/CB10, Brooklyn CB7/CB10/CB17 scraped from page HTML~~ — Switched to the sites' events API (`scrapeTribeREST`). Fixes wrong years (Brooklyn CB10/CB17 showed Nov–Dec 2027 dates), 27 duplicate entries, and one-page limits (Manhattan CB10 34 → 71).
+- ~~Brooklyn CB5 hardcoded~~ — Now reads the board's Google Calendar; the hardcoded schedule is the fallback.
+- ~~Bronx CB10 silently on estimated dates~~ — The agenda PDF's filename changes month to month; the scraper now finds the link on the calendar page.
+- ~~Cancelled meetings listed~~ — One cleanup pass (`lib/health.js` `sanitizeMeetings`) now drops cancelled/postponed meetings, holidays, duplicates and invalid dates from every source.
+- ~~81 meetings couldn't be selected on the website~~ — Scrapers produced committee keys (e.g. `licensing` for Manhattan CB2) that weren't in the site's list. `public/app.js` now adds any scraped key it doesn't know under its board.
+- ~~Unrecognised committees filed under "Full Board"~~ — They now go to an "Other Committees" entry per board.
+- ~~Estimated dates looked like real ones~~ — Pattern-generated meetings carry `estimated: true` and a note in the calendar entry.
+- ~~Silent breakage~~ — Every run writes a health report (`health.json`, served at `/api/health`). A board or agency that had real data and has had none for 35 days, or hand-entered data within 30 days of running out, is emailed once. A source that goes quiet keeps its last real upcoming meetings for 21 days instead of dropping to estimates.
+- ~~Year-stamped Rent Guidelines Board URL~~ — Built from the current year.
 
 ## Fixed (October 12, 2026)
 
@@ -82,3 +101,14 @@ Generated meetings appear on holidays (MLK Day, Thanksgiving, etc.) when they al
 ### 11. Manhattan CB5 blocked by Cloudflare
 `cb5.org` 403s every scripted request, even from residential IPs, and the Pages Function relay (see CB8) doesn't help. On pattern fallback; marked `estimated` in the UI.
 - **Action:** Look for an alternate feed, or ask the board to exempt `/wp-json/` from bot protection
+
+### 13. Hand-maintained data
+- `lib/data/mta-schedule.json` — add each new set of MTA dates (the site blocks scrapers). The health check emails 30 days before it runs out.
+- `lib/data/political-calendar-2026.js` — the Elections tab is the 2026 NYS calendar; a 2027 calendar is a new file plus a year switch.
+- Brooklyn CB1 and Queens CB8 read annual schedule PDFs with the year in the URL (`Press-Release-2026-2027.pdf`, `2026-Board-Meeting-Date.pdf`). When those run dry the health check flags the board as dark.
+
+### 14. City Planning Commission dates are estimated
+`scrapeCPC` generates every other Wednesday from a reference date; it does not read the commission's posted calendar (the page is rendered by JavaScript). Marked `estimated`.
+
+### 15. `lib/organizations.js` is unused
+Nothing imports it; `public/app.js` holds the list the site uses. Delete it or generate one from the other.
