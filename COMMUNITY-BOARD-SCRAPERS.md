@@ -68,7 +68,7 @@ Status as of **November 2026**. The per-board counts below drift; the live truth
 | CB8 | Crown Heights, Prospect Heights | `cb8brooklyn-gcal` | GCal `u0jm9q72uejq6doel8n061pngs@group.calendar.google.com` | 🔶 board posts sporadically |
 | CB9 | Crown Heights, Prospect Lefferts Gardens | `brooklyn-cb9-csv` | CSV `/assets/brooklyncb9/data/calendar.csv` | ✅ 13 meetings |
 | CB10 | Bay Ridge, Dyker Heights, Fort Hamilton | `cbbrooklyn` | `cbbrooklyn.cityofnewyork.us` Tribe HTML | ✅ |
-| CB11 | Bensonhurst, Bath Beach, Gravesend | `cb11brooklyn` | `brooklyncb11.org` WordPress posts | ✅ |
+| CB11 | Bensonhurst, Bath Beach, Gravesend | `cb11brooklyn` | `brooklyncb11.org` WordPress posts | 🔶 notices go up ~1 week ahead, so often estimated between meetings. Site also has a Tribe events API with the same items (same lead time) |
 | **CB12** | **Borough Park, Kensington** | `nyc-gov` | **nyc.gov page empty** | **⚠️ pattern only** |
 | **CB13** | **Coney Island, Brighton Beach, Gravesend** | `pattern` | **nyc.gov calendar page removed** | **⚠️ pattern only** |
 | CB14 | Flatbush, Midwood | `cb14brooklyn` | `cb14brooklyn.com` WordPress | ✅ |
@@ -85,7 +85,7 @@ Status as of **November 2026**. The per-board counts below drift; the live truth
 |---|---|---|---|---|
 | CB1 | Astoria, Long Island City | `nyc-gov-queens` | nyc.gov h3/p calendar | ✅ 9 committee meetings |
 | CB2 | Woodside, Sunnyside, Long Island City | `queens-cb2-gcal` | 14 committee Google Calendars | ✅ 10 events |
-| CB3 | Jackson Heights, East Elmhurst | `queenscb3` | `queenscb3.cityofnewyork.us` Tribe REST | ✅ 3 meetings/month |
+| CB3 | Jackson Heights, East Elmhurst | `queenscb3` | `queenscb3.cityofnewyork.us` Tribe REST | **⚠️ host (SiteGround) answers some scripted requests with a captcha page (HTTP 202 → `/.well-known/sgcaptcha/`); estimated on most runs since at least Nov 2026. Feed itself lists monthly meetings through Jun 2027** |
 | CB4 | Corona, Elmhurst | `queens-cb4-csv` | CSV `/assets/queenscb4/data/queenscb4-calendar.csv` | 🔶 through May 2026; updates monthly |
 | CB5 | Ridgewood, Glendale, Maspeth, Middle Village | `queens-cb5-js` | Custom JS `calEvents` `/assets/queenscb5/js/calendar_events.js` | ✅ 10 meetings |
 | CB6 | Forest Hills, Rego Park | `queens-cb6-gcal` | GCal `queenscb6secretary@gmail.com` | ✅ 7 meetings |
@@ -96,7 +96,7 @@ Status as of **November 2026**. The per-board counts below drift; the live truth
 | CB11 | Bayside, Douglaston, Little Neck | `nyc-gov-queens` | nyc.gov `<li>` date list | ✅ full board dates |
 | **CB12** | **Jamaica, Hollis, St. Albans** | `nyc-gov-queens` | **PDF-only archive** | **⚠️ pattern only** |
 | CB13 | Queens Village, Cambria Heights, Laurelton, Rosedale | `queens-cb13-gcal` | GCal `seeqcb13@gmail.com` | ✅ 9 committee meetings |
-| CB14 | Far Rockaway, Rockaway, Arverne | `nyc-gov-queens` | nyc.gov calendar page | ✅ |
+| CB14 | Far Rockaway, Rockaway, Arverne | `nyc-gov-queens` | nyc.gov calendar page — full-board dates list ("December 8th, 2026"; ordinal suffixes parsed since Nov 2026) | 🔶 real dates through Dec 2026; pattern fills rest until the 2027 list is posted |
 
 ---
 
@@ -141,6 +141,14 @@ Status as of **November 2026**. The per-board counts below drift; the live truth
 **Total: 59 boards across 5 boroughs**
 
 ---
+
+## Monthly Upgrade Checks
+
+Each monthly maintenance run checks three `estimated` boards for a new feed. Pick boards not listed here (or listed longest ago).
+
+| Month | Boards checked | Result |
+|---|---|---|
+| Nov 2026 | Queens CB3, Brooklyn CB11, Queens CB14 | Queens CB3: feed fine, host captcha blocks scraper (owner action). Brooklyn CB11: Tribe API exists but has nothing beyond the posted notices; not switched. Queens CB14: date parser fixed for "8th"-style dates (0 → 1 real) |
 
 ## Maintenance Notes
 
