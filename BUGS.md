@@ -2,6 +2,11 @@
 
 Last reviewed: November 15, 2026
 
+## Fixed (November 15, 2026) — monthly maintenance
+
+- ~~Queens CB14 always on estimated dates~~ — The board lists its full-board dates as "December 8th, 2026"; the Queens nyc.gov date pattern didn't allow "st/nd/rd/th", so every date was skipped. Fixed; a "Full Board / …" section heading is now named "Full Board Meeting" (also renames Queens CB1's six full-board entries, same dates and times). Queens CB14 0 → 1 real meeting (the rest of 2026's list is past; 2027 not posted yet).
+- MTA: mta.info lists nothing after December 16, 2026 yet; `mta-schedule.json` unchanged. The health check will start warning about it ~November 16.
+
 ## Fixed (November 15, 2026) — long-term stability audit
 
 - ~~Gist token expired again (daily run failed Nov 9–15)~~ — Replaced with a gist-only token that has no expiration.
@@ -112,3 +117,10 @@ Generated meetings appear on holidays (MLK Day, Thanksgiving, etc.) when they al
 
 ### 15. `lib/organizations.js` is unused
 Nothing imports it; `public/app.js` holds the list the site uses. Delete it or generate one from the other.
+
+### 16. Queens CB3 blocked by a captcha on some requests
+`queenscb3.cityofnewyork.us` (SiteGround) answers some scripted requests with HTTP 202 and a redirect to `/.well-known/sgcaptcha/`. The events API itself is fine and lists monthly meetings through June 2027, but the daily run lands on estimated dates. Not worked around on purpose (no bot-check evasion).
+- **Action (owner):** ask the board or its web host to exempt `/wp-json/tribe/events/` from the bot check, or route through a relay like CB8's if the board agrees.
+
+### 17. Queens CB1 meeting times off by 30 minutes
+The page says board and committee meetings start at 6:30 PM; the scraper reports 6:00 or 7:00 PM (it takes the first time it sees, or defaults to 7:00). Dates are correct.
